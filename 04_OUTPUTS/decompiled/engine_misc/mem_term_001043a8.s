@@ -1,0 +1,13 @@
+# mem_term_001043a8
+# address: 0x001043A8  size: 40 bytes  evidence: untagged
+
+  001043A8:  01006324   addiu    $v1, $v1, 1
+  001043AC:  7a100200   .byte    0x7a, 0x10, 0x02, 0x00
+  001043B0:  3f340600   .byte    0x3f, 0x34, 0x06, 0x00
+  001043B4:  3f2c0500   .byte    0x3f, 0x2c, 0x05, 0x00
+  001043B8:  7a180300   .byte    0x7a, 0x18, 0x03, 0x00
+  001043BC:  2f30c200   .byte    0x2f, 0x30, 0xc2, 0x00
+  001043C0:  2f28a300   .byte    0x2f, 0x28, 0xa3, 0x00
+  001043C4:  38110600   .byte    0x38, 0x11, 0x06, 0x00
+  001043C8:  003c0700   sll      $a3, $a3, 0x10
+  001043CC:  0400e010   beqz     $a3, 0x1043e0

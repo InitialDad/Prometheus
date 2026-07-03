@@ -1,0 +1,239 @@
+{
+  "main": {
+    "id": "8dd35f1e50f22bd5",
+    "type": "split",
+    "children": [
+      {
+        "id": "9fafe2edf0b0b971",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b2d9fbea0cf24d5e",
+            "type": "leaf",
+            "state": {
+              "type": "canvas",
+              "state": {
+                "file": "we had been working on a char swap for tenchu and wos, essentiallt taking the mesh and textures and remapping it onto Untitled.canvas",
+                "viewState": {
+                  "x": 0,
+                  "y": 0,
+                  "zoom": 0
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "we had been working on a char swap for tenchu and wos, essentiallt taking the mesh and textures and remapping it onto Untitled"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "31a4063f4f1cf814",
+    "type": "split",
+    "children": [
+      {
+        "id": "1b9b3b635c73edf4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a838d809d3021537",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "b09653b619859a0b",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "10847c29df4354bd",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "a9f72a391815af27",
+    "type": "split",
+    "children": [
+      {
+        "id": "0c08987937d318f1",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "60e45303ac2c8566",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "01_GAMES/SLUS-20407_WayOfTheSamurai/ghidra/dispatcher_v2_disasm.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for dispatcher_v2_disasm"
+            }
+          },
+          {
+            "id": "b32a0233691ec342",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "01_GAMES/SLUS-20407_WayOfTheSamurai/ghidra/dispatcher_v2_disasm.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from dispatcher_v2_disasm"
+            }
+          },
+          {
+            "id": "d160731e50b5b93a",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "5b1718767e3af2b0",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "3001e908c40b5054",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "01_GAMES/SLUS-20407_WayOfTheSamurai/ghidra/dispatcher_v2_disasm.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of dispatcher_v2_disasm"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "b2d9fbea0cf24d5e",
+  "lastOpenFiles": [
+    "01_GAMES/SLUS-20407_WayOfTheSamurai/db/mods.db-journal",
+    "08_OBSIDIAN/Prometheus Map.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char Wounded Enemy.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char Tesshu.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char Stone Boss C.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char Stone Boss B.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char Stone Boss A.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char Standard Guard.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char Rikimaru.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char Medium NPC.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char Light Guard.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char CHARABIN88 UIIcon 08.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char CHARABIN87 UIIcon 07.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char CHARABIN86 UIIcon 06.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char CHARABIN85 UIIcon 05.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char CHARABIN84 UIIcon 04.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char CHARABIN83 UIIcon 03.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char CHARABIN82 UIIcon 02.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char CHARABIN81 UIIcon 01.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char CHARABIN80 PropWeapon 48.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char CHARABIN79 PropWeapon 47.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char CHARABIN78 PropWeapon 46.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char CHARABIN77 PropWeapon 45.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char CHARABIN76 PropWeapon 44.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char CHARABIN75 PropWeapon 43.md",
+    "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char CHARABIN74 PropWeapon 42.md",
+    "08_OBSIDIAN/SLUS-20397/characters",
+    "08_OBSIDIAN/SLUS-20397/mods",
+    "08_OBSIDIAN/SLUS-20397/findings",
+    "08_OBSIDIAN/SLUS-20397/addresses",
+    "08_OBSIDIAN/SLUS-20397",
+    "08_OBSIDIAN/SLUS-20407/findings",
+    "08_OBSIDIAN/SLUS-20407/mods",
+    "08_OBSIDIAN/SLUS-20407/addresses",
+    "08_OBSIDIAN/SLUS-20407",
+    "08_OBSIDIAN/_notes",
+    "we had been working on a char swap for tenchu and wos, essentiallt taking the mesh and textures and remapping it onto Untitled.canvas",
+    "01_GAMES/SLUS-20397_Tenchu/extracted_textures_LIVE/onikage/onikage_tex2.png",
+    "01_GAMES/SLUS-20397_Tenchu/extracted_textures_LIVE/onikage/onikage_tex1.png",
+    "01_GAMES/SLUS-20397_Tenchu/extracted_textures_LIVE/onikage/onikage_tex0.png",
+    "01_GAMES/SLUS-20397_Tenchu/extracted_textures_LIVE/mp_slot_36/mp_slot_36_tex3.png",
+    "01_GAMES/SLUS-20397_Tenchu/extracted_textures_LIVE/mp_slot_36/mp_slot_36_tex2.png",
+    "01_GAMES/SLUS-20397_Tenchu/extracted_textures_LIVE/mp_slot_36/mp_slot_36_tex1.png",
+    "01_GAMES/SLUS-20397_Tenchu/extracted_textures_LIVE/mp_slot_36/mp_slot_36_tex0.png",
+    "01_GAMES/SLUS-20397_Tenchu/extracted_textures_LIVE/mp_char_f/mp_char_f_tex3.png",
+    "01_GAMES/SLUS-20397_Tenchu/extracted_textures_LIVE/mp_char_f/mp_char_f_tex2.png",
+    "01_GAMES/SLUS-20397_Tenchu/extracted_textures_LIVE/mp_char_f/mp_char_f_tex1.png"
+  ]
+}

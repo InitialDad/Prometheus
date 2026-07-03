@@ -1,0 +1,98 @@
+INFO  Using log config file: jar:file:/C:/Users/owner/pcsx2_modder/ghidra_install/ghidra_11.1.2_PUBLIC/Ghidra/Framework/Generic/lib/Generic.jar!/generic.log4j.xml (LoggingInitialization)  
+INFO  Using log file: C:\Users\owner\AppData\Roaming\ghidra\ghidra_11.1.2_PUBLIC\application.log (LoggingInitialization)  
+INFO  Loading user preferences: C:\Users\owner\AppData\Roaming\ghidra\ghidra_11.1.2_PUBLIC\preferences (Preferences)  
+INFO  Searching for classes... (ClassSearcher)  
+INFO  Ignoring class 'generic.jar.GClassLoader' from 'C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Framework\Utility\lib\Utility.jar'. Already found at 'C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Framework\Utility\lib\Utility.jar'. (ClassSearcher)  
+INFO  Ignoring class 'ghidra.GhidraClassLoader' from 'C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Framework\Utility\lib\Utility.jar'. Already found at 'C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Framework\Utility\lib\Utility.jar'. (ClassSearcher)  
+INFO  Class search complete (1696 ms) (ClassSearcher)  
+INFO  Initializing SSL Context (SSLContextInitializer)  
+INFO  Initializing Random Number Generator... (SecureRandomFactory)  
+INFO  Random Number Generator initialization complete: SHA1PRNG (SecureRandomFactory)  
+INFO  Trust manager disabled, cacerts have not been set (ApplicationTrustManagerFactory)  
+INFO  Headless startup complete (6231 ms) (AnalyzeHeadless)  
+INFO  Class searcher loaded 57 extension points (17 false positives) (ClassSearcher)  
+INFO  HEADLESS Script Paths:
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Features\Base\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Features\Python\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Extensions\ghidra-emotionengine-reloaded\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Features\BytePatterns\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Debug\Debugger-agent-dbgmodel-traceloader\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Debug\Debugger\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Features\FileFormats\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Features\SwiftDemangler\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Processors\PIC\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Features\FunctionID\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Processors\8051\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Processors\Atmel\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Debug\Debugger-rmi-trace\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Processors\DATA\ghidra_scripts
+    C:\Users\owner\pcsx2_modder_wos\scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Debug\Debugger-agent-frida\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Features\WildcardAssembler\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Features\BSim\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Features\Decompiler\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Features\PDB\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Features\SystemEmulation\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Processors\JVM\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Features\GnuDemangler\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Features\MicrosoftCodeAnalyzer\ghidra_scripts
+    C:\Users\owner\pcsx2_modder\ghidra_install\ghidra_11.1.2_PUBLIC\Ghidra\Features\VersionTracking\ghidra_scripts (HeadlessAnalyzer)  
+INFO  HEADLESS: execution starts (HeadlessAnalyzer)  
+INFO  Creating temporary project: C:\Users\owner\pcsx2_modder_wos\ghidra\project\wos (HeadlessAnalyzer)  
+INFO  Creating project: C:\Users\owner\pcsx2_modder_wos\ghidra\project\wos (DefaultProject)  
+INFO  REPORT: Processing input files:  (HeadlessAnalyzer)  
+INFO       project: C:\Users\owner\pcsx2_modder_wos\ghidra\project\wos (HeadlessAnalyzer)  
+INFO  IMPORTING: file:///C:/Users/owner/pcsx2_modder_wos/elf/SLUS_204.07 (HeadlessAnalyzer)  
+INFO  Using Loader: Executable and Linking Format (ELF) (AutoImporter)  
+INFO  Using Language/Compiler: r5900:LE:32:default:default (AutoImporter)  
+INFO  Additional info:
+Loading file:///C:/Users/owner/pcsx2_modder_wos/elf/SLUS_204.07?MD5=b8e0598a182c718487303049ba51abf4...
+Skipping zero-length segment [1,Loadable segment] at address ram:00c29100
+Skipping section [.strtab] with invalid size 0x0
+Skipping section [.symtab] with invalid size 0x0
+Skipping section [SECTION5] with invalid size 0x0
+_mips_gp0_value=0x22c0f0
+------------------------------------------------
+
+ (AutoImporter)  
+INFO  IMPORTING: Loaded 0 additional files (HeadlessAnalyzer)  
+INFO  ANALYZING all memory and code: file:///C:/Users/owner/pcsx2_modder_wos/elf/SLUS_204.07 (HeadlessAnalyzer)  
+INFO  Packed database cache: C:\Users\owner\AppData\Local\ghidra\packed-db-cache (PackedDatabaseCache)  
+INFO  Applied data type archive: generic_clib (ApplyDataArchiveAnalyzer)  
+INFO  -----------------------------------------------------
+    ASCII Strings                              0.605 secs
+    Apply Data Archives                        0.932 secs
+    Call Convention ID                         0.029 secs
+    Call-Fixup Installer                       0.034 secs
+    Create Address Tables                      0.224 secs
+    Create Address Tables - One Time           0.832 secs
+    Create Function                            1.695 secs
+    Data Reference                             0.414 secs
+    Decompiler Switch Analysis                32.156 secs
+    Demangler GNU                              0.108 secs
+    Disassemble                                2.068 secs
+    Disassemble Entry Points                   1.720 secs
+    Embedded Media                             0.027 secs
+    External Entry References                  0.000 secs
+    Function Start Search                      0.277 secs
+    Function Start Search delayed - One Time   0.001 secs
+    MIPS-R5900 Constant Reference Analyzer    17.493 secs
+    MIPS-R5900 Unaligned Instruction Fix       0.262 secs
+    Non-Returning Functions - Discovered       0.870 secs
+    Non-Returning Functions - Known            0.019 secs
+    Reference                                  0.783 secs
+    Shared Return Calls                        0.560 secs
+    Stack                                     22.575 secs
+    Subroutine References                      0.828 secs
+    Subroutine References - One Time           0.011 secs
+-----------------------------------------------------
+     Total Time   84 secs
+-----------------------------------------------------
+ (AutoAnalysisManager)  
+INFO  REPORT: Analysis succeeded for file: file:///C:/Users/owner/pcsx2_modder_wos/elf/SLUS_204.07 (HeadlessAnalyzer)  
+INFO  SCRIPT: C:\Users\owner\pcsx2_modder_wos\scripts\ghidra_export.py (HeadlessAnalyzer)  
+WROTE C:\Users\owner\pcsx2_modder_wos\ghidra\analysis.json functions=2820 strings=1010
+INFO  ANALYZING changes made by post scripts: file:///C:/Users/owner/pcsx2_modder_wos/elf/SLUS_204.07 (HeadlessAnalyzer)  
+INFO  REPORT: Post-analysis succeeded for file: file:///C:/Users/owner/pcsx2_modder_wos/elf/SLUS_204.07 (HeadlessAnalyzer)  
+INFO  REPORT: Save succeeded for: /SLUS_204.07 (wos:/SLUS_204.07) (HeadlessAnalyzer)  
+INFO  REPORT: Import succeeded (HeadlessAnalyzer)  

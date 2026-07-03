@@ -1,0 +1,9 @@
+# err_sys_sce_mpeg_get_picture_helper7_00105058
+# address: 0x00105058  size: 24 bytes  evidence: INFERRED_HELPER
+
+  00105058:  2000b2ff   .byte    0x20, 0x00, 0xb2, 0xff
+  0010505C:  2d98c000   .byte    0x2d, 0x98, 0xc0, 0x00
+  00105060:  0000b0ff   .byte    0x00, 0x00, 0xb0, 0xff
+  00105064:  2d90a000   .byte    0x2d, 0x90, 0xa0, 0x00
+  00105068:  4000bfff   .byte    0x40, 0x00, 0xbf, 0xff
+  0010506C:  9813040c   jal      0x104e60

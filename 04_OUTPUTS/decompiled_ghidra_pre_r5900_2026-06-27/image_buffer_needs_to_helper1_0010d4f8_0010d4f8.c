@@ -1,0 +1,14 @@
+// image_buffer_needs_to_helper1_0010d4f8
+// VA: 0x0010d4f8
+// Decompiled by Ghidra 12.1.2 headless
+
+
+/* WARNING: Control flow encountered bad instruction data */
+
+void image_buffer_needs_to_helper1_0010d4f8(void)
+
+{
+                    /* WARNING: Bad instruction - Truncating control flow here */
+  halt_baddata();
+}
+

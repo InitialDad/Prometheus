@@ -1,0 +1,15 @@
+// FUN_0010f320
+// VA: 0x0010f320
+// Decompiled by Ghidra 12.1.2 headless
+
+
+undefined4 FUN_0010f320(void)
+
+{
+  undefined4 *puVar1;
+  
+  puVar1 = (undefined4 *)FUN_001cf728();
+  *puVar1 = 5;
+  return 0xffffffff;
+}
+

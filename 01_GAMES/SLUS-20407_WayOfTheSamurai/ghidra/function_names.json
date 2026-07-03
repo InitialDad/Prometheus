@@ -1,0 +1,776 @@
+{
+  "0x00100550": {
+    "name": "alloc_std_00100550",
+    "ref_count": 1,
+    "score": 65,
+    "string": "\"!std::exception!!std::bad_alloc!!\""
+  },
+  "0x00100630": {
+    "name": "alloc_std_00100630",
+    "ref_count": 1,
+    "score": 51,
+    "string": "\"!std::exception!!std::bad_alloc!!\""
+  },
+  "0x00102F80": {
+    "name": "draw_sce_gs_put_draw_env_00102f80",
+    "ref_count": 1,
+    "score": 37,
+    "string": "\"sceGsPutDrawEnv: DMA Ch.2 does not terminate\\r\\n\""
+  },
+  "0x00103710": {
+    "name": "load_sce_gs_set_def_load_image_00103710",
+    "ref_count": 1,
+    "score": 32,
+    "string": "\"sceGsSetDefLoadImage: too big size\\r\\n\""
+  },
+  "0x001046F8": {
+    "name": "libdma_001046f8",
+    "ref_count": 1,
+    "score": 51,
+    "string": "\"libdma: sync timeout\\n\""
+  },
+  "0x001047D0": {
+    "name": "libdma_001047d0",
+    "ref_count": 1,
+    "score": 49,
+    "string": "\"libdma: sync timeout\\n\""
+  },
+  "0x001048B8": {
+    "name": "libdma_001048b8",
+    "ref_count": 1,
+    "score": 49,
+    "string": "\"libdma: sync timeout\\n\""
+  },
+  "0x001049A0": {
+    "name": "libdma_001049a0",
+    "ref_count": 1,
+    "score": 53,
+    "string": "\"libdma: sync timeout\\n\""
+  },
+  "0x00104A68": {
+    "name": "libdma_00104a68",
+    "ref_count": 1,
+    "score": 49,
+    "string": "\"libdma: sync timeout\\n\""
+  },
+  "0x00104B58": {
+    "name": "libdma_00104b58",
+    "ref_count": 1,
+    "score": 49,
+    "string": "\"libdma: sync timeout\\n\""
+  },
+  "0x00104C48": {
+    "name": "libdma_00104c48",
+    "ref_count": 1,
+    "score": 45,
+    "string": "\"libdma: sync timeout\\n\""
+  },
+  "0x00104D10": {
+    "name": "libdma_00104d10",
+    "ref_count": 1,
+    "score": 43,
+    "string": "\"libdma: sync timeout\\n\""
+  },
+  "0x00106780": {
+    "name": "validate_invalid_modion_type_ignored_00106780",
+    "ref_count": 1,
+    "score": 24,
+    "string": "\"Invalid modion type -- ignored(%d)\""
+  },
+  "0x00108888": {
+    "name": "validate_invalid_macroblock_address_increment_cod_00108888",
+    "ref_count": 1,
+    "score": 51,
+    "string": "\"Invalid macroblock_address_increment code(0x%08x)\""
+  },
+  "0x00108998": {
+    "name": "skip_to_the_next_00108998",
+    "ref_count": 1,
+    "score": 13,
+    "string": "\"= Skip to the next picture =\""
+  },
+  "0x00108AA0": {
+    "name": "start_slice_start_code_x_x_out_00108aa0",
+    "ref_count": 2,
+    "score": 48,
+    "string": "\"slice_start_code(0x%08x) out of range\""
+  },
+  "0x00108BD0": {
+    "name": "too_many_macroblocks_in_00108bd0",
+    "ref_count": 1,
+    "score": 20,
+    "string": "\"Too many macroblocks in picture\""
+  },
+  "0x00108DC0": {
+    "name": "skiped_macroblock_in_i_00108dc0",
+    "ref_count": 1,
+    "score": 33,
+    "string": "\"skiped macroblock in I picure is not allowed\""
+  },
+  "0x00108E80": {
+    "name": "validate_invalid_macroblock_type_code_00108e80",
+    "ref_count": 1,
+    "score": 39,
+    "string": "\"Invalid macroblock_type code: 0\""
+  },
+  "0x0010A420": {
+    "name": "load_chroma_intra_quantizer_matrix_0010a420",
+    "ref_count": 2,
+    "score": 50,
+    "string": "\"load_chroma_intra_quantizer_matrix == 1\""
+  },
+  "0x0010A670": {
+    "name": "odd_number_of_field_0010a670",
+    "ref_count": 2,
+    "score": 52,
+    "string": "\"odd number of field pictures\""
+  },
+  "0x0010AA88": {
+    "name": "too_small_buffer_size_0010aa88",
+    "ref_count": 1,
+    "score": 40,
+    "string": "\"Too small buffer size for %dx%d picture\\n\""
+  },
+  "0x0010CC58": {
+    "name": "the_size_of_work_0010cc58",
+    "ref_count": 1,
+    "score": 41,
+    "string": "\"The size of work area is too small\""
+  },
+  "0x0010D1E8": {
+    "name": "work_area_size_is_0010d1e8",
+    "ref_count": 1,
+    "score": 42,
+    "string": "\"work area size is too small\""
+  },
+  "0x0010D270": {
+    "name": "image_buffer_needs_to_0010d270",
+    "ref_count": 1,
+    "score": 51,
+    "string": "\"image buffer needs to be aligned to 64byte boundary(0x%08x)\""
+  },
+  "0x0010D718": {
+    "name": "the_second_field_is_0010d718",
+    "ref_count": 1,
+    "score": 57,
+    "string": "\"the second field is missing\""
+  },
+  "0x0010D8B8": {
+    "name": "err_mpeg_error_s_n_0010d8b8",
+    "ref_count": 1,
+    "score": 63,
+    "string": "\"[MPEG ERROR]%s\\n\""
+  },
+  "0x0010DA68": {
+    "name": "vertical_size_0010da68",
+    "ref_count": 1,
+    "score": 44,
+    "string": "\"vertical size > 2800\""
+  },
+  "0x0010DFF0": {
+    "name": "chroma_format_needs_to_be_0010dff0",
+    "ref_count": 2,
+    "score": 42,
+    "string": "\"_chroma_format needs to be 1: 420\""
+  },
+  "0x0010FAA0": {
+    "name": "err_internel_error_in_libkernl_0010faa0",
+    "ref_count": 1,
+    "score": 44,
+    "string": "\"## internel error in libkernl.a!\\n\""
+  },
+  "0x00110088": {
+    "name": "tty_00110088",
+    "ref_count": 2,
+    "score": 48,
+    "string": "\"TTY: packet size larger than expect\\n\""
+  },
+  "0x00116DB8": {
+    "name": "too_long_parameter_s_00116db8",
+    "ref_count": 1,
+    "score": 41,
+    "string": "\"too long parameter '%s'\\n\""
+  },
+  "0x001171D0": {
+    "name": "tlb_spad_kernel_001171d0",
+    "ref_count": 3,
+    "score": 66,
+    "string": "\"# TLB spad=0 kernel=1:%d default=%d:%d extended=%d:%d\\n\""
+  },
+  "0x00117B90": {
+    "name": "libpad_00117b90",
+    "ref_count": 1,
+    "score": 24,
+    "string": "\"libpad: sceSifSetDma faild\\n\""
+  },
+  "0x00117CA8": {
+    "name": "libpad_00117ca8",
+    "ref_count": 1,
+    "score": 27,
+    "string": "\"libpad: Module version mismatch \""
+  },
+  "0x00117F08": {
+    "name": "libpad_00117f08",
+    "ref_count": 2,
+    "score": 46,
+    "string": "\"libpad: buffer addr is not 64 byte align. %08x\\n\""
+  },
+  "0x001190B0": {
+    "name": "sce_cd_cbfunc_d_sce_cd_cbfunc_num_d_001190b0",
+    "ref_count": 1,
+    "score": 45,
+    "string": "\"sceCdCbfunc= %d sceCdCbfunc_num= %d\\n\""
+  },
+  "0x00119818": {
+    "name": "ncmd_fail_sema_cur_cmd_00119818",
+    "ref_count": 1,
+    "score": 50,
+    "string": "\"Ncmd fail sema cur_cmd:%d keep_cmd:%d\\n\""
+  },
+  "0x00119A20": {
+    "name": "n_cmd_wait_n_00119a20",
+    "ref_count": 1,
+    "score": 49,
+    "string": "\"N cmd wait\\n\""
+  },
+  "0x00119AC0": {
+    "name": "s_cmd_wait_n_00119ac0",
+    "ref_count": 1,
+    "score": 50,
+    "string": "\"S cmd wait\\n\""
+  },
+  "0x00119B30": {
+    "name": "scmd_fail_sema_cur_cmd_00119b30",
+    "ref_count": 1,
+    "score": 50,
+    "string": "\"Scmd fail sema cur_cmd:%d keep_cmd:%d\\n\""
+  },
+  "0x00119CA0": {
+    "name": "init_libcdvd_bind_err_d_00119ca0",
+    "ref_count": 1,
+    "score": 15,
+    "string": "\"Libcdvd bind err %d CD_Init %d\\n\""
+  },
+  "0x00119F80": {
+    "name": "read_disk_ready_n_00119f80",
+    "ref_count": 2,
+    "score": 44,
+    "string": "\"DiskReady 0\\n\""
+  },
+  "0x0011A340": {
+    "name": "read_sce_cd_st_read_call_read_size_0011a340",
+    "ref_count": 2,
+    "score": 52,
+    "string": "\"sceCdStRead call read size= %d mode= %d\\n\""
+  },
+  "0x0011A4C8": {
+    "name": "sce_cd_st_pause_call_n_0011a4c8",
+    "ref_count": 1,
+    "score": 58,
+    "string": "\"sceCdStPause call\\n\""
+  },
+  "0x0011A518": {
+    "name": "sce_cd_st_resume_call_n_0011a518",
+    "ref_count": 1,
+    "score": 58,
+    "string": "\"sceCdStResume call\\n\""
+  },
+  "0x0011A570": {
+    "name": "sce_cd_st_stat_call_n_0011a570",
+    "ref_count": 1,
+    "score": 59,
+    "string": "\"sceCdStStat call\\n\""
+  },
+  "0x0011A5B8": {
+    "name": "read_call_cdreadstm_call_n_0011a5b8",
+    "ref_count": 2,
+    "score": 40,
+    "string": "\"call cdreadstm call\\n\""
+  },
+  "0x0011A720": {
+    "name": "err_bind_error_libmc_n_0011a720",
+    "ref_count": 1,
+    "score": 15,
+    "string": "\"bind error libmc \\n\""
+  },
+  "0x0011B420": {
+    "name": "check_sce_mc_ud_check_new_card_rpc_faild_n_0011b420",
+    "ref_count": 1,
+    "score": 64,
+    "string": "\"sceMcUdCheckNewCard RPC faild\\n\""
+  },
+  "0x0011BF88": {
+    "name": "err_sce_sd_remote_init_rpc_bind_error_0011bf88",
+    "ref_count": 1,
+    "score": 64,
+    "string": "\"sceSdRemoteInit() RPC bind error!\\n\""
+  },
+  "0x0011CD10": {
+    "name": "set_target_char_0011cd10",
+    "ref_count": 1,
+    "score": 59,
+    "string": "\"SetTargetChar: No Target!\""
+  },
+  "0x0011F3A0": {
+    "name": "err_ccamera_battle_0011f3a0",
+    "ref_count": 1,
+    "score": 60,
+    "string": "\"CCameraBattle: no target error!\""
+  },
+  "0x001335E0": {
+    "name": "init_heap_done_n_001335e0",
+    "ref_count": 1,
+    "score": 23,
+    "string": "\"InitHeap Done\\n\""
+  },
+  "0x00134DA0": {
+    "name": "delete_character_failure_n_00134da0",
+    "ref_count": 1,
+    "score": 37,
+    "string": "\"DeleteCharacter = failure\\n\""
+  },
+  "0x00135870": {
+    "name": "err_memory_alloc_error_00135870",
+    "ref_count": 1,
+    "score": 16,
+    "string": "\"memory alloc error!!\""
+  },
+  "0x00148120": {
+    "name": "init_file_system_begin_00148120",
+    "ref_count": 2,
+    "score": 65,
+    "string": "\"Init File System Begin\\n\""
+  },
+  "0x00148160": {
+    "name": "loading_module_s_00148160",
+    "ref_count": 3,
+    "score": 48,
+    "string": "\"loading module [%s]...\""
+  },
+  "0x00148200": {
+    "name": "init_cd_vd_init_n_00148200",
+    "ref_count": 5,
+    "score": 50,
+    "string": "\"CdVdInit----------\\n\""
+  },
+  "0x00148320": {
+    "name": "s_00148320",
+    "ref_count": 1,
+    "score": 29,
+    "string": "\"!!![%s]\""
+  },
+  "0x0014BE40": {
+    "name": "sound_common_vgd_0014be40",
+    "ref_count": 1,
+    "score": 14,
+    "string": "\"sound/common.vgd\""
+  },
+  "0x0014CF90": {
+    "name": "ending_no_mismatch_d_0014cf90",
+    "ref_count": 1,
+    "score": 17,
+    "string": "\"Ending No Mismatch %d\""
+  },
+  "0x0014D0E0": {
+    "name": "load_now_loading_0014d0e0",
+    "ref_count": 1,
+    "score": 42,
+    "string": "\"Now Loading\""
+  },
+  "0x0014D1D0": {
+    "name": "load_now_loading_0014d1d0",
+    "ref_count": 1,
+    "score": 23,
+    "string": "\"Now Loading\""
+  },
+  "0x0014E3E0": {
+    "name": "kenji_0014e3e0",
+    "ref_count": 1,
+    "score": 51,
+    "string": "\"KENJI\""
+  },
+  "0x00152D00": {
+    "name": "module_bin_00152d00",
+    "ref_count": 1,
+    "score": 52,
+    "string": "\"MODULE.BIN\""
+  },
+  "0x0015E410": {
+    "name": "s_has_left_the_0015e410",
+    "ref_count": 1,
+    "score": 38,
+    "string": "\"%s has left the pass ...\""
+  },
+  "0x00161AE0": {
+    "name": "you_have_obtained_s_00161ae0",
+    "ref_count": 1,
+    "score": 56,
+    "string": "\" You have obtained %s !\""
+  },
+  "0x001636C0": {
+    "name": "err_unknown_error_001636c0",
+    "ref_count": 2,
+    "score": 49,
+    "string": "\"unknown error\""
+  },
+  "0x00163A80": {
+    "name": "error_00163a80",
+    "ref_count": 1,
+    "score": 40,
+    "string": "\"error\""
+  },
+  "0x00164320": {
+    "name": "null_object_00164320",
+    "ref_count": 1,
+    "score": 10,
+    "string": "\"(Null Object)\""
+  },
+  "0x001654A0": {
+    "name": "call_script_over_flow_n_001654a0",
+    "ref_count": 1,
+    "score": 53,
+    "string": "\"CallScript Over Flow!!!\\n\""
+  },
+  "0x00165B70": {
+    "name": "call_script_over_flow_n_00165b70",
+    "ref_count": 1,
+    "score": 53,
+    "string": "\"CallScript Over Flow!!!\\n\""
+  },
+  "0x00165F70": {
+    "name": "call_script_over_flow_n_00165f70",
+    "ref_count": 1,
+    "score": 53,
+    "string": "\"CallScript Over Flow!!!\\n\""
+  },
+  "0x00167410": {
+    "name": "print_00167410",
+    "ref_count": 2,
+    "score": 42,
+    "string": "\"print\""
+  },
+  "0x00169130": {
+    "name": "bad_args_00169130",
+    "ref_count": 2,
+    "score": 44,
+    "string": "\"bad args\""
+  },
+  "0x0016A100": {
+    "name": "error_0016a100",
+    "ref_count": 1,
+    "score": 19,
+    "string": "\"error\""
+  },
+  "0x0016A910": {
+    "name": "function_recursive_is_too_0016a910",
+    "ref_count": 2,
+    "score": 26,
+    "string": "\"function recursive is too deep\""
+  },
+  "0x0016B1F0": {
+    "name": "error_0016b1f0",
+    "ref_count": 1,
+    "score": 26,
+    "string": "\"error\""
+  },
+  "0x0016B5C0": {
+    "name": "err_while_must_arguments_error_0016b5c0",
+    "ref_count": 1,
+    "score": 23,
+    "string": "\"while must 2 arguments (error \""
+  },
+  "0x0016D670": {
+    "name": "error_0016d670",
+    "ref_count": 1,
+    "score": 32,
+    "string": "\"error\""
+  },
+  "0x0016DA00": {
+    "name": "i_0016da00",
+    "ref_count": 2,
+    "score": 54,
+    "string": "\"?i: if valuation failure\""
+  },
+  "0x0016E970": {
+    "name": "bad_if_0016e970",
+    "ref_count": 2,
+    "score": 17,
+    "string": "\"bad if\""
+  },
+  "0x0016F430": {
+    "name": "error_0016f430",
+    "ref_count": 1,
+    "score": 36,
+    "string": "\"error\""
+  },
+  "0x0016F7E0": {
+    "name": "error_0016f7e0",
+    "ref_count": 1,
+    "score": 36,
+    "string": "\"error\""
+  },
+  "0x0016FB90": {
+    "name": "err_operator_0016fb90",
+    "ref_count": 2,
+    "score": 55,
+    "string": "\"operator @: no argument error\""
+  },
+  "0x00170020": {
+    "name": "error_00170020",
+    "ref_count": 1,
+    "score": 32,
+    "string": "\"error\""
+  },
+  "0x001702A0": {
+    "name": "err_list_001702a0",
+    "ref_count": 2,
+    "score": 51,
+    "string": "\"list: argument error\""
+  },
+  "0x00170A40": {
+    "name": "err_push_back_00170a40",
+    "ref_count": 1,
+    "score": 32,
+    "string": "\"push_back: argument error\""
+  },
+  "0x00170C10": {
+    "name": "err_push_back_00170c10",
+    "ref_count": 1,
+    "score": 32,
+    "string": "\"push_back: argument error\""
+  },
+  "0x001716C0": {
+    "name": "cmpr_001716c0",
+    "ref_count": 2,
+    "score": 58,
+    "string": "\"cmpr: no compare target\""
+  },
+  "0x00171790": {
+    "name": "esopr_opr_00171790",
+    "ref_count": 1,
+    "score": 40,
+    "string": "\"ESOpr_opr: different type operation\\n\""
+  },
+  "0x00176CE0": {
+    "name": "create_format_string_00176ce0",
+    "ref_count": 1,
+    "score": 56,
+    "string": "\"CreateFormatString: bad arg.\""
+  },
+  "0x00177510": {
+    "name": "is_defined_00177510",
+    "ref_count": 2,
+    "score": 49,
+    "string": "\"IsDefined: bad arg.\""
+  },
+  "0x00178260": {
+    "name": "cb1_shall_i_remain_00178260",
+    "ref_count": 2,
+    "score": 41,
+    "string": "\"CB1 'Shall I remain here a little longer?','Shall I leave this pass?';\""
+  },
+  "0x00178910": {
+    "name": "a12_d_d_d_00178910",
+    "ref_count": 1,
+    "score": 25,
+    "string": "\"A12 %d,%d,%d,%d;\""
+  },
+  "0x0017AC90": {
+    "name": "a14_d_d_0017ac90",
+    "ref_count": 1,
+    "score": 37,
+    "string": "\"/)1 A14 %d,%d;\""
+  },
+  "0x0017B8B0": {
+    "name": "a0_d_d_d_d_0017b8b0",
+    "ref_count": 1,
+    "score": 27,
+    "string": "\"/)1 A0D %d,%d,%d;\""
+  },
+  "0x0017BBB0": {
+    "name": "a00_d_d_0017bbb0",
+    "ref_count": 1,
+    "score": 48,
+    "string": "\"/)1 A00 %d,%d;\""
+  },
+  "0x0017BE50": {
+    "name": "a11_d_0017be50",
+    "ref_count": 1,
+    "score": 42,
+    "string": "\"/)1 A11 %d;\""
+  },
+  "0x0017C110": {
+    "name": "a13_d_d_d_0017c110",
+    "ref_count": 1,
+    "score": 56,
+    "string": "\"/)1 A13 %d,%d,%d,%d;\""
+  },
+  "0x0017EE10": {
+    "name": "cb1_shall_i_remain_0017ee10",
+    "ref_count": 2,
+    "score": 24,
+    "string": "\"CB1 'Shall I remain here a little longer?','Shall I leave this pass?';\""
+  },
+  "0x0017FED0": {
+    "name": "script_0017fed0",
+    "ref_count": 2,
+    "score": 36,
+    "string": "\"script/\""
+  },
+  "0x00183D50": {
+    "name": "a0_e_d_d_00183d50",
+    "ref_count": 1,
+    "score": 10,
+    "string": "\"/)1 A0E %d,%d;\""
+  },
+  "0x00183F70": {
+    "name": "a15_d_00183f70",
+    "ref_count": 1,
+    "score": 20,
+    "string": "\"/)1 A15 %d;\""
+  },
+  "0x00184050": {
+    "name": "a04_d_d_d_00184050",
+    "ref_count": 1,
+    "score": 11,
+    "string": "\"/)1 A04 %d,%d,%d;\""
+  },
+  "0x00184360": {
+    "name": "a03_d_d_00184360",
+    "ref_count": 1,
+    "score": 12,
+    "string": "\"/)1 A03 %d,%d;\""
+  },
+  "0x001844D0": {
+    "name": "a06_d_d_d_001844d0",
+    "ref_count": 1,
+    "score": 11,
+    "string": "\"/)1 A06 %d,%d,%d,%d;\""
+  },
+  "0x00184690": {
+    "name": "a05_d_d_d_00184690",
+    "ref_count": 1,
+    "score": 11,
+    "string": "\"/)1 A05 %d,%d,%d,%d;\""
+  },
+  "0x00199C70": {
+    "name": "volume_dat_00199c70",
+    "ref_count": 1,
+    "score": 43,
+    "string": "\"volume.dat\""
+  },
+  "0x0019D4B0": {
+    "name": "c7_f_0019d4b0",
+    "ref_count": 1,
+    "score": 8,
+    "string": "\"$C7F;\""
+  },
+  "0x0019D8E0": {
+    "name": "c8_b_c8_a_0019d8e0",
+    "ref_count": 1,
+    "score": 11,
+    "string": "\"$C8B;$C8A;\""
+  },
+  "0x0019DD40": {
+    "name": "its_attack_power_increased_0019dd40",
+    "ref_count": 3,
+    "score": 51,
+    "string": "\"Its Attack Power increased by %d%.\""
+  },
+  "0x0019E6C0": {
+    "name": "c55_s03_c7_f_0019e6c0",
+    "ref_count": 1,
+    "score": 50,
+    "string": "\"$C55 0,2,1,2;$S03 2.0;$C7F;\""
+  },
+  "0x0019E960": {
+    "name": "c53_c55_c98_0019e960",
+    "ref_count": 2,
+    "score": 49,
+    "string": "\"$C53 0,128;$C55 0,2,1,1;$C98;\""
+  },
+  "0x001A48F0": {
+    "name": "stop_gz_mf_bgm_001a48f0",
+    "ref_count": 1,
+    "score": 34,
+    "string": "\"GzMfBgm::Stop()\\n\""
+  },
+  "0x001A6940": {
+    "name": "host_001a6940",
+    "ref_count": 4,
+    "score": 28,
+    "string": "\"host:\""
+  },
+  "0x001A6FC0": {
+    "name": "host0_001a6fc0",
+    "ref_count": 1,
+    "score": 20,
+    "string": "\"host0:\""
+  },
+  "0x001A7110": {
+    "name": "host0_001a7110",
+    "ref_count": 1,
+    "score": 28,
+    "string": "\"host0:\""
+  },
+  "0x001AAF60": {
+    "name": "a02_d_d_001aaf60",
+    "ref_count": 1,
+    "score": 46,
+    "string": "\"/)1 A02 %d,%d;\""
+  },
+  "0x001AB280": {
+    "name": "a01_d_d_001ab280",
+    "ref_count": 1,
+    "score": 46,
+    "string": "\"/)1 A01 %d,%d;\""
+  },
+  "0x001C9D70": {
+    "name": "baslus_001c9d70",
+    "ref_count": 2,
+    "score": 37,
+    "string": "\"/BASLUS-20407\""
+  },
+  "0x001CE4C0": {
+    "name": "init_infinity_001ce4c0",
+    "ref_count": 1,
+    "score": 8,
+    "string": "\"Infinity\""
+  },
+  "0x001E9710": {
+    "name": "abcdefghijklmnopqrstuvwxyz_001e9710",
+    "ref_count": 1,
+    "score": 76,
+    "string": "\"ABCDEFGHIJKLMNOPQRSTUVWXYZ,.;:abcdefghijklmnopqrstuvwxyz!?!?0123456789_'*&@()\\\"#$%+-=/\\\\|~^ \""
+  },
+  "0x001EC8A0": {
+    "name": "cdrom0_001ec8a0",
+    "ref_count": 1,
+    "score": 31,
+    "string": "\"cdrom0\""
+  },
+  "0x001ED5B0": {
+    "name": "dma_add_not_active_001ed5b0",
+    "ref_count": 1,
+    "score": 57,
+    "string": "\"DMA ADD not active\\n\""
+  },
+  "0x001EDD20": {
+    "name": "err_sce_mpeg_get_picture_decode_error_001edd20",
+    "ref_count": 1,
+    "score": 39,
+    "string": "\"sceMpegGetPicture() decode error\""
+  },
+  "0x001F4C40": {
+    "name": "cdrom0_001f4c40",
+    "ref_count": 2,
+    "score": 38,
+    "string": "\"cdrom0:/MOVIE/TUTOR1.PSS;1\""
+  },
+  "0x001F7520": {
+    "name": "do_you_want_to_001f7520",
+    "ref_count": 1,
+    "score": 39,
+    "string": "\"Do you want to leave the pass with your swords?\""
+  }
+}

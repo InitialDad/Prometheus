@@ -1,0 +1,2654 @@
+{
+  "0x00100008": {
+    "name": "entry",
+    "reason": "ghidra_headless"
+  },
+  "0x00100140": {
+    "name": "entry_helper2_helper1_00100140",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00100310": {
+    "name": "cdrom0_helper12_helper2_helper1_00100310",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00100550": {
+    "name": "alloc_rt_std_00100550",
+    "reason": "v1_string_xref"
+  },
+  "0x00100630": {
+    "name": "alloc_mem_std_00100630",
+    "reason": "v1_string_xref"
+  },
+  "0x00102690": {
+    "name": "cdrom0_helper7_helper1_helper1_00102690",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00102820": {
+    "name": "cdrom0_helper7_helper1_next1_00102820",
+    "reason": "adjacency_of_prior_run"
+  },
+  "0x00102830": {
+    "name": "cdrom0_helper7_helper1_helper2_00102830",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00102898": {
+    "name": "play_scegsdefdispenv_00102898",
+    "reason": "strxref_prior_run"
+  },
+  "0x00102F80": {
+    "name": "draw_mem_sce_gs_put_draw_env_00102f80",
+    "reason": "v1_string_xref"
+  },
+  "0x001033F8": {
+    "name": "scegssyncpath_001033f8",
+    "reason": "strxref_prior_run"
+  },
+  "0x00103710": {
+    "name": "load_mem_sce_gs_set_def_load_image_00103710",
+    "reason": "v1_string_xref"
+  },
+  "0x00103A38": {
+    "name": "load_scegsexecloadimage_00103a38",
+    "reason": "strxref_prior_run"
+  },
+  "0x00103BB8": {
+    "name": "scegsexecstoreimage_00103bb8",
+    "reason": "strxref_prior_run"
+  },
+  "0x00104248": {
+    "name": "cdrom0_helper7_helper1_helper3_00104248",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00104370": {
+    "name": "cdrom0_helper7_helper1_helper1_00104370",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001043D0": {
+    "name": "cdrom0_helper7_helper1_helper4_001043d0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001044C0": {
+    "name": "cdrom0_helper7_helper1_helper1_001044c0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001046F8": {
+    "name": "libdma_001046f8",
+    "reason": "v1_string_xref"
+  },
+  "0x001047D0": {
+    "name": "libdma_001047d0",
+    "reason": "v1_string_xref"
+  },
+  "0x001048B8": {
+    "name": "libdma_001048b8",
+    "reason": "v1_string_xref"
+  },
+  "0x001049A0": {
+    "name": "libdma_001049a0",
+    "reason": "v1_string_xref"
+  },
+  "0x00104A68": {
+    "name": "libdma_00104a68",
+    "reason": "v1_string_xref"
+  },
+  "0x00104B58": {
+    "name": "libdma_00104b58",
+    "reason": "v1_string_xref"
+  },
+  "0x00104C48": {
+    "name": "libdma_00104c48",
+    "reason": "v1_string_xref"
+  },
+  "0x00104D10": {
+    "name": "libdma_00104d10",
+    "reason": "v1_string_xref"
+  },
+  "0x00104E40": {
+    "name": "err_sys_sce_mpeg_get_picture_helper1_00104e40",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00104E50": {
+    "name": "err_sys_sce_mpeg_get_picture_helper2_00104e50",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00104EB8": {
+    "name": "err_sys_sce_mpeg_get_picture_helper3_00104eb8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00104F30": {
+    "name": "err_sys_sce_mpeg_get_picture_helper4_00104f30",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00104FC8": {
+    "name": "err_sys_sce_mpeg_get_picture_helper5_00104fc8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00105040": {
+    "name": "err_sys_sce_mpeg_get_picture_helper6_00105040",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00105058": {
+    "name": "err_sys_sce_mpeg_get_picture_helper7_00105058",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00105070": {
+    "name": "err_sys_sce_mpeg_get_picture_helper8_00105070",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00105118": {
+    "name": "err_sys_sce_mpeg_get_picture_helper9_00105118",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00105140": {
+    "name": "cdrom0_helper7_helper1_helper1_00105140",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00106780": {
+    "name": "validate_invalid_modion_type_ignored_00106780",
+    "reason": "v1_string_xref"
+  },
+  "0x001069D0": {
+    "name": "validate_a_invalid_motion_type_d_001069d0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001070D8": {
+    "name": "validate_a_invalid_motion_helper1_001070d8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001074F8": {
+    "name": "intra_skip_mb_001074f8",
+    "reason": "strxref_prior_run"
+  },
+  "0x001084F0": {
+    "name": "error_code_detected_bdec_001084f0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001086E0": {
+    "name": "validate_invalid_macroblock_helper1_001086e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00108700": {
+    "name": "validate_a_invalid_motion_helper2_00108700",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00108888": {
+    "name": "validate_invalid_macroblock_address_increment_cod_00108888",
+    "reason": "v1_string_xref"
+  },
+  "0x00108998": {
+    "name": "skip_to_the_next_00108998",
+    "reason": "v1_string_xref"
+  },
+  "0x00108AA0": {
+    "name": "start_slice_start_code_x_x_out_00108aa0",
+    "reason": "v1_string_xref"
+  },
+  "0x00108BD0": {
+    "name": "too_many_macroblocks_in_00108bd0",
+    "reason": "v1_string_xref"
+  },
+  "0x00108DC0": {
+    "name": "skiped_macroblock_in_i_00108dc0",
+    "reason": "v1_string_xref"
+  },
+  "0x00108E80": {
+    "name": "validate_invalid_macroblock_type_code_00108e80",
+    "reason": "v1_string_xref"
+  },
+  "0x00109328": {
+    "name": "validate_invalid_macroblock_helper2_00109328",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001093B0": {
+    "name": "validate_invalid_macroblock_helper1_001093b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00109550": {
+    "name": "validate_invalid_macroblock_next1_00109550",
+    "reason": "adjacency_of_prior_run"
+  },
+  "0x00109D68": {
+    "name": "start_slice_start_code_x_x_helper1_00109d68",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010A420": {
+    "name": "load_mem_chroma_intra_quantizer_matrix_0010a420",
+    "reason": "v1_string_xref"
+  },
+  "0x0010A670": {
+    "name": "odd_number_of_field_0010a670",
+    "reason": "v1_string_xref"
+  },
+  "0x0010AA88": {
+    "name": "too_small_buffer_size_0010aa88",
+    "reason": "v1_string_xref"
+  },
+  "0x0010B218": {
+    "name": "validate_invalid_modion_helper1_0010b218",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010B370": {
+    "name": "validate_invalid_macroblock_helper2_0010b370",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010B670": {
+    "name": "err_csc_handler_error_n_0010b670",
+    "reason": "strxref_prior_run"
+  },
+  "0x0010BDB0": {
+    "name": "play_no_memory_for_movie_helper1_0010bdb0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010C350": {
+    "name": "play_no_memory_for_movie_helper1_0010c350",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010CBB8": {
+    "name": "play_no_memory_for_movie_helper1_0010cbb8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010CC58": {
+    "name": "the_size_of_work_0010cc58",
+    "reason": "v1_string_xref"
+  },
+  "0x0010CE90": {
+    "name": "err_sys_sce_mpeg_get_picture_helper1_0010ce90",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010CFA8": {
+    "name": "err_sys_sce_mpeg_get_picture_helper2_0010cfa8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010D018": {
+    "name": "the_size_of_work_helper1_0010d018",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010D070": {
+    "name": "play_no_memory_for_movie_helper1_0010d070",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010D1B0": {
+    "name": "the_size_of_work_helper2_0010d1b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010D1C8": {
+    "name": "the_size_of_work_helper3_0010d1c8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010D1D8": {
+    "name": "vertical_size_helper1_0010d1d8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010D1E8": {
+    "name": "work_area_size_is_0010d1e8",
+    "reason": "v1_string_xref"
+  },
+  "0x0010D270": {
+    "name": "image_buffer_needs_to_0010d270",
+    "reason": "v1_string_xref"
+  },
+  "0x0010D3E0": {
+    "name": "image_buffer_needs_to_helper_helper1_0010d3e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010D4F8": {
+    "name": "image_buffer_needs_to_helper1_0010d4f8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010D540": {
+    "name": "image_buffer_needs_to_helper_helper1_0010d540",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010D6A0": {
+    "name": "image_buffer_needs_to_helper_next1_0010d6a0",
+    "reason": "adjacency_of_prior_run"
+  },
+  "0x0010D718": {
+    "name": "the_second_field_is_0010d718",
+    "reason": "v1_string_xref"
+  },
+  "0x0010D798": {
+    "name": "the_size_of_work_helper4_0010d798",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010D8B8": {
+    "name": "err_mem_mpeg_error_s_n_0010d8b8",
+    "reason": "v1_string_xref"
+  },
+  "0x0010D900": {
+    "name": "the_second_field_is_next1_0010d900",
+    "reason": "adjacency_of_prior_run"
+  },
+  "0x0010DA48": {
+    "name": "vertical_size_helper2_0010da48",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010DA68": {
+    "name": "vertical_size_0010da68",
+    "reason": "v1_string_xref"
+  },
+  "0x0010DE38": {
+    "name": "vertical_size_helper3_0010de38",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010DF18": {
+    "name": "vertical_size_helper4_0010df18",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010DFF0": {
+    "name": "chroma_format_needs_to_be_0010dff0",
+    "reason": "v1_string_xref"
+  },
+  "0x0010E860": {
+    "name": "SetGsCrt",
+    "reason": "ghidra_headless"
+  },
+  "0x0010E880": {
+    "name": "Exit",
+    "reason": "ghidra_headless"
+  },
+  "0x0010E8A0": {
+    "name": "LoadExecPS2",
+    "reason": "ghidra_headless"
+  },
+  "0x0010E910": {
+    "name": "SetVTLBRefillHandler",
+    "reason": "ghidra_headless"
+  },
+  "0x0010E940": {
+    "name": "AddIntcHandler2",
+    "reason": "ghidra_headless"
+  },
+  "0x0010E950": {
+    "name": "AddIntcHandler2",
+    "reason": "ghidra_headless"
+  },
+  "0x0010E960": {
+    "name": "RemoveIntcHandler",
+    "reason": "ghidra_headless"
+  },
+  "0x0010E970": {
+    "name": "AddDmacHandler",
+    "reason": "ghidra_headless"
+  },
+  "0x0010E980": {
+    "name": "AddDmacHandler",
+    "reason": "ghidra_headless"
+  },
+  "0x0010E990": {
+    "name": "RemoveDmacHandler",
+    "reason": "ghidra_headless"
+  },
+  "0x0010E9A0": {
+    "name": "_EnableIntc",
+    "reason": "ghidra_headless"
+  },
+  "0x0010E9B0": {
+    "name": "_DisableIntc",
+    "reason": "ghidra_headless"
+  },
+  "0x0010E9C0": {
+    "name": "_EnableDmac",
+    "reason": "ghidra_headless"
+  },
+  "0x0010E9D0": {
+    "name": "_DisableDmac",
+    "reason": "ghidra_headless"
+  },
+  "0x0010E9E0": {
+    "name": "SetAlarm",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EA00": {
+    "name": "_iEnableIntc",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EA10": {
+    "name": "_iDisableIntc",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EA20": {
+    "name": "_iEnableDmac",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EA30": {
+    "name": "_iDisableDmac",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EA60": {
+    "name": "CreateThread",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EA70": {
+    "name": "DeleteThread",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EA80": {
+    "name": "StartThread",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EAA0": {
+    "name": "ExitDeleteThread",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EAB0": {
+    "name": "TerminateThread",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EAF0": {
+    "name": "ChangeThreadPriority",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EB10": {
+    "name": "RotateThreadReadyQueue",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EB50": {
+    "name": "GetThreadId",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EB60": {
+    "name": "ReferThreadStatus",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EB80": {
+    "name": "SleepThread",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EB90": {
+    "name": "WakeupThread",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EBA0": {
+    "name": "_iWakeupThread",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EBD0": {
+    "name": "SuspendThread",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EBE0": {
+    "name": "_iSuspendThread",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EC40": {
+    "name": "EndOfHeap",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EC60": {
+    "name": "CreateSema",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EC70": {
+    "name": "DeleteSema",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EC80": {
+    "name": "SignalSema",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EC90": {
+    "name": "iSignalSema",
+    "reason": "ghidra_headless"
+  },
+  "0x0010ECA0": {
+    "name": "WaitSema",
+    "reason": "ghidra_headless"
+  },
+  "0x0010ECB0": {
+    "name": "PollSema",
+    "reason": "ghidra_headless"
+  },
+  "0x0010ECC0": {
+    "name": "iPollSema",
+    "reason": "ghidra_headless"
+  },
+  "0x0010ED00": {
+    "name": "SetOsdConfigParam",
+    "reason": "ghidra_headless"
+  },
+  "0x0010ED10": {
+    "name": "GetOsdConfigParam",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EEE0": {
+    "name": "FlushCache",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EF30": {
+    "name": "sceSifStopDma",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EF80": {
+    "name": "GsGetIMR",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EFA0": {
+    "name": "GsPutIMR",
+    "reason": "ghidra_headless"
+  },
+  "0x0010EFD0": {
+    "name": "SetVSyncFlag",
+    "reason": "ghidra_headless"
+  },
+  "0x0010F000": {
+    "name": "sceSifDmaStat",
+    "reason": "ghidra_headless"
+  },
+  "0x0010F020": {
+    "name": "sceSifSetDma",
+    "reason": "ghidra_headless"
+  },
+  "0x0010F030": {
+    "name": "isceSifSetDma",
+    "reason": "ghidra_headless"
+  },
+  "0x0010F040": {
+    "name": "sceSifSetDChain",
+    "reason": "ghidra_headless"
+  },
+  "0x0010F050": {
+    "name": "isceSifSetDChain",
+    "reason": "ghidra_headless"
+  },
+  "0x0010F060": {
+    "name": "sceSifSetReg",
+    "reason": "ghidra_headless"
+  },
+  "0x0010F070": {
+    "name": "sceSifGetReg",
+    "reason": "ghidra_headless"
+  },
+  "0x0010F080": {
+    "name": "ExecOSD",
+    "reason": "ghidra_headless"
+  },
+  "0x0010F090": {
+    "name": "Deci2Call",
+    "reason": "ghidra_headless"
+  },
+  "0x0010F0C0": {
+    "name": "GetMemorySize",
+    "reason": "ghidra_headless"
+  },
+  "0x0010F0D0": {
+    "name": "InitTLB",
+    "reason": "ghidra_headless"
+  },
+  "0x0010F0E0": {
+    "name": "init_battle_cd_vd_init_n_helper1_0010f0e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010F960": {
+    "name": "SetSyscall",
+    "reason": "ghidra_headless"
+  },
+  "0x0010F970": {
+    "name": "entry_helper1_helper1_helper1_0010f970",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010F9B8": {
+    "name": "RFU091",
+    "reason": "ghidra_headless"
+  },
+  "0x0010F9C8": {
+    "name": "entry_helper1_helper1_0010f9c8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010FAA0": {
+    "name": "err_stdcpp_internel_error_in_libkernl_0010faa0",
+    "reason": "v1_string_xref"
+  },
+  "0x0010FB78": {
+    "name": "entry_helper1_helper2_0010fb78",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010FEC8": {
+    "name": "tty_helper1_0010fec8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0010FF00": {
+    "name": "tty_helper2_0010ff00",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00110008": {
+    "name": "tty_helper3_00110008",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00110088": {
+    "name": "tty_00110088",
+    "reason": "v1_string_xref"
+  },
+  "0x00111170": {
+    "name": "too_long_parameter_s_helper1_helper1_00111170",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00111208": {
+    "name": "init_stdcpp_libcdvd_bind_helper1_00111208",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00111760": {
+    "name": "too_long_parameter_s_helper1_00111760",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00112DE0": {
+    "name": "init_battle_cd_vd_init_n_helper1_00112de0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00115BB8": {
+    "name": "module_bin_helper1_00115bb8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00116650": {
+    "name": "module_bin_helper2_00116650",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001168B8": {
+    "name": "loading_module_s_helper1_001168b8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00116C18": {
+    "name": "too_long_parameter_s_helper2_00116c18",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00116D80": {
+    "name": "init_battle_cd_vd_init_n_helper2_00116d80",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00116DB8": {
+    "name": "too_long_parameter_s_00116db8",
+    "reason": "v1_string_xref"
+  },
+  "0x00116FF8": {
+    "name": "RFU091",
+    "reason": "ghidra_headless"
+  },
+  "0x00117008": {
+    "name": "SetSyscall",
+    "reason": "ghidra_headless"
+  },
+  "0x001170F0": {
+    "name": "SetTLBEntry",
+    "reason": "ghidra_headless"
+  },
+  "0x001171D0": {
+    "name": "tlb_spad_kernel_001171d0",
+    "reason": "v1_string_xref"
+  },
+  "0x001177C0": {
+    "name": "entry_helper1_helper3_001177c0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00117840": {
+    "name": "entry_helper1_helper4_helper1_00117840",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00117850": {
+    "name": "entry_helper1_helper4_00117850",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00117890": {
+    "name": "SetSyscall",
+    "reason": "ghidra_headless"
+  },
+  "0x001178C0": {
+    "name": "entry_helper1_001178c0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00117900": {
+    "name": "SetSyscall",
+    "reason": "ghidra_headless"
+  },
+  "0x00117910": {
+    "name": "psiilibpad_helper1_00117910",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00117958": {
+    "name": "RFU091",
+    "reason": "ghidra_headless"
+  },
+  "0x00117968": {
+    "name": "psiilibpad_helper2_00117968",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001179D0": {
+    "name": "psiilibpad_001179d0",
+    "reason": "strxref_prior_run"
+  },
+  "0x00117A80": {
+    "name": "thunk_FUN_00117190",
+    "reason": "ghidra_headless"
+  },
+  "0x00117B90": {
+    "name": "libpad_00117b90",
+    "reason": "v1_string_xref"
+  },
+  "0x00117CA8": {
+    "name": "libpad_00117ca8",
+    "reason": "v1_string_xref"
+  },
+  "0x00117DE8": {
+    "name": "libpad_helper1_00117de8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00117F08": {
+    "name": "libpad_00117f08",
+    "reason": "v1_string_xref"
+  },
+  "0x00118E58": {
+    "name": "libpad_helper2_00118e58",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001190B0": {
+    "name": "sce_cd_cbfunc_d_sce_cd_cbfunc_num_d_001190b0",
+    "reason": "v1_string_xref"
+  },
+  "0x00119380": {
+    "name": "init_stdcpp_libcdvd_bind_helper1_00119380",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00119518": {
+    "name": "libcdvd_bind_err_cdsearchfile_n_00119518",
+    "reason": "strxref_prior_run"
+  },
+  "0x00119818": {
+    "name": "ncmd_fail_sema_cur_cmd_00119818",
+    "reason": "v1_string_xref"
+  },
+  "0x00119A20": {
+    "name": "n_cmd_wait_n_00119a20",
+    "reason": "v1_string_xref"
+  },
+  "0x00119AC0": {
+    "name": "s_cmd_wait_n_00119ac0",
+    "reason": "v1_string_xref"
+  },
+  "0x00119B30": {
+    "name": "scmd_fail_sema_cur_cmd_00119b30",
+    "reason": "v1_string_xref"
+  },
+  "0x00119CA0": {
+    "name": "init_stdcpp_libcdvd_bind_err_d_00119ca0",
+    "reason": "v1_string_xref"
+  },
+  "0x00119F80": {
+    "name": "read_disk_ready_n_00119f80",
+    "reason": "v1_string_xref"
+  },
+  "0x0011A178": {
+    "name": "init_battle_cd_vd_init_n_helper3_0011a178",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0011A240": {
+    "name": "cdrom0_helper1_0011a240",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0011A270": {
+    "name": "cdrom0_helper2_0011a270",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0011A340": {
+    "name": "read_sce_cd_st_read_call_read_size_0011a340",
+    "reason": "v1_string_xref"
+  },
+  "0x0011A4C8": {
+    "name": "sce_cd_st_pause_call_n_0011a4c8",
+    "reason": "v1_string_xref"
+  },
+  "0x0011A518": {
+    "name": "sce_cd_st_resume_call_n_0011a518",
+    "reason": "v1_string_xref"
+  },
+  "0x0011A570": {
+    "name": "sce_cd_st_stat_call_n_0011a570",
+    "reason": "v1_string_xref"
+  },
+  "0x0011A5B8": {
+    "name": "read_call_cdreadstm_call_n_0011a5b8",
+    "reason": "v1_string_xref"
+  },
+  "0x0011A720": {
+    "name": "err_stdcpp_bind_error_libmc_n_0011a720",
+    "reason": "v1_string_xref"
+  },
+  "0x0011ABF8": {
+    "name": "baslus_helper2_helper1_0011abf8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0011ACE8": {
+    "name": "baslus_baslus_helper1_helper1_0011ace8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0011B420": {
+    "name": "check_sce_mc_ud_check_new_card_rpc_faild_n_0011b420",
+    "reason": "v1_string_xref"
+  },
+  "0x0011BA68": {
+    "name": "baslus_helper1_helper1_0011ba68",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0011BF88": {
+    "name": "err_stdcpp_sce_sd_remote_init_rpc_bind_error_0011bf88",
+    "reason": "v1_string_xref"
+  },
+  "0x0011CD10": {
+    "name": "camera_settargetchar",
+    "reason": "km_addresses[camera]"
+  },
+  "0x0011DEB0": {
+    "name": "entry_helper2_helper2_helper_helper1_0011deb0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0011EAA0": {
+    "name": "cb1_shall_i_remain_helper3_helper1_0011eaa0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0011F3A0": {
+    "name": "camera_err_ccamera_battle",
+    "reason": "km_addresses[camera]"
+  },
+  "0x00120690": {
+    "name": "maximum_defense_power_of_helper1_00120690",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00120860": {
+    "name": "maximum_defense_power_of_helper2_00120860",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00120A50": {
+    "name": "maximum_defense_power_of_the_helper1_00120a50",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00120CC0": {
+    "name": "maximum_defense_power_of_the_helper2_00120cc0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00120EA0": {
+    "name": "destroy_sword_helper1_00120ea0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00122450": {
+    "name": "entry_helper2_helper2_helper_helper1_00122450",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0012B630": {
+    "name": "err_memory_alloc_error_helper1_0012b630",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0012BBC0": {
+    "name": "err_memory_alloc_error_helper1_0012bbc0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001335E0": {
+    "name": "init_battle_heap_done_n_001335e0",
+    "reason": "v1_string_xref"
+  },
+  "0x001336A0": {
+    "name": "sound_common_vgd_helper1_001336a0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001338D0": {
+    "name": "entry_helper2_helper2_helper_helper1_001338d0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001339A0": {
+    "name": "err_memory_alloc_error_helper2_001339a0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00133D00": {
+    "name": "entry_helper2_helper2_helper_helper1_00133d00",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00134DA0": {
+    "name": "delete_character_failure_n_00134da0",
+    "reason": "v1_string_xref"
+  },
+  "0x001350D0": {
+    "name": "err_memory_alloc_error_001350d0",
+    "reason": "strxref_prior_run"
+  },
+  "0x00135650": {
+    "name": "you_can_choose_the_sword_helper1_00135650",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001356B0": {
+    "name": "you_can_choose_the_sword_next1_001356b0",
+    "reason": "adjacency_of_prior_run"
+  },
+  "0x00135870": {
+    "name": "err_battle_memory_alloc_error_00135870",
+    "reason": "v1_string_xref"
+  },
+  "0x00135F00": {
+    "name": "cdrom0_helper1_00135f00",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001363A0": {
+    "name": "err_ccamera_battle_helper1_001363a0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00139DB0": {
+    "name": "cdrom0_helper2_helper1_helper1_00139db0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0013A550": {
+    "name": "cdrom0_helper7_helper1_0013a550",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0013FA20": {
+    "name": "err_memory_alloc_error_helper1_0013fa20",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0013FC60": {
+    "name": "err_memory_alloc_error_helper2_0013fc60",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001461E0": {
+    "name": "get_target_helper2_helper1_001461e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00146C10": {
+    "name": "entry_helper2_helper2_helper_helper2_00146c10",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00147430": {
+    "name": "entry_helper2_helper2_helper_helper2_00147430",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00148120": {
+    "name": "init_battle_file_system_begin_00148120",
+    "reason": "v1_string_xref"
+  },
+  "0x00148160": {
+    "name": "loading_module_s_00148160",
+    "reason": "v1_string_xref"
+  },
+  "0x00148200": {
+    "name": "init_battle_cd_vd_init_n_00148200",
+    "reason": "v1_string_xref"
+  },
+  "0x00148320": {
+    "name": "s_00148320",
+    "reason": "v1_string_xref"
+  },
+  "0x001485B0": {
+    "name": "thunk_FUN_00199c50",
+    "reason": "ghidra_headless"
+  },
+  "0x00148890": {
+    "name": "entry_helper2_helper2_helper_helper1_00148890",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00149430": {
+    "name": "entry_helper2_helper2_helper_helper2_00149430",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00149B70": {
+    "name": "abcdefghijklmnopqrstuvwxyz_helper1_00149b70",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00149D40": {
+    "name": "abcdefghijklmnopqrstuvwxyz_next1_00149d40",
+    "reason": "adjacency_of_prior_run"
+  },
+  "0x00149E00": {
+    "name": "cdrom0_helper2_00149e00",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00149E20": {
+    "name": "cdrom0_helper7_helper1_helper1_00149e20",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00149E60": {
+    "name": "cdrom0_helper2_helper1_00149e60",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014A0B0": {
+    "name": "abcdefghijklmnopqrstuvwxyz_helper2_0014a0b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014A140": {
+    "name": "entry_helper2_helper2_helper_helper1_0014a140",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014A390": {
+    "name": "cdrom0_helper3_0014a390",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014A6F0": {
+    "name": "cdrom0_helper3_helper1_0014a6f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014AA00": {
+    "name": "entry_helper2_helper2_helper_helper2_0014aa00",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014AC00": {
+    "name": "entry_helper2_helper2_helper_helper1_0014ac00",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014B910": {
+    "name": "cdrom0_helper4_0014b910",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014BB10": {
+    "name": "entry_helper2_helper2_helper1_0014bb10",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014BE40": {
+    "name": "sound_common_vgd_0014be40",
+    "reason": "v1_string_xref"
+  },
+  "0x0014C8D0": {
+    "name": "cdrom0_helper5_0014c8d0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014CA30": {
+    "name": "entry_helper2_helper2_helper2_0014ca30",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014CB10": {
+    "name": "get_target_helper1_0014cb10",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014CC80": {
+    "name": "entry_helper2_helper2_helper_helper1_0014cc80",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014CF90": {
+    "name": "ending_no_mismatch_d_0014cf90",
+    "reason": "v1_string_xref"
+  },
+  "0x0014D0E0": {
+    "name": "load_battle_now_loading_0014d0e0",
+    "reason": "v1_string_xref"
+  },
+  "0x0014D1D0": {
+    "name": "load_battle_now_loading_0014d1d0",
+    "reason": "v1_string_xref"
+  },
+  "0x0014D340": {
+    "name": "get_target_helper2_0014d340",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014D870": {
+    "name": "get_target_helper3_0014d870",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014DC20": {
+    "name": "get_target_helper4_0014dc20",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014E190": {
+    "name": "baslus_baslus_helper1_0014e190",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014E3E0": {
+    "name": "kenji_0014e3e0",
+    "reason": "v1_string_xref"
+  },
+  "0x0014EAD0": {
+    "name": "cdrom0_helper6_0014ead0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014EBA0": {
+    "name": "entry_helper2_helper2_0014eba0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0014EC60": {
+    "name": "get_target_0014ec60",
+    "reason": "strxref_prior_run"
+  },
+  "0x00150DF0": {
+    "name": "entry_helper2_helper2_helper1_00150df0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00151020": {
+    "name": "entry_helper2_helper2_helper_helper2_00151020",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00151190": {
+    "name": "entry_helper2_helper2_helper_helper1_00151190",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001512A0": {
+    "name": "entry_helper2_helper2_helper_helper1_001512a0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00151720": {
+    "name": "entry_helper2_helper2_helper2_00151720",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00151B90": {
+    "name": "entry_helper2_helper2_helper_helper1_00151b90",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00152800": {
+    "name": "entry_helper2_helper2_helper_helper2_00152800",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00152A50": {
+    "name": "cdrom0_00152a50",
+    "reason": "strxref_prior_run"
+  },
+  "0x00152D00": {
+    "name": "module_bin_00152d00",
+    "reason": "v1_string_xref"
+  },
+  "0x00152EE0": {
+    "name": "cdrom0_helper7_00152ee0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001548B0": {
+    "name": "entry_helper2_001548b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00154960": {
+    "name": "baslus_helper1_00154960",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00154AC0": {
+    "name": "baslus_baslus_helper1_00154ac0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00154C50": {
+    "name": "baslus_helper2_00154c50",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00155D00": {
+    "name": "err_memory_alloc_error_helper3_00155d00",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00157EF0": {
+    "name": "get_target_helper5_00157ef0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00158110": {
+    "name": "you_can_choose_the_sword_helper2_00158110",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00158950": {
+    "name": "cdrom0_helper8_00158950",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015B000": {
+    "name": "cdrom0_helper7_helper1_helper1_0015b000",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015B4C0": {
+    "name": "cdrom0_helper7_helper1_helper2_0015b4c0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015BA40": {
+    "name": "entry_helper2_helper2_helper_helper1_0015ba40",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015BB40": {
+    "name": "entry_helper2_helper2_helper_helper1_0015bb40",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015BE10": {
+    "name": "entry_helper2_helper2_helper_helper2_0015be10",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015BFA0": {
+    "name": "entry_helper2_helper2_helper_helper3_0015bfa0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015CF30": {
+    "name": "entry_helper2_helper2_helper_helper1_0015cf30",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015CFC0": {
+    "name": "s_has_left_the_helper1_0015cfc0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015D2A0": {
+    "name": "entry_helper2_helper2_helper_helper1_0015d2a0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015D2B0": {
+    "name": "entry_helper2_helper2_helper_helper1_0015d2b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015D2D0": {
+    "name": "entry_helper2_helper2_helper_helper1_0015d2d0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015D730": {
+    "name": "entry_helper2_helper2_helper_helper1_0015d730",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015DEB0": {
+    "name": "entry_helper2_helper2_helper_helper4_0015deb0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015E160": {
+    "name": "entry_helper2_helper2_helper_helper1_0015e160",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015E1C0": {
+    "name": "entry_helper2_helper2_helper_helper1_0015e1c0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015E2C0": {
+    "name": "entry_helper2_helper2_helper_next1_0015e2c0",
+    "reason": "adjacency_of_prior_run"
+  },
+  "0x0015E3B0": {
+    "name": "entry_helper2_helper2_helper_helper1_0015e3b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015E410": {
+    "name": "s_has_left_the_0015e410",
+    "reason": "v1_string_xref"
+  },
+  "0x0015E570": {
+    "name": "entry_helper2_helper2_helper_helper1_0015e570",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015E5F0": {
+    "name": "entry_helper2_helper2_helper_helper2_0015e5f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015E6D0": {
+    "name": "entry_helper2_helper2_helper_helper5_0015e6d0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015E840": {
+    "name": "entry_helper2_helper2_helper_helper1_0015e840",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015E9D0": {
+    "name": "entry_helper2_helper2_helper_helper6_0015e9d0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015EB80": {
+    "name": "cb1_shall_i_remain_helper3_helper1_0015eb80",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015EBA0": {
+    "name": "entry_helper2_helper2_helper_helper2_0015eba0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015F040": {
+    "name": "cdrom0_helper3_helper1_helper1_0015f040",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015F490": {
+    "name": "entry_helper2_helper2_helper_helper1_0015f490",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015F500": {
+    "name": "cdrom0_helper3_helper1_helper2_0015f500",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015FD00": {
+    "name": "cdrom0_helper7_helper1_helper3_0015fd00",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015FD60": {
+    "name": "cdrom0_helper7_helper1_0015fd60",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0015FE30": {
+    "name": "cdrom0_helper7_helper2_0015fe30",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00161AE0": {
+    "name": "you_have_obtained_s_00161ae0",
+    "reason": "v1_string_xref"
+  },
+  "0x00162F10": {
+    "name": "cdrom0_helper9_00162f10",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00162F50": {
+    "name": "cdrom0_helper10_helper1_00162f50",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00163280": {
+    "name": "cdrom0_helper10_00163280",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001635D0": {
+    "name": "cdrom0_helper11_001635d0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001636C0": {
+    "name": "err_world_unknown_error_001636c0",
+    "reason": "v1_string_xref"
+  },
+  "0x00163A80": {
+    "name": "error_00163a80",
+    "reason": "v1_string_xref"
+  },
+  "0x001640C0": {
+    "name": "err_script_operator_helper1_001640c0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00164320": {
+    "name": "null_object_00164320",
+    "reason": "v1_string_xref"
+  },
+  "0x001654A0": {
+    "name": "script_vm_vm_main_loop_a",
+    "reason": "km_addresses[script_vm]"
+  },
+  "0x00165B70": {
+    "name": "script_vm_vm_main_loop_b",
+    "reason": "km_addresses[script_vm]"
+  },
+  "0x00165F70": {
+    "name": "script_vm_vm_main_loop_c",
+    "reason": "km_addresses[script_vm]"
+  },
+  "0x00166580": {
+    "name": "cb1_shall_i_remain_helper1_helper1_00166580",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00166790": {
+    "name": "cb1_shall_i_remain_helper1_helper2_00166790",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00166D10": {
+    "name": "error_helper1_00166d10",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00167410": {
+    "name": "print_world_00167410",
+    "reason": "v1_string_xref"
+  },
+  "0x00169130": {
+    "name": "bad_args_00169130",
+    "reason": "v1_string_xref"
+  },
+  "0x00169850": {
+    "name": "error_00169850",
+    "reason": "strxref_prior_run"
+  },
+  "0x0016A0D0": {
+    "name": "error_helper1_0016a0d0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0016A100": {
+    "name": "error_0016a100",
+    "reason": "v1_string_xref"
+  },
+  "0x0016A910": {
+    "name": "function_recursive_is_too_0016a910",
+    "reason": "v1_string_xref"
+  },
+  "0x0016AB10": {
+    "name": "error_0016ab10",
+    "reason": "strxref_prior_run"
+  },
+  "0x0016B1F0": {
+    "name": "error_0016b1f0",
+    "reason": "v1_string_xref"
+  },
+  "0x0016B5C0": {
+    "name": "err_world_while_must_arguments_error_0016b5c0",
+    "reason": "v1_string_xref"
+  },
+  "0x0016B8A0": {
+    "name": "error_0016b8a0",
+    "reason": "strxref_prior_run"
+  },
+  "0x0016CE20": {
+    "name": "error_helper2_0016ce20",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0016CF00": {
+    "name": "i_no_if_conditional_0016cf00",
+    "reason": "strxref_prior_run"
+  },
+  "0x0016D670": {
+    "name": "error_0016d670",
+    "reason": "v1_string_xref"
+  },
+  "0x0016DA00": {
+    "name": "script_vm_if_statement_evaluator",
+    "reason": "km_addresses[script_vm]"
+  },
+  "0x0016E970": {
+    "name": "bad_if_0016e970",
+    "reason": "v1_string_xref"
+  },
+  "0x0016EFE0": {
+    "name": "error_0016efe0",
+    "reason": "strxref_prior_run"
+  },
+  "0x0016F430": {
+    "name": "error_0016f430",
+    "reason": "v1_string_xref"
+  },
+  "0x0016F7E0": {
+    "name": "error_0016f7e0",
+    "reason": "v1_string_xref"
+  },
+  "0x0016FB90": {
+    "name": "err_script_operator_0016fb90",
+    "reason": "v1_string_xref"
+  },
+  "0x00170020": {
+    "name": "error_00170020",
+    "reason": "v1_string_xref"
+  },
+  "0x001702A0": {
+    "name": "err_script_list_001702a0",
+    "reason": "v1_string_xref"
+  },
+  "0x00170A40": {
+    "name": "err_script_push_back_00170a40",
+    "reason": "v1_string_xref"
+  },
+  "0x00170C10": {
+    "name": "err_script_push_back_00170c10",
+    "reason": "v1_string_xref"
+  },
+  "0x001716C0": {
+    "name": "cmpr_001716c0",
+    "reason": "v1_string_xref"
+  },
+  "0x00171790": {
+    "name": "esopr_opr_00171790",
+    "reason": "v1_string_xref"
+  },
+  "0x00171C90": {
+    "name": "error_helper1_00171c90",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00171D50": {
+    "name": "error_helper1_helper1_00171d50",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00171E30": {
+    "name": "error_helper1_next1_00171e30",
+    "reason": "adjacency_of_prior_run"
+  },
+  "0x00171FA0": {
+    "name": "error_helper1_next1_next1_00171fa0",
+    "reason": "adjacency_of_prior_run"
+  },
+  "0x00171FB0": {
+    "name": "err_attribute_error_00171fb0",
+    "reason": "strxref_prior_run"
+  },
+  "0x00173530": {
+    "name": "print_world_helper1_00173530",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001735C0": {
+    "name": "err_method_definition_error_because_001735c0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001750E0": {
+    "name": "print_world_helper2_001750e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00175430": {
+    "name": "print_world_helper3_00175430",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00175780": {
+    "name": "print_world_helper4_00175780",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00175BC0": {
+    "name": "print_world_helper5_00175bc0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00176CE0": {
+    "name": "create_format_string_00176ce0",
+    "reason": "v1_string_xref"
+  },
+  "0x00177510": {
+    "name": "is_defined_00177510",
+    "reason": "v1_string_xref"
+  },
+  "0x00177D60": {
+    "name": "error_helper3_00177d60",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00177F20": {
+    "name": "error_helper4_00177f20",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00178250": {
+    "name": "cb1_shall_i_remain_helper3_helper2_00178250",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00178260": {
+    "name": "cb1_shall_i_remain_00178260",
+    "reason": "v1_string_xref"
+  },
+  "0x00178910": {
+    "name": "a12_d_d_d_00178910",
+    "reason": "v1_string_xref"
+  },
+  "0x00178AF0": {
+    "name": "c55_s03_c55_s03_c53_helper1_00178af0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00178CF0": {
+    "name": "c55_s03_c55_s03_c53_helper1_next1_00178cf0",
+    "reason": "adjacency_of_prior_run"
+  },
+  "0x00179630": {
+    "name": "a10_d_d_helper1_00179630",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00179E10": {
+    "name": "shujinko_is_not_in_a_00179e10",
+    "reason": "strxref_prior_run"
+  },
+  "0x0017AC90": {
+    "name": "a14_d_d_0017ac90",
+    "reason": "v1_string_xref"
+  },
+  "0x0017B470": {
+    "name": "a10_d_d_0017b470",
+    "reason": "strxref_prior_run"
+  },
+  "0x0017B8B0": {
+    "name": "a0_d_d_d_d_0017b8b0",
+    "reason": "v1_string_xref"
+  },
+  "0x0017BBB0": {
+    "name": "a00_d_d_0017bbb0",
+    "reason": "v1_string_xref"
+  },
+  "0x0017BE50": {
+    "name": "a11_d_0017be50",
+    "reason": "v1_string_xref"
+  },
+  "0x0017C110": {
+    "name": "a13_d_d_d_0017c110",
+    "reason": "v1_string_xref"
+  },
+  "0x0017C500": {
+    "name": "get_target_helper6_0017c500",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0017C620": {
+    "name": "oneself_d_0017c620",
+    "reason": "strxref_prior_run"
+  },
+  "0x0017D6E0": {
+    "name": "oneself_d_0017d6e0",
+    "reason": "strxref_prior_run"
+  },
+  "0x0017DF90": {
+    "name": "oneself_d_0017df90",
+    "reason": "strxref_prior_run"
+  },
+  "0x0017E500": {
+    "name": "playerpos_sol_0017e500",
+    "reason": "strxref_prior_run"
+  },
+  "0x0017EE10": {
+    "name": "cb1_shall_i_remain_0017ee10",
+    "reason": "v1_string_xref"
+  },
+  "0x0017EFF0": {
+    "name": "entry_helper2_helper2_helper_helper3_0017eff0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0017F000": {
+    "name": "cb1_shall_i_remain_helper1_0017f000",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0017F7F0": {
+    "name": "cb1_shall_i_remain_helper1_helper1_0017f7f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0017F8B0": {
+    "name": "a12_d_d_d_d_0017f8b0",
+    "reason": "strxref_prior_run"
+  },
+  "0x0017FBF0": {
+    "name": "playcount_d_0017fbf0",
+    "reason": "strxref_prior_run"
+  },
+  "0x0017FED0": {
+    "name": "script_vm_cscript_container_ctor",
+    "reason": "km_addresses[script_vm]"
+  },
+  "0x00180530": {
+    "name": "script_helper1_00180530",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001811E0": {
+    "name": "entry_helper2_helper2_helper_helper1_001811e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001811F0": {
+    "name": "entry_helper2_helper2_helper_helper3_001811f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00181810": {
+    "name": "a00_f_id_num_00181810",
+    "reason": "strxref_prior_run"
+  },
+  "0x00181B50": {
+    "name": "entry_helper2_helper2_helper_helper1_00181b50",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00183D50": {
+    "name": "a0_e_d_d_00183d50",
+    "reason": "v1_string_xref"
+  },
+  "0x00183F70": {
+    "name": "a15_d_00183f70",
+    "reason": "v1_string_xref"
+  },
+  "0x00184050": {
+    "name": "a04_d_d_d_00184050",
+    "reason": "v1_string_xref"
+  },
+  "0x00184360": {
+    "name": "a03_d_d_00184360",
+    "reason": "v1_string_xref"
+  },
+  "0x001844D0": {
+    "name": "a06_d_d_d_001844d0",
+    "reason": "v1_string_xref"
+  },
+  "0x00184690": {
+    "name": "a05_d_d_d_00184690",
+    "reason": "v1_string_xref"
+  },
+  "0x00184850": {
+    "name": "a0b_d_d_00184850",
+    "reason": "strxref_prior_run"
+  },
+  "0x00184B20": {
+    "name": "a08_d_d_d_d_00184b20",
+    "reason": "strxref_prior_run"
+  },
+  "0x00184E30": {
+    "name": "a0a_d_d_00184e30",
+    "reason": "strxref_prior_run"
+  },
+  "0x001858C0": {
+    "name": "cb1_shall_i_remain_helper2_001858c0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00185A70": {
+    "name": "cb1_shall_i_remain_helper1_helper1_00185a70",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00187840": {
+    "name": "entry_helper2_helper2_helper_helper1_00187840",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001878F0": {
+    "name": "entry_helper2_helper2_helper_helper1_001878f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00187D80": {
+    "name": "entry_helper2_helper2_helper_helper2_00187d80",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00187F90": {
+    "name": "entry_helper2_helper2_helper_helper3_00187f90",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001883D0": {
+    "name": "entry_helper2_helper2_helper_helper1_001883d0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001886A0": {
+    "name": "sound_common_vgd_helper2_001886a0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00188980": {
+    "name": "a12_d_d_d_helper1_00188980",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00189150": {
+    "name": "maximum_defense_power_of_the_00189150",
+    "reason": "strxref_prior_run"
+  },
+  "0x001895D0": {
+    "name": "you_ve_thwarted_all_the_001895d0",
+    "reason": "strxref_prior_run"
+  },
+  "0x00189660": {
+    "name": "create_you_ve_created_all_the_00189660",
+    "reason": "strxref_prior_run"
+  },
+  "0x001896F0": {
+    "name": "your_life_has_decreased_by_001896f0",
+    "reason": "strxref_prior_run"
+  },
+  "0x0018E3E0": {
+    "name": "sound_common_vgd_helper3_0018e3e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0018E3F0": {
+    "name": "sound_common_vgd_helper4_0018e3f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0018E400": {
+    "name": "sound_common_vgd_helper5_0018e400",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0018E410": {
+    "name": "sound_common_vgd_helper6_0018e410",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0018E420": {
+    "name": "sound_common_vgd_helper7_0018e420",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0018E430": {
+    "name": "sound_common_vgd_helper8_0018e430",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0018F0B0": {
+    "name": "c55_s03_c55_s03_c53_helper1_helper1_0018f0b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00191340": {
+    "name": "volume_dat_helper1_00191340",
+    "reason": "helper_of_prior_run"
+  },
+  "0x00199C70": {
+    "name": "volume_dat_00199c70",
+    "reason": "v1_string_xref"
+  },
+  "0x0019B220": {
+    "name": "err_memory_alloc_error_helper4_0019b220",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0019C3B0": {
+    "name": "entry_helper2_helper2_helper_helper2_0019c3b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0019CE20": {
+    "name": "sound_common_vgd_helper9_0019ce20",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0019CED0": {
+    "name": "entry_helper2_helper2_helper_helper1_0019ced0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0019CFE0": {
+    "name": "cdrom0_helper12_0019cfe0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x0019D4B0": {
+    "name": "c7_f_0019d4b0",
+    "reason": "v1_string_xref"
+  },
+  "0x0019D8E0": {
+    "name": "c8_b_c8_a_0019d8e0",
+    "reason": "v1_string_xref"
+  },
+  "0x0019DD40": {
+    "name": "its_attack_power_increased_0019dd40",
+    "reason": "v1_string_xref"
+  },
+  "0x0019E6C0": {
+    "name": "c55_s03_c7_f_0019e6c0",
+    "reason": "v1_string_xref"
+  },
+  "0x0019E960": {
+    "name": "c53_c55_c98_0019e960",
+    "reason": "v1_string_xref"
+  },
+  "0x001A0240": {
+    "name": "c53_c55_c97_001a0240",
+    "reason": "strxref_prior_run"
+  },
+  "0x001A04E0": {
+    "name": "c55_s03_c55_s03_c53_001a04e0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001A48F0": {
+    "name": "stop_gz_mf_bgm_001a48f0",
+    "reason": "v1_string_xref"
+  },
+  "0x001A51C0": {
+    "name": "host_001a51c0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001A6920": {
+    "name": "cdrom0_helper13_helper1_001a6920",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001A6940": {
+    "name": "host_001a6940",
+    "reason": "v1_string_xref"
+  },
+  "0x001A6FC0": {
+    "name": "host0_001a6fc0",
+    "reason": "v1_string_xref"
+  },
+  "0x001A7110": {
+    "name": "host0_001a7110",
+    "reason": "v1_string_xref"
+  },
+  "0x001A7250": {
+    "name": "cdrom0_helper12_helper2_helper1_001a7250",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001A7460": {
+    "name": "cdrom0_helper12_helper2_helper2_001a7460",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001A74E0": {
+    "name": "cdrom0_helper12_helper2_helper1_001a74e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001A8450": {
+    "name": "cdrom0_helper12_helper2_helper2_001a8450",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001AAF60": {
+    "name": "a02_d_d_001aaf60",
+    "reason": "v1_string_xref"
+  },
+  "0x001AB280": {
+    "name": "a01_d_d_001ab280",
+    "reason": "v1_string_xref"
+  },
+  "0x001B34B0": {
+    "name": "entry_helper2_helper2_helper_helper3_001b34b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B3B30": {
+    "name": "sound_common_vgd_helper9_helper1_001b3b30",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B3C50": {
+    "name": "sound_common_vgd_helper9_next1_001b3c50",
+    "reason": "adjacency_of_prior_run"
+  },
+  "0x001B4150": {
+    "name": "sound_common_vgd_helper9_helper2_001b4150",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B4180": {
+    "name": "sound_common_vgd_helper9_helper1_001b4180",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B4380": {
+    "name": "sound_common_vgd_helper9_helper3_001b4380",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B43C0": {
+    "name": "cdrom0_helper12_helper1_001b43c0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B47B0": {
+    "name": "cdrom0_helper12_helper1_helper1_001b47b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B4BE0": {
+    "name": "cdrom0_helper13_001b4be0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B4DE0": {
+    "name": "entry_helper2_helper2_helper_helper1_001b4de0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B5240": {
+    "name": "cdrom0_helper12_helper2_001b5240",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B5DD0": {
+    "name": "volume_dat_helper2_001b5dd0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B5ED0": {
+    "name": "volume_dat_helper3_001b5ed0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B6F40": {
+    "name": "entry_helper2_helper2_helper_helper4_001b6f40",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B6F90": {
+    "name": "entry_helper2_helper2_helper_helper2_001b6f90",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B7330": {
+    "name": "entry_helper2_helper2_helper_helper1_001b7330",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B7420": {
+    "name": "entry_helper2_helper2_helper_helper2_001b7420",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B76F0": {
+    "name": "entry_helper2_helper2_helper_helper1_001b76f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B78D0": {
+    "name": "entry_helper2_helper2_helper_helper1_001b78d0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B7AC0": {
+    "name": "entry_helper2_helper2_helper_helper2_001b7ac0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B7EF0": {
+    "name": "entry_helper2_helper2_helper_helper3_001b7ef0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B8070": {
+    "name": "entry_helper2_helper2_helper_helper4_001b8070",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B81E0": {
+    "name": "entry_helper2_helper2_helper_helper5_001b81e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B82D0": {
+    "name": "entry_helper2_helper2_helper_helper6_001b82d0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B8400": {
+    "name": "entry_helper2_helper2_helper_helper1_001b8400",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B8A90": {
+    "name": "entry_helper2_helper2_helper_helper7_001b8a90",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B8BB0": {
+    "name": "entry_helper2_helper2_helper_helper1_001b8bb0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B8F70": {
+    "name": "entry_helper2_helper2_helper_helper8_001b8f70",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B9210": {
+    "name": "entry_helper2_helper2_helper_helper1_001b9210",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B92E0": {
+    "name": "entry_helper2_helper2_helper_helper1_001b92e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B9470": {
+    "name": "entry_helper2_helper2_helper_helper1_001b9470",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B9490": {
+    "name": "entry_helper2_helper2_helper_helper2_001b9490",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B94B0": {
+    "name": "entry_helper2_helper2_helper_helper2_001b94b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B94C0": {
+    "name": "entry_helper2_helper2_helper_helper9_001b94c0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B98F0": {
+    "name": "entry_helper2_helper2_helper_helper2_001b98f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B9C10": {
+    "name": "cdrom0_helper7_helper1_helper4_001b9c10",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B9C60": {
+    "name": "entry_helper2_helper2_helper_helper1_001b9c60",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B9D70": {
+    "name": "cb1_shall_i_remain_helper3_helper1_001b9d70",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001B9EF0": {
+    "name": "entry_helper2_helper2_helper_helper2_001b9ef0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BA250": {
+    "name": "entry_helper2_helper2_helper_helper1_001ba250",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BA3B0": {
+    "name": "entry_helper2_helper2_helper_helper3_001ba3b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BA440": {
+    "name": "entry_helper2_helper2_helper_helper4_001ba440",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BA4A0": {
+    "name": "entry_helper2_helper2_helper_helper5_001ba4a0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BA5F0": {
+    "name": "entry_helper2_helper2_helper_helper3_001ba5f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BA770": {
+    "name": "entry_helper2_helper2_helper_helper4_001ba770",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BADA0": {
+    "name": "entry_helper2_helper2_helper_helper1_001bada0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BB1E0": {
+    "name": "entry_helper2_helper2_helper_helper1_001bb1e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BB3E0": {
+    "name": "cb1_shall_i_remain_helper3_helper1_001bb3e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BB400": {
+    "name": "cb1_shall_i_remain_helper3_helper2_001bb400",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BB4C0": {
+    "name": "entry_helper2_helper2_helper_helper6_001bb4c0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BB6B0": {
+    "name": "entry_helper2_helper2_helper_helper1_001bb6b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BBAA0": {
+    "name": "entry_helper2_helper2_helper_helper2_001bbaa0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BC830": {
+    "name": "entry_helper2_helper2_helper_helper1_001bc830",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BC8C0": {
+    "name": "entry_helper2_helper2_helper_helper1_001bc8c0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BCC70": {
+    "name": "entry_helper2_helper2_helper_helper1_001bcc70",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BD150": {
+    "name": "cdrom0_helper3_helper1_helper1_001bd150",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BD300": {
+    "name": "save_the_current_saved_game_data_001bd300",
+    "reason": "strxref_prior_run"
+  },
+  "0x001BD470": {
+    "name": "open_cdrom0_001bd470",
+    "reason": "strxref_prior_run"
+  },
+  "0x001BDDC0": {
+    "name": "you_can_choose_the_sword_helper3_001bddc0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BE320": {
+    "name": "you_can_choose_the_sword_001be320",
+    "reason": "strxref_prior_run"
+  },
+  "0x001BF6D0": {
+    "name": "open_cdrom0_helper1_helper1_001bf6d0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BF810": {
+    "name": "open_cdrom0_helper1_001bf810",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BFDD0": {
+    "name": "open_cdrom0_helper2_helper1_helper1_001bfdd0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001BFF30": {
+    "name": "save_from_now_on_game_data_001bff30",
+    "reason": "strxref_prior_run"
+  },
+  "0x001C0030": {
+    "name": "open_cdrom0_helper2_helper1_001c0030",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001C0400": {
+    "name": "open_cdrom0_helper2_helper2_001c0400",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001C05F0": {
+    "name": "up_and_down_directional_button_001c05f0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001C16E0": {
+    "name": "open_cdrom0_helper2_001c16e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001C1AA0": {
+    "name": "attribs_001c1aa0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001C2020": {
+    "name": "open_cdrom0_helper3_helper1_001c2020",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001C2490": {
+    "name": "open_cdrom0_helper3_helper2_001c2490",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001C2DF0": {
+    "name": "open_cdrom0_helper3_helper3_001c2df0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001C3560": {
+    "name": "up_and_down_directional_button_001c3560",
+    "reason": "strxref_prior_run"
+  },
+  "0x001C4190": {
+    "name": "open_cdrom0_helper3_helper4_001c4190",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001C4C20": {
+    "name": "open_cdrom0_helper3_helper5_001c4c20",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001C56B0": {
+    "name": "open_cdrom0_helper3_helper6_001c56b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001C5920": {
+    "name": "open_cdrom0_helper3_001c5920",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001C5B40": {
+    "name": "open_cdrom0_helper3_helper1_001c5b40",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001C8928": {
+    "name": "print_bug_in_vfprintf_helper1_001c8928",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001C8970": {
+    "name": "print_bug_in_vfprintf_helper2_001c8970",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001C9068": {
+    "name": "a08_d_d_d_d_helper1_001c9068",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001C90B0": {
+    "name": "baslus_baslus_001c90b0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001C9D70": {
+    "name": "baslus_001c9d70",
+    "reason": "v1_string_xref"
+  },
+  "0x001CA440": {
+    "name": "baslus_baslus_001ca440",
+    "reason": "strxref_prior_run"
+  },
+  "0x001CB410": {
+    "name": "baslus_baslus_001cb410",
+    "reason": "strxref_prior_run"
+  },
+  "0x001CBE20": {
+    "name": "baslus_baslus_001cbe20",
+    "reason": "strxref_prior_run"
+  },
+  "0x001CC6E0": {
+    "name": "baslus_baslus_001cc6e0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001CCF00": {
+    "name": "baslus_baslus_001ccf00",
+    "reason": "strxref_prior_run"
+  },
+  "0x001CDAC0": {
+    "name": "baslus_baslus_helper2_001cdac0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001CDC10": {
+    "name": "baslus_baslus_helper1_001cdc10",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001CDDD0": {
+    "name": "samurai_ico_001cddd0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001CE290": {
+    "name": "init_fx_infinity_helper1_001ce290",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001CE4C0": {
+    "name": "init_fx_infinity_001ce4c0",
+    "reason": "v1_string_xref"
+  },
+  "0x001CFFB8": {
+    "name": "print_bug_in_vfprintf_helper_helper1_001cffb8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001D0430": {
+    "name": "cdrom0_helper3_001d0430",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001D0510": {
+    "name": "print_bug_in_vfprintf_helper3_001d0510",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001D1338": {
+    "name": "print_bug_in_vfprintf_helper4_001d1338",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001D3640": {
+    "name": "host_helper1_001d3640",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001D3C38": {
+    "name": "create_format_string_helper1_001d3c38",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001D43F0": {
+    "name": "create_format_string_helper2_001d43f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001D5410": {
+    "name": "init_battle_heap_done_n_helper1_001d5410",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001D5698": {
+    "name": "error_helper5_001d5698",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001D56E8": {
+    "name": "print_bug_in_vfprintf_helper5_001d56e8",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001D5730": {
+    "name": "print_bug_in_vfprintf_helper6_001d5730",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001D57E8": {
+    "name": "print_bug_in_vfprintf_helper_next1_001d57e8",
+    "reason": "adjacency_of_prior_run"
+  },
+  "0x001D5860": {
+    "name": "print_bug_in_vfprintf_001d5860",
+    "reason": "strxref_prior_run"
+  },
+  "0x001D6ED0": {
+    "name": "print_bug_in_vfprintf_helper7_001d6ed0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001D7090": {
+    "name": "print_bug_in_vfprintf_helper8_001d7090",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001D7800": {
+    "name": "moves_you_blocked_001d7800",
+    "reason": "strxref_prior_run"
+  },
+  "0x001D7D10": {
+    "name": "moves_you_blocked_001d7d10",
+    "reason": "strxref_prior_run"
+  },
+  "0x001D8490": {
+    "name": "play_select_001d8490",
+    "reason": "strxref_prior_run"
+  },
+  "0x001DA8E0": {
+    "name": "destroy_sword_001da8e0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001DB1E0": {
+    "name": "please_insert_a_controller_r_helper1_001db1e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001DBCB0": {
+    "name": "please_insert_a_controller_r_001dbcb0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001DCAC0": {
+    "name": "please_insert_a_controller_r_helper2_001dcac0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001DCB50": {
+    "name": "please_insert_a_controller_r_helper3_001dcb50",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001DD6F0": {
+    "name": "entry_helper2_helper2_helper_helper5_001dd6f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001E0100": {
+    "name": "save_the_player_information_has_been_001e0100",
+    "reason": "strxref_prior_run"
+  },
+  "0x001E0B20": {
+    "name": "save_the_player_information_helper1_001e0b20",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001E0BD0": {
+    "name": "baslus_baslus_001e0bd0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001E0F90": {
+    "name": "baslus_baslus_001e0f90",
+    "reason": "strxref_prior_run"
+  },
+  "0x001E18C0": {
+    "name": "save_the_game_and_exit_001e18c0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001E2570": {
+    "name": "start_001e2570",
+    "reason": "strxref_prior_run"
+  },
+  "0x001E2F90": {
+    "name": "the_number_of_tutorials_has_001e2f90",
+    "reason": "strxref_prior_run"
+  },
+  "0x001E3370": {
+    "name": "open_cdrom0_helper4_001e3370",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001E3E00": {
+    "name": "attribs_helper1_001e3e00",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001E4B20": {
+    "name": "moves_you_blocked_001e4b20",
+    "reason": "strxref_prior_run"
+  },
+  "0x001E5020": {
+    "name": "moves_you_blocked_001e5020",
+    "reason": "strxref_prior_run"
+  },
+  "0x001E6E90": {
+    "name": "what_do_you_want_to_001e6e90",
+    "reason": "strxref_prior_run"
+  },
+  "0x001E7270": {
+    "name": "cancel_equipping_sword_001e7270",
+    "reason": "strxref_prior_run"
+  },
+  "0x001E77D0": {
+    "name": "attribs_001e77d0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001E7ED0": {
+    "name": "your_warehouse_is_full_001e7ed0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001E9590": {
+    "name": "abcdefghijklmnopqrstuvwxyz_helper3_001e9590",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001E9710": {
+    "name": "abcdefghijklmnopqrstuvwxyz_001e9710",
+    "reason": "v1_string_xref"
+  },
+  "0x001E9FB0": {
+    "name": "open_cdrom0_helper1_helper1_001e9fb0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EA140": {
+    "name": "get_target_helper7_helper1_001ea140",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EA770": {
+    "name": "get_target_helper7_helper2_001ea770",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EA8E0": {
+    "name": "get_target_helper7_001ea8e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EB0C0": {
+    "name": "get_target_helper8_001eb0c0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EB330": {
+    "name": "get_target_helper9_001eb330",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EB3C0": {
+    "name": "get_target_helper10_001eb3c0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EB630": {
+    "name": "err_sys_sce_mpeg_get_picture_helper3_001eb630",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EBAC0": {
+    "name": "play_no_memory_for_movie_playing_001ebac0",
+    "reason": "strxref_prior_run"
+  },
+  "0x001EC470": {
+    "name": "pts_buffer_overflow_n_001ec470",
+    "reason": "strxref_prior_run"
+  },
+  "0x001EC7E0": {
+    "name": "play_no_memory_for_movie_helper2_001ec7e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EC8A0": {
+    "name": "cdrom0_001ec8a0",
+    "reason": "v1_string_xref"
+  },
+  "0x001ECCD0": {
+    "name": "pts_buffer_overflow_n_helper_helper1_001eccd0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001ECE00": {
+    "name": "pts_buffer_overflow_n_helper_helper1_001ece00",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001ED5B0": {
+    "name": "dma_add_not_active_001ed5b0",
+    "reason": "v1_string_xref"
+  },
+  "0x001EDBB0": {
+    "name": "play_no_memory_for_movie_helper2_001edbb0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EDD20": {
+    "name": "err_sys_sce_mpeg_get_picture_decode_error_001edd20",
+    "reason": "v1_string_xref"
+  },
+  "0x001EE140": {
+    "name": "pts_buffer_overflow_n_helper1_001ee140",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EE1E0": {
+    "name": "pts_buffer_overflow_n_helper2_001ee1e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EE1F0": {
+    "name": "pts_buffer_overflow_n_helper3_001ee1f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EE200": {
+    "name": "play_no_memory_for_movie_helper3_001ee200",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EE220": {
+    "name": "play_no_memory_for_movie_helper4_001ee220",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EE3C0": {
+    "name": "err_sys_sce_mpeg_get_picture_helper4_001ee3c0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EE410": {
+    "name": "err_sys_sce_mpeg_get_picture_helper5_001ee410",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EE4E0": {
+    "name": "play_no_memory_for_movie_helper5_001ee4e0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EEE40": {
+    "name": "play_no_memory_for_movie_helper6_001eee40",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EF140": {
+    "name": "entry_helper2_helper2_helper_helper3_001ef140",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EF3F0": {
+    "name": "entry_helper2_helper2_helper_helper1_001ef3f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001EFC20": {
+    "name": "a10_d_d_helper2_001efc20",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F0130": {
+    "name": "entry_helper2_helper2_helper_helper6_001f0130",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F05B0": {
+    "name": "cb1_shall_i_remain_helper3_001f05b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F09D0": {
+    "name": "cb1_shall_i_remain_helper3_helper1_001f09d0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F0DB0": {
+    "name": "cb1_shall_i_remain_helper3_helper2_001f0db0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F0F30": {
+    "name": "cb1_shall_i_remain_helper3_helper3_001f0f30",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F1050": {
+    "name": "cb1_shall_i_remain_helper3_helper4_001f1050",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F14F0": {
+    "name": "cb1_shall_i_remain_helper3_helper1_001f14f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F1810": {
+    "name": "cb1_shall_i_remain_helper3_helper2_001f1810",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F1930": {
+    "name": "cb1_shall_i_remain_helper3_helper3_001f1930",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F1A90": {
+    "name": "cb1_shall_i_remain_helper3_helper4_001f1a90",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F1BF0": {
+    "name": "cb1_shall_i_remain_helper3_helper1_001f1bf0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F2B50": {
+    "name": "entry_helper2_helper2_helper_helper2_001f2b50",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F33F0": {
+    "name": "open_cdrom0_helper5_helper1_001f33f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F3AC0": {
+    "name": "open_cdrom0_helper5_helper2_001f3ac0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F4400": {
+    "name": "open_cdrom0_helper5_helper3_001f4400",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F46F0": {
+    "name": "open_cdrom0_helper5_helper4_001f46f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F4990": {
+    "name": "open_cdrom0_helper5_001f4990",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F4C40": {
+    "name": "cdrom0_001f4c40",
+    "reason": "v1_string_xref"
+  },
+  "0x001F4D20": {
+    "name": "up_and_down_directional_button_001f4d20",
+    "reason": "strxref_prior_run"
+  },
+  "0x001F5100": {
+    "name": "open_cdrom0_helper6_001f5100",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F52F0": {
+    "name": "open_cdrom0_helper7_helper1_001f52f0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F5790": {
+    "name": "open_cdrom0_helper7_001f5790",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F5940": {
+    "name": "ending_no_mismatch_d_helper1_helper1_001f5940",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F5B30": {
+    "name": "ending_no_mismatch_d_helper1_next1_001f5b30",
+    "reason": "adjacency_of_prior_run"
+  },
+  "0x001F5D20": {
+    "name": "ending_no_mismatch_d_helper1_helper1_001f5d20",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F6140": {
+    "name": "ending_no_mismatch_d_helper1_001f6140",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F69B0": {
+    "name": "ending_no_mismatch_d_helper1_helper1_001f69b0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F6AF0": {
+    "name": "ending_no_mismatch_d_helper2_001f6af0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F6BD0": {
+    "name": "ending_no_mismatch_d_helper3_001f6bd0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F7520": {
+    "name": "do_you_want_to_001f7520",
+    "reason": "v1_string_xref"
+  },
+  "0x001F77D0": {
+    "name": "cb1_shall_i_remain_helper4_001f77d0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F78D0": {
+    "name": "cb1_shall_i_remain_helper5_001f78d0",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F7930": {
+    "name": "entry_helper2_helper2_helper_helper3_001f7930",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F8390": {
+    "name": "entry_helper2_helper2_helper_helper4_001f8390",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F8600": {
+    "name": "entry_helper2_helper2_helper_helper1_001f8600",
+    "reason": "helper_of_prior_run"
+  },
+  "0x001F8AE0": {
+    "name": "entry_helper2_helper2_helper_helper7_001f8ae0",
+    "reason": "helper_of_prior_run"
+  }
+}

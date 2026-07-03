@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PROMETHEUS // PS2 MOD PIPELINE</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<!-- ===== top classification ===== -->
+<div class="classification">
+  <span>CLASSIFICATION ▸ INTERNAL // R&amp;D</span>
+  <span>SYS ▸ PROMETHEUS PIPELINE</span>
+  <span>BUILD ▸ <span id="bv">v0.3-alpha</span></span>
+</div>
+
+<!-- ===== top bar ===== -->
+<div class="top-bar">
+  <div class="logo">PROMETHEUS<span>//</span>PIPELINE</div>
+  <div class="status">
+    <div class="status-item"><span class="status-dot sc"></span><span>BACKEND ▸ <span id="be-state">…</span></span></div>
+    <div class="status-item"><span class="status-dot" id="pcsx-dot"></span><span>PCSX2 ▸ <span id="pcsx-state">…</span></span></div>
+    <div class="status-item"><span class="status-dot wc"></span><span>TOOLS ▸ <span id="tool-state">…</span></span></div>
+    <div class="status-item"><span class="status-dot" id="dm-dot"></span><span>DAEMONS ▸ <span id="dm-state">…</span></span></div>
+  </div>
+</div>
+
+<!-- ===== tabs ===== -->
+<div class="tabs">
+  <button class="tab active" data-tab="galaxy">GALAXY</button>
+  <button class="tab" data-tab="library">3D LIBRARY</button>
+  <button class="tab" data-tab="agents">AGENTS</button>
+  <button class="tab" data-tab="pending">PENDING <span id="pending-badge" class="pending-badge hidden">0</span></button>
+  <button class="tab" data-tab="daily">DAILY LOG</button>
+  <button class="tab" data-tab="chat">CLAUDE CHAT</button>
+  <button class="tab" data-tab="logs">SYSTEM LOG</button>
+</div>
+
+<!-- ===== main canvas (galaxy / planet zoom) ===== -->
+<canvas id="scene"></canvas>
+
+<!-- ===== overlay: 3D library ===== -->
+<div class="overlay" id="lib-overlay">
+  <div class="overlay-header">
+    <div class="overlay-title">3D MODEL LIBRARY</div>
+    <div class="overlay-filters">
+      <select id="lib-game"><option value="">All games</option></select>
+      <select id="lib-category">
+        <option value="">All categories</option>
+        <option value="character">Characters</option>
+        <option value="environment">Environments</option>
+        <option value="weapon">Weapons</option>
+        <option value="prop">Props</option>
+      </select>
+      <input id="lib-search" placeholder="search…" />
+    </div>
+  </div>
+  <div class="lib-split">
+    <div class="lib-list" id="lib-list">
+      <div class="lib-empty">No models extracted yet.<br><small>Use a game's extractor to populate this library.</small></div>
+    </div>
+    <div class="lib-viewer">
+      <canvas id="lib-canvas"></canvas>
+      <div class="lib-controls">
+        <label><input type="checkbox" id="ck-mesh" checked> mesh</label>
+        <label><input type="checkbox" id="ck-skel"> skeleton</label>
+        <label><input type="checkbox" id="ck-tex" checked> textures</label>
+        <label><input type="checkbox" id="ck-wire"> wireframe</label>
+        <div class="anim-bar">
+          <select id="anim-sel"><option>(no animations)</option></select>
+          <button id="anim-play">▶</button>
+          <button id="anim-pause">⏸</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== overlay: claude chat ===== -->
+<div class="overlay" id="chat-overlay">
+  <div class="overlay-header">
+    <div class="overlay-title">CLAUDE CLI ▸ SESSION</div>
+    <div class="overlay-filters">
+      <button id="cl-start">START</button>
+      <button id="cl-stop" class="danger">STOP</button>
+      <span id="cl-status" class="cl-status">disconnected</span>
+    </div>
+  </div>
+  <div class="chat-area">
+    <pre id="chat-out"></pre>
+    <div class="chat-input">
+      <textarea id="chat-in" placeholder="type message and press Ctrl+Enter…"></textarea>
+      <button id="chat-send">SEND</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== overlay: agents ===== -->
+<div class="overlay" id="agents-overlay">
+  <div class="overlay-header">
+    <div class="overlay-title">AGENTS ▸ DISPATCH</div>
+    <div class="overlay-filters">
+      <select id="ag-skill"></select>
+      <select id="ag-serial"></select>
+      <button id="ag-watch">WATCH</button>
+      <button id="ag-schedule">SCHEDULE</button>
+      <button id="ag-refresh">REFRESH</button>
+    </div>
+  </div>
+  <div class="ag-split">
+    <div class="ag-runs">
+      <div class="panel-subheader">RUN HISTORY</div>
+      <div id="ag-runlist"></div>
+    </div>
+    <div class="ag-detail">
+      <div class="panel-subheader">TASK SPEC (JSON)</div>
+      <textarea id="ag-spec" placeholder='{ "elf": "elf/SLUS_204.07" }'></textarea>
+      <div class="panel-subheader">LIVE LOG</div>
+      <pre id="ag-log"></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ===== overlay: pending findings ===== -->
+<div class="overlay" id="pending-overlay">
+  <div class="overlay-header">
+    <div class="overlay-title">PENDING ▸ REVIEW QUEUE</div>
+    <div class="overlay-filters">
+      <select id="pn-serial"></select>
+      <select id="pn-status">
+        <option value="pending">Pending</option>
+        <option value="accepted">Accepted</option>
+        <option value="rejected">Rejected</option>
+      </select>
+      <button id="pn-refresh">REFRESH</button>
+    </div>
+  </div>
+  <div id="pn-list" class="pn-list"></div>
+</div>
+
+<!-- ===== overlay: daily log ===== -->
+<div class="overlay" id="daily-overlay">
+  <div class="overlay-header">
+    <div class="overlay-title">DAILY LOG ▸ AUTONOMOUS RUNS</div>
+    <div class="overlay-filters">
+      <select id="dl-date"></select>
+      <button id="dl-refresh">REFRESH</button>
+    </div>
+  </div>
+  <pre id="dl-content"></pre>
+</div>
+
+<!-- ===== overlay: system log ===== -->
+<div class="overlay" id="log-overlay">
+  <div class="overlay-header">
+    <div class="overlay-title">SYSTEM LOG</div>
+    <div class="overlay-filters"><button id="log-clear">CLEAR</button></div>
+  </div>
+  <pre id="log-out"></pre>
+</div>
+
+<!-- ===== side panels (galaxy view) ===== -->
+<div class="side-panel left" id="sp-left">
+  <div class="panel-header">PIPELINE ▸ SUN CORE</div>
+  <div id="tools-list" class="tools-list"></div>
+  <div class="panel-subheader">ACTIVE DAEMONS (moons)</div>
+  <div id="daemons-list" class="daemons-list"></div>
+</div>
+
+<div class="side-panel right" id="sp-right">
+  <div class="panel-header" id="sp-right-h">GAME ▸ INSPECT</div>
+  <div id="game-detail">Click a planet to inspect.</div>
+  <div class="panel-subheader">QUICK ACTIONS</div>
+  <div class="qa-grid" id="qa-grid"></div>
+</div>
+
+<!-- ===== bottom bar ===== -->
+<div class="bottom-bar">
+  <div class="zoom-back" id="zoom-back" style="display:none">◀ BACK TO GALAXY</div>
+  <div class="legend" id="legend"></div>
+  <div class="bb-stat" id="bb-stat">— planets: <span id="bb-plnt">0</span> · nodes: <span id="bb-nodes">0</span> · daemons: <span id="bb-dm">0</span></div>
+</div>
+
+<!-- ===== vendor (Three.js via CDN) ===== -->
+<script type="importmap">
+{
+  "imports": {
+    "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

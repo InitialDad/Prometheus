@@ -1,0 +1,14 @@
+// actor_node_0018e000
+// VA: 0x0018e000
+// Decompiled by Ghidra 12.1.2 headless
+
+
+/* WARNING: Control flow encountered bad instruction data */
+
+void actor_node_0018e000(void)
+
+{
+                    /* WARNING: Bad instruction - Truncating control flow here */
+  halt_baddata();
+}
+

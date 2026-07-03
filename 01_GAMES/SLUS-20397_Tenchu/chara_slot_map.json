@@ -1,0 +1,892 @@
+[
+  {
+    "idx": 0,
+    "offset": 0,
+    "size": 771104,
+    "n_submeshes": 15,
+    "has_kmd": true,
+    "name": "Rikimaru",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 1,
+    "offset": 771104,
+    "size": 865152,
+    "n_submeshes": 15,
+    "has_kmd": true,
+    "name": "Ayame",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 2,
+    "offset": 1636256,
+    "size": 1161376,
+    "n_submeshes": 19,
+    "has_kmd": true,
+    "name": "Tesshu",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 3,
+    "offset": 2797632,
+    "size": 2857104,
+    "n_submeshes": 19,
+    "has_kmd": true,
+    "name": "Rikimaru (Cinematic)",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 4,
+    "offset": 5654736,
+    "size": 1095792,
+    "n_submeshes": 23,
+    "has_kmd": true,
+    "name": "Onikage",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 5,
+    "offset": 6750528,
+    "size": 1356896,
+    "n_submeshes": 25,
+    "has_kmd": true,
+    "name": "Tatsumaru",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 6,
+    "offset": 8107424,
+    "size": 2132464,
+    "n_submeshes": 27,
+    "has_kmd": true,
+    "name": "Kagami",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 7,
+    "offset": 10239888,
+    "size": 1323152,
+    "n_submeshes": 25,
+    "has_kmd": true,
+    "name": "Genbu",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 8,
+    "offset": 11563040,
+    "size": 2502320,
+    "n_submeshes": 25,
+    "has_kmd": true,
+    "name": "Suzaku",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 9,
+    "offset": 14065360,
+    "size": 1203600,
+    "n_submeshes": 18,
+    "has_kmd": true,
+    "name": "Byakko",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 10,
+    "offset": 15268960,
+    "size": 1112976,
+    "n_submeshes": 14,
+    "has_kmd": true,
+    "name": "Seiryu",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 11,
+    "offset": 16381936,
+    "size": 1270528,
+    "n_submeshes": 13,
+    "has_kmd": true,
+    "name": "Lord Gohda",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 12,
+    "offset": 17652464,
+    "size": 1221280,
+    "n_submeshes": 13,
+    "has_kmd": true,
+    "name": "Princess Kiku",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 13,
+    "offset": 18873744,
+    "size": 502640,
+    "n_submeshes": 13,
+    "has_kmd": true,
+    "name": "MP Character A",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 14,
+    "offset": 19376384,
+    "size": 1218784,
+    "n_submeshes": 19,
+    "has_kmd": true,
+    "name": "MP Character B",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 15,
+    "offset": 20595168,
+    "size": 532160,
+    "n_submeshes": 16,
+    "has_kmd": true,
+    "name": "MP Character C",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 16,
+    "offset": 21127328,
+    "size": 731424,
+    "n_submeshes": 14,
+    "has_kmd": true,
+    "name": "MP Character D",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 17,
+    "offset": 21858752,
+    "size": 660800,
+    "n_submeshes": 17,
+    "has_kmd": true,
+    "name": "MP Character E",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 18,
+    "offset": 22519552,
+    "size": 1535264,
+    "n_submeshes": 20,
+    "has_kmd": true,
+    "name": "MP Character F",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 19,
+    "offset": 24054816,
+    "size": 715088,
+    "n_submeshes": 10,
+    "has_kmd": true,
+    "name": "Guard (Light)",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 20,
+    "offset": 24769904,
+    "size": 830880,
+    "n_submeshes": 9,
+    "has_kmd": true,
+    "name": "Guard (Standard)",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 21,
+    "offset": 25600784,
+    "size": 710512,
+    "n_submeshes": 15,
+    "has_kmd": true,
+    "name": "Samurai (Heavy)",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 22,
+    "offset": 26311296,
+    "size": 1643664,
+    "n_submeshes": 18,
+    "has_kmd": true,
+    "name": "Samurai (Officer)",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 23,
+    "offset": 27954960,
+    "size": 1166384,
+    "n_submeshes": 21,
+    "has_kmd": true,
+    "name": "Ninja (Standard)",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 24,
+    "offset": 29121344,
+    "size": 868608,
+    "n_submeshes": 23,
+    "has_kmd": true,
+    "name": "Ninja (Elite)",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 25,
+    "offset": 29989952,
+    "size": 734640,
+    "n_submeshes": 18,
+    "has_kmd": true,
+    "name": "Monk",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 26,
+    "offset": 30724592,
+    "size": 951696,
+    "n_submeshes": 15,
+    "has_kmd": false,
+    "name": "Priest",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 27,
+    "offset": 31676288,
+    "size": 669840,
+    "n_submeshes": 17,
+    "has_kmd": true,
+    "name": "Civilian (Adult M)",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 28,
+    "offset": 32346128,
+    "size": 1191472,
+    "n_submeshes": 21,
+    "has_kmd": true,
+    "name": "Civilian (Adult F)",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 29,
+    "offset": 33537600,
+    "size": 550832,
+    "n_submeshes": 15,
+    "has_kmd": true,
+    "name": "Civilian (Old)",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 30,
+    "offset": 34088432,
+    "size": 847456,
+    "n_submeshes": 17,
+    "has_kmd": true,
+    "name": "Civilian (Child)",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 31,
+    "offset": 34935888,
+    "size": 872912,
+    "n_submeshes": 2,
+    "has_kmd": true,
+    "name": "Civilian (Variant)",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 32,
+    "offset": 35808800,
+    "size": 310528,
+    "n_submeshes": 1,
+    "has_kmd": true,
+    "name": "Civilian (Lite)",
+    "role": "character",
+    "confidence": "medium"
+  },
+  {
+    "idx": 33,
+    "offset": 36119328,
+    "size": 661872,
+    "n_submeshes": 6,
+    "has_kmd": true,
+    "name": "Prop/Weapon #01",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 34,
+    "offset": 36781200,
+    "size": 658480,
+    "n_submeshes": 15,
+    "has_kmd": true,
+    "name": "Prop/Weapon #02",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 35,
+    "offset": 37439680,
+    "size": 1229088,
+    "n_submeshes": 18,
+    "has_kmd": true,
+    "name": "Prop/Weapon #03",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 36,
+    "offset": 38668768,
+    "size": 1101216,
+    "n_submeshes": 18,
+    "has_kmd": true,
+    "name": "Prop/Weapon #04",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 37,
+    "offset": 39769984,
+    "size": 1166976,
+    "n_submeshes": 6,
+    "has_kmd": true,
+    "name": "Prop/Weapon #05",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 38,
+    "offset": 40936960,
+    "size": 453328,
+    "n_submeshes": 6,
+    "has_kmd": true,
+    "name": "Prop/Weapon #06",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 39,
+    "offset": 41390288,
+    "size": 773184,
+    "n_submeshes": 4,
+    "has_kmd": true,
+    "name": "Prop/Weapon #07",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 40,
+    "offset": 42163472,
+    "size": 575872,
+    "n_submeshes": 6,
+    "has_kmd": true,
+    "name": "Prop/Weapon #08",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 41,
+    "offset": 42739344,
+    "size": 430128,
+    "n_submeshes": 4,
+    "has_kmd": true,
+    "name": "Prop/Weapon #09",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 42,
+    "offset": 43169472,
+    "size": 472688,
+    "n_submeshes": 4,
+    "has_kmd": true,
+    "name": "Prop/Weapon #10",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 43,
+    "offset": 43642160,
+    "size": 612832,
+    "n_submeshes": 4,
+    "has_kmd": true,
+    "name": "Prop/Weapon #11",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 44,
+    "offset": 44254992,
+    "size": 306448,
+    "n_submeshes": 3,
+    "has_kmd": true,
+    "name": "Prop/Weapon #12",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 45,
+    "offset": 44561440,
+    "size": 587376,
+    "n_submeshes": 5,
+    "has_kmd": true,
+    "name": "Prop/Weapon #13",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 46,
+    "offset": 45148816,
+    "size": 830240,
+    "n_submeshes": 4,
+    "has_kmd": true,
+    "name": "Prop/Weapon #14",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 47,
+    "offset": 45979056,
+    "size": 252640,
+    "n_submeshes": 1,
+    "has_kmd": true,
+    "name": "Prop/Weapon #15",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 48,
+    "offset": 46231696,
+    "size": 640144,
+    "n_submeshes": 5,
+    "has_kmd": true,
+    "name": "Prop/Weapon #16",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 49,
+    "offset": 46871840,
+    "size": 462960,
+    "n_submeshes": 5,
+    "has_kmd": true,
+    "name": "Prop/Weapon #17",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 50,
+    "offset": 47334800,
+    "size": 433792,
+    "n_submeshes": 4,
+    "has_kmd": false,
+    "name": "Prop/Weapon #18",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 51,
+    "offset": 47768592,
+    "size": 302720,
+    "n_submeshes": 4,
+    "has_kmd": true,
+    "name": "Prop/Weapon #19",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 52,
+    "offset": 48071312,
+    "size": 282400,
+    "n_submeshes": 5,
+    "has_kmd": true,
+    "name": "Prop/Weapon #20",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 53,
+    "offset": 48353712,
+    "size": 733600,
+    "n_submeshes": 6,
+    "has_kmd": true,
+    "name": "Prop/Weapon #21",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 54,
+    "offset": 49087312,
+    "size": 442176,
+    "n_submeshes": 6,
+    "has_kmd": true,
+    "name": "Prop/Weapon #22",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 55,
+    "offset": 49529488,
+    "size": 441568,
+    "n_submeshes": 6,
+    "has_kmd": true,
+    "name": "Prop/Weapon #23",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 56,
+    "offset": 49971056,
+    "size": 431600,
+    "n_submeshes": 7,
+    "has_kmd": true,
+    "name": "Prop/Weapon #24",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 57,
+    "offset": 50402656,
+    "size": 432064,
+    "n_submeshes": 4,
+    "has_kmd": true,
+    "name": "Prop/Weapon #25",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 58,
+    "offset": 50834720,
+    "size": 280240,
+    "n_submeshes": 3,
+    "has_kmd": true,
+    "name": "Prop/Weapon #26",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 59,
+    "offset": 51114960,
+    "size": 247360,
+    "n_submeshes": 3,
+    "has_kmd": true,
+    "name": "Prop/Weapon #27",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 60,
+    "offset": 51362320,
+    "size": 284032,
+    "n_submeshes": 3,
+    "has_kmd": true,
+    "name": "Prop/Weapon #28",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 61,
+    "offset": 51646352,
+    "size": 597840,
+    "n_submeshes": 4,
+    "has_kmd": true,
+    "name": "Prop/Weapon #29",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 62,
+    "offset": 52244192,
+    "size": 695888,
+    "n_submeshes": 5,
+    "has_kmd": true,
+    "name": "Prop/Weapon #30",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 63,
+    "offset": 52940080,
+    "size": 488048,
+    "n_submeshes": 4,
+    "has_kmd": true,
+    "name": "Prop/Weapon #31",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 64,
+    "offset": 53428128,
+    "size": 510048,
+    "n_submeshes": 7,
+    "has_kmd": true,
+    "name": "Prop/Weapon #32",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 65,
+    "offset": 53938176,
+    "size": 137776,
+    "n_submeshes": 1,
+    "has_kmd": true,
+    "name": "Prop/Weapon #33",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 66,
+    "offset": 54075952,
+    "size": 753488,
+    "n_submeshes": 17,
+    "has_kmd": true,
+    "name": "Boss/NPC variant #01",
+    "role": "character",
+    "confidence": "low"
+  },
+  {
+    "idx": 67,
+    "offset": 54829440,
+    "size": 569024,
+    "n_submeshes": 18,
+    "has_kmd": true,
+    "name": "Boss/NPC variant #02",
+    "role": "character",
+    "confidence": "low"
+  },
+  {
+    "idx": 68,
+    "offset": 55398464,
+    "size": 678656,
+    "n_submeshes": 16,
+    "has_kmd": true,
+    "name": "Boss/NPC variant #03",
+    "role": "character",
+    "confidence": "low"
+  },
+  {
+    "idx": 69,
+    "offset": 56077120,
+    "size": 493520,
+    "n_submeshes": 13,
+    "has_kmd": true,
+    "name": "Boss/NPC variant #04",
+    "role": "character",
+    "confidence": "low"
+  },
+  {
+    "idx": 70,
+    "offset": 56570640,
+    "size": 526400,
+    "n_submeshes": 7,
+    "has_kmd": true,
+    "name": "Boss/NPC variant #05",
+    "role": "character",
+    "confidence": "low"
+  },
+  {
+    "idx": 71,
+    "offset": 57097040,
+    "size": 841056,
+    "n_submeshes": 15,
+    "has_kmd": true,
+    "name": "Boss/NPC variant #06",
+    "role": "character",
+    "confidence": "low"
+  },
+  {
+    "idx": 72,
+    "offset": 57938096,
+    "size": 605872,
+    "n_submeshes": 6,
+    "has_kmd": true,
+    "name": "Prop/Weapon #40",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 73,
+    "offset": 58543968,
+    "size": 273312,
+    "n_submeshes": 4,
+    "has_kmd": true,
+    "name": "Prop/Weapon #41",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 74,
+    "offset": 58817280,
+    "size": 523856,
+    "n_submeshes": 9,
+    "has_kmd": true,
+    "name": "Prop/Weapon #42",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 75,
+    "offset": 59341136,
+    "size": 97824,
+    "n_submeshes": 1,
+    "has_kmd": false,
+    "name": "Prop/Weapon #43",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 76,
+    "offset": 59438960,
+    "size": 97824,
+    "n_submeshes": 1,
+    "has_kmd": false,
+    "name": "Prop/Weapon #44",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 77,
+    "offset": 59536784,
+    "size": 97824,
+    "n_submeshes": 1,
+    "has_kmd": false,
+    "name": "Prop/Weapon #45",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 78,
+    "offset": 59634608,
+    "size": 75360,
+    "n_submeshes": 1,
+    "has_kmd": false,
+    "name": "Prop/Weapon #46",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 79,
+    "offset": 59709968,
+    "size": 98144,
+    "n_submeshes": 2,
+    "has_kmd": true,
+    "name": "Prop/Weapon #47",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 80,
+    "offset": 59808112,
+    "size": 368208,
+    "n_submeshes": 4,
+    "has_kmd": true,
+    "name": "Prop/Weapon #48",
+    "role": "prop",
+    "confidence": "low"
+  },
+  {
+    "idx": 81,
+    "offset": 60176320,
+    "size": 83088,
+    "n_submeshes": 0,
+    "has_kmd": true,
+    "name": "UI/Icon #01",
+    "role": "ui",
+    "confidence": "low"
+  },
+  {
+    "idx": 82,
+    "offset": 60259408,
+    "size": 77008,
+    "n_submeshes": 0,
+    "has_kmd": true,
+    "name": "UI/Icon #02",
+    "role": "ui",
+    "confidence": "low"
+  },
+  {
+    "idx": 83,
+    "offset": 60336416,
+    "size": 126144,
+    "n_submeshes": 1,
+    "has_kmd": true,
+    "name": "UI/Icon #03",
+    "role": "ui",
+    "confidence": "low"
+  },
+  {
+    "idx": 84,
+    "offset": 60462560,
+    "size": 3096128,
+    "n_submeshes": 0,
+    "has_kmd": true,
+    "name": "UI/Icon #04",
+    "role": "ui",
+    "confidence": "low"
+  },
+  {
+    "idx": 85,
+    "offset": 63558688,
+    "size": 105168,
+    "n_submeshes": 0,
+    "has_kmd": false,
+    "name": "UI/Icon #05",
+    "role": "ui",
+    "confidence": "low"
+  },
+  {
+    "idx": 86,
+    "offset": 63663856,
+    "size": 80080,
+    "n_submeshes": 0,
+    "has_kmd": false,
+    "name": "UI/Icon #06",
+    "role": "ui",
+    "confidence": "low"
+  },
+  {
+    "idx": 87,
+    "offset": 63743936,
+    "size": 138688,
+    "n_submeshes": 0,
+    "has_kmd": true,
+    "name": "UI/Icon #07",
+    "role": "ui",
+    "confidence": "low"
+  },
+  {
+    "idx": 88,
+    "offset": 63882624,
+    "size": 172416,
+    "n_submeshes": 0,
+    "has_kmd": true,
+    "name": "UI/Icon #08",
+    "role": "ui",
+    "confidence": "low"
+  }
+]
