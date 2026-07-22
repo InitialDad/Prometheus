@@ -4,3 +4,7 @@
 06_REFERENCE/cheat_sources/
 __pycache__/
 06_REFERENCE/tools/
+
+# unified knowledge store - rebuildable via 09_ORCHESTRATOR/merge_knowledge.py
+db/prometheus.db
+db/*.db-journal

@@ -4,24 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "9fafe2edf0b0b971",
+        "id": "5eba03c6a43561e0",
         "type": "tabs",
         "children": [
           {
-            "id": "b2d9fbea0cf24d5e",
+            "id": "c8049cf6bbb33ced",
             "type": "leaf",
             "state": {
-              "type": "canvas",
-              "state": {
-                "file": "we had been working on a char swap for tenchu and wos, essentiallt taking the mesh and textures and remapping it onto Untitled.canvas",
-                "viewState": {
-                  "x": 0,
-                  "y": 0,
-                  "zoom": 0
-                }
-              },
-              "icon": "lucide-layout-dashboard",
-              "title": "we had been working on a char swap for tenchu and wos, essentiallt taking the mesh and textures and remapping it onto Untitled"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -77,7 +70,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -186,10 +180,11 @@
       "bases:Create new base": false
     }
   },
-  "active": "b2d9fbea0cf24d5e",
+  "active": "c8049cf6bbb33ced",
   "lastOpenFiles": [
     "01_GAMES/SLUS-20407_WayOfTheSamurai/db/mods.db-journal",
     "08_OBSIDIAN/Prometheus Map.md",
+    "we had been working on a char swap for tenchu and wos, essentiallt taking the mesh and textures and remapping it onto Untitled.canvas",
     "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char Wounded Enemy.md",
     "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char Tesshu.md",
     "08_OBSIDIAN/SLUS-20397/characters/SLUS-20397 char Stone Boss C.md",
@@ -223,8 +218,6 @@
     "08_OBSIDIAN/SLUS-20407/mods",
     "08_OBSIDIAN/SLUS-20407/addresses",
     "08_OBSIDIAN/SLUS-20407",
-    "08_OBSIDIAN/_notes",
-    "we had been working on a char swap for tenchu and wos, essentiallt taking the mesh and textures and remapping it onto Untitled.canvas",
     "01_GAMES/SLUS-20397_Tenchu/extracted_textures_LIVE/onikage/onikage_tex2.png",
     "01_GAMES/SLUS-20397_Tenchu/extracted_textures_LIVE/onikage/onikage_tex1.png",
     "01_GAMES/SLUS-20397_Tenchu/extracted_textures_LIVE/onikage/onikage_tex0.png",
