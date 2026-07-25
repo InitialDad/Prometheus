@@ -1,7 +1,0 @@
-# err_sys_sce_mpeg_get_picture_helper1_00104e40
-# address: 0x00104E40  size: 16 bytes  evidence: INFERRED_HELPER
-
-  00104E40:  2d100000   .byte    0x2d, 0x10, 0x00, 0x00
-  00104E44:  4000bfdf   .byte    0x40, 0x00, 0xbf, 0xdf
-  00104E48:  3000b3df   .byte    0x30, 0x00, 0xb3, 0xdf
-  00104E4C:  2000b2df   .byte    0x20, 0x00, 0xb2, 0xdf
