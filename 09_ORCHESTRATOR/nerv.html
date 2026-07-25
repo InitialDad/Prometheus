@@ -710,6 +710,11 @@ function fitAll(){document.querySelectorAll('canvas').forEach(c=>{
   const w=Math.round(r.width*DPR),h=Math.round(r.height*DPR);
   if(w>0&&h>0&&(c.width!==w||c.height!==h)){c.width=w;c.height=h;}});}
 addEventListener('resize',fitAll);setTimeout(fitAll,120);
+// belt-and-braces: re-fit after tiling (Win+Arrow), on focus/visibility, and on
+// a slow timer, so canvases never get stuck at a stale/zero backing size
+addEventListener('focus',fitAll);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)fitAll();});
+setInterval(fitAll,2500);
 
 /* ---------- ambient canvases ---------- */
 let tt=0;
@@ -1237,10 +1242,23 @@ function chart(cid){const c=document.getElementById(cid);if(!c||!c.width||!CHART
   d.textAlign='left';d.fillStyle='#00ff9c';d.fillText('■ cumulative findings',P.l+4,P.t+12);
   d.fillStyle='#ff8a00';d.fillText('■ cumulative commits',P.l+150,P.t+12);}
 
-function loop(){tt+=.012;ecgTick();
-  if(!ZOOM){unit('cv-unit');magi('cv-magi');ecgDraw('cv-ecg');planet('cv-planet');codemap('cv-map');}
-  else{unit('z-unit');magi('z-magi');ecgDraw('z-ecg');planet('z-planet');codemap('z-map');chart('z-chart');}
-  requestAnimationFrame(loop);}
+/* BULLETPROOF LOOP. Every draw is isolated: one function throwing (a transient
+   with async data, a mid-frame resize) can NEVER kill the whole animation - the
+   others still draw and it self-heals next frame. requestAnimationFrame is
+   ALWAYS scheduled. The first error per function is logged so a real bug still
+   surfaces instead of silently freezing everything. */
+const _drawErr={};
+function _draw(fn,id){try{fn(id);}catch(e){
+  if(!_drawErr[id]){_drawErr[id]=1;console.warn('[prom] draw error in',id,e);}}}
+function loop(){
+  tt+=.012;
+  try{ecgTick();}catch(e){}
+  if(!ZOOM){_draw(unit,'cv-unit');_draw(magi,'cv-magi');_draw(ecgDraw,'cv-ecg');
+    _draw(planet,'cv-planet');_draw(codemap,'cv-map');}
+  else{_draw(unit,'z-unit');_draw(magi,'z-magi');_draw(ecgDraw,'z-ecg');
+    _draw(planet,'z-planet');_draw(codemap,'z-map');_draw(chart,'z-chart');}
+  requestAnimationFrame(loop);
+}
 loop();
 
 /* ---------- zoom views ---------- */
