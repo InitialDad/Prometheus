@@ -10,6 +10,7 @@
   --acc:#ff2f3d; --acc-dim:#8e1520; --acc-deep:#2a060a;
   --grn:#00ff9c; --grn-dim:#0b6b45; --amb:#ff8a00; --yel:#ffe000;
   --ink:#ff6a72; --mut:#6d2229; --void:#050203; --pnl:#0a0305;
+    --acc-rgb:255,47,61; --grn-rgb:0,255,156; --amb-rgb:255,138,0;
   --mono:'Consolas','DejaVu Sans Mono','Courier New',monospace;
   --disp:'Arial Narrow','Roboto Condensed','Haettenschweiler','Impact',sans-serif;
 }
@@ -150,7 +151,7 @@ function applyLabels(){
 }
 .blk{position:relative;border:1px solid var(--acc-dim);background:linear-gradient(180deg,rgba(10,3,5,.80),rgba(5,1,2,.86));
   padding:5px 8px;min-height:0;overflow:hidden;cursor:pointer;transition:border-color .15s,box-shadow .15s}
-.blk:hover{border-color:var(--acc);box-shadow:0 0 22px rgba(255,47,61,.28),inset 0 0 22px rgba(255,47,61,.07)}
+.blk:hover{border-color:var(--acc);box-shadow:0 0 22px rgba(var(--acc-rgb),.28),inset 0 0 22px rgba(var(--acc-rgb),.07)}
 .blk:hover .exp{opacity:1}
 .blk::after{content:'';position:absolute;right:0;top:0;border-left:9px solid transparent;
   border-top:9px solid var(--acc-dim)}
@@ -172,7 +173,7 @@ function applyLabels(){
 #hexfield{position:absolute;inset:0;width:100%;height:100%}
 .logo-wrap{position:relative;z-index:2;text-align:center}
 .logo-wrap .pl{font-family:var(--disp);font-weight:700;font-size:40px;letter-spacing:.2em;color:var(--acc);
-  text-shadow:0 0 26px rgba(255,47,61,.85);line-height:.92}
+  text-shadow:0 0 26px rgba(var(--acc-rgb),.85);line-height:.92}
 .logo-wrap .pm{font-size:9px;letter-spacing:.42em;color:var(--acc-dim)}
 
 /* main system */
@@ -181,16 +182,16 @@ function applyLabels(){
   border-bottom:1px solid var(--grn-dim);padding-bottom:3px}
 .ms-b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:0}
 .wel{font-family:var(--disp);font-weight:700;font-size:clamp(20px,2.5vw,36px);letter-spacing:.13em;color:var(--grn);
-  text-shadow:0 0 20px rgba(0,255,156,.6)}
+  text-shadow:0 0 20px rgba(var(--grn-rgb),.6)}
 .wel-jp{font-size:14px;letter-spacing:.28em;color:var(--grn-dim)}
 .gate{font-size:11px;letter-spacing:.2em;color:var(--acc);margin-top:6px}
 .startrow{display:flex;align-items:center;gap:10px;width:78%;justify-content:center}
 .startrow .sl{flex:1;height:15px;background:repeating-linear-gradient(45deg,var(--acc) 0 9px,transparent 9px 18px);opacity:.55}
 #startBtn{font-family:var(--disp);font-weight:700;font-size:clamp(26px,3.4vw,50px);letter-spacing:.14em;
   color:#fff;background:linear-gradient(180deg,#4d0a11,#22050a);border:2px solid var(--acc);
-  padding:5px 46px;cursor:pointer;text-shadow:0 0 18px rgba(255,47,61,.95);position:relative;
-  box-shadow:0 0 34px rgba(255,47,61,.4),inset 0 0 24px rgba(255,47,61,.28);animation:bp 2.4s infinite}
-@keyframes bp{50%{box-shadow:0 0 54px rgba(255,47,61,.72),inset 0 0 30px rgba(255,47,61,.42)}}
+  padding:5px 46px;cursor:pointer;text-shadow:0 0 18px rgba(var(--acc-rgb),.95);position:relative;
+  box-shadow:0 0 34px rgba(var(--acc-rgb),.4),inset 0 0 24px rgba(var(--acc-rgb),.28);animation:bp 2.4s infinite}
+@keyframes bp{50%{box-shadow:0 0 54px rgba(var(--acc-rgb),.72),inset 0 0 30px rgba(var(--acc-rgb),.42)}}
 #startBtn:hover{background:linear-gradient(180deg,#7d1119,#3a070d)}
 #startBtn small{display:block;font-size:14px;letter-spacing:.3em;opacity:.85}
 .ms-f{display:flex;justify-content:space-between;font-size:10px;color:var(--grn-dim);
@@ -239,7 +240,7 @@ canvas.cv{width:100%;flex:1;min-height:0;display:block}
   background:linear-gradient(180deg,#3a0c12,#160406);opacity:.62;
   -webkit-mask:var(--silm) center/contain no-repeat;mask:var(--silm) center/contain no-repeat}
 #b-user .nm{font-family:var(--disp);font-weight:700;font-size:24px;color:#fff;letter-spacing:.06em;
-  text-shadow:0 0 14px rgba(255,47,61,.7)}
+  text-shadow:0 0 14px rgba(var(--acc-rgb),.7)}
 .barcode{height:16px;margin-top:3px;background:repeating-linear-gradient(90deg,
   var(--acc) 0 2px,transparent 2px 4px,var(--acc) 4px 5px,transparent 5px 9px,
   var(--acc) 9px 12px,transparent 12px 13px);opacity:.75}
@@ -270,9 +271,9 @@ button.act.sm{font-size:11px;padding:3px 9px}
   display:flex;flex-direction:column;justify-content:center}
 .mv-stage video{position:absolute;inset:0;width:100%;height:100%;background:#000}
 .mv-lib{position:absolute;inset:0;overflow:auto;background:#000;padding:6px 8px}
-.mv-lib .it{padding:4px 5px;border-bottom:1px solid rgba(255,47,61,.16);cursor:pointer;
+.mv-lib .it{padding:4px 5px;border-bottom:1px solid rgba(var(--acc-rgb),.16);cursor:pointer;
   font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mv-lib .it:hover{background:rgba(255,47,61,.14)}
+.mv-lib .it:hover{background:rgba(var(--acc-rgb),.14)}
 .mv-lib .d{color:var(--amb)} .mv-lib .f{color:var(--grn)}
 .mv-lib h4{margin:2px 0 6px;font-family:var(--disp);font-size:13px;letter-spacing:.14em;
   color:var(--acc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -288,17 +289,17 @@ button.act.sm{font-size:11px;padding:3px 9px}
   transition:transform .55s cubic-bezier(.16,1,.3,1)}
 #bg-deep{--d:7;opacity:.5;
   background-image:
-    repeating-linear-gradient(60deg,rgba(255,47,61,.055) 0 1px,transparent 1px 26px),
-    repeating-linear-gradient(-60deg,rgba(255,47,61,.055) 0 1px,transparent 1px 26px),
-    repeating-linear-gradient(0deg,rgba(255,47,61,.045) 0 1px,transparent 1px 45px)}
+    repeating-linear-gradient(60deg,rgba(var(--acc-rgb),.055) 0 1px,transparent 1px 26px),
+    repeating-linear-gradient(-60deg,rgba(var(--acc-rgb),.055) 0 1px,transparent 1px 26px),
+    repeating-linear-gradient(0deg,rgba(var(--acc-rgb),.045) 0 1px,transparent 1px 45px)}
 #bg-mid{--d:17;opacity:.5;
   background-image:
-    repeating-linear-gradient(135deg,rgba(255,47,61,.075) 0 2px,transparent 2px 30px),
-    repeating-linear-gradient(45deg,rgba(0,255,156,.035) 0 1px,transparent 1px 64px)}
+    repeating-linear-gradient(135deg,rgba(var(--acc-rgb),.075) 0 2px,transparent 2px 30px),
+    repeating-linear-gradient(45deg,rgba(var(--grn-rgb),.035) 0 1px,transparent 1px 64px)}
 #bg-near{--d:32;opacity:.45;
   background-image:
-    repeating-linear-gradient(90deg,rgba(255,47,61,.10) 0 1px,transparent 1px 128px),
-    repeating-linear-gradient(0deg,rgba(255,47,61,.10) 0 1px,transparent 1px 128px)}
+    repeating-linear-gradient(90deg,rgba(var(--acc-rgb),.10) 0 1px,transparent 1px 128px),
+    repeating-linear-gradient(0deg,rgba(var(--acc-rgb),.10) 0 1px,transparent 1px 128px)}
 /* slow vertical sweep across the whole plate - the one moving backdrop element */
 /* the sigil: large, centred, very faint, sitting deepest in the plate.
    Tinted toward the accent (sepia first, because hue-rotate does nothing to a
@@ -310,7 +311,7 @@ button.act.sm{font-size:11px;padding:3px 9px}
   -webkit-mask:radial-gradient(62% 62% at 50% 44%,#000 46%,transparent 82%);
   mask:radial-gradient(62% 62% at 50% 44%,#000 46%,transparent 82%)}
 #bg-sweep{position:fixed;left:0;right:0;height:34vh;z-index:0;pointer-events:none;
-  background:linear-gradient(180deg,transparent,rgba(255,47,61,.045) 45%,transparent);
+  background:linear-gradient(180deg,transparent,rgba(var(--acc-rgb),.045) 45%,transparent);
   animation:sweep 13s linear infinite}
 @keyframes sweep{0%{top:-40vh}100%{top:110vh}}
 #hq{position:relative;z-index:1}
@@ -334,7 +335,7 @@ button.act.sm{font-size:11px;padding:3px 9px}
     linear-gradient(var(--acc),var(--acc)) right 0 bottom 0/2px 13px no-repeat}
 .blk:hover .chrome{opacity:1}
 .ruler{position:absolute;left:14px;right:14px;top:0;height:5px;pointer-events:none;z-index:3;
-  background:repeating-linear-gradient(90deg,rgba(255,47,61,.55) 0 1px,transparent 1px 7px);
+  background:repeating-linear-gradient(90deg,rgba(var(--acc-rgb),.55) 0 1px,transparent 1px 7px);
   opacity:.42;transition:opacity .18s}
 .blk:hover .ruler{opacity:.8}
 .slot{position:absolute;right:8px;top:5px;z-index:3;font-family:var(--disp);font-weight:700;
@@ -344,24 +345,24 @@ button.act.sm{font-size:11px;padding:3px 9px}
 /* ============ INTERACTION FEEL ============ */
 .blk{transition:border-color .18s,box-shadow .22s,background .22s}
 .blk:hover{border-color:var(--acc);
-  box-shadow:0 0 30px rgba(255,47,61,.22),inset 0 0 34px rgba(255,47,61,.055)}
-.blk:active{box-shadow:0 0 12px rgba(255,47,61,.4),inset 0 0 40px rgba(255,47,61,.10)}
+  box-shadow:0 0 30px rgba(var(--acc-rgb),.22),inset 0 0 34px rgba(var(--acc-rgb),.055)}
+.blk:active{box-shadow:0 0 12px rgba(var(--acc-rgb),.4),inset 0 0 40px rgba(var(--acc-rgb),.10)}
 button.act,nav button,#ztabs button,.healthchip,.mirror-ind{transition:
   background .16s,color .16s,border-color .16s,box-shadow .16s,transform .08s}
 button.act:active{transform:translateY(1px)}
 button.act:focus-visible,input:focus-visible,select:focus-visible,
 .blk:focus-visible,#ztabs button:focus-visible{outline:2px solid var(--grn);
-  outline-offset:2px;box-shadow:0 0 14px rgba(0,255,156,.45)}
-input:focus,select:focus{border-color:var(--grn);box-shadow:0 0 12px rgba(0,255,156,.22)}
+  outline-offset:2px;box-shadow:0 0 14px rgba(var(--grn-rgb),.45)}
+input:focus,select:focus{border-color:var(--grn);box-shadow:0 0 12px rgba(var(--grn-rgb),.22)}
 .mv-lib .it,.row{transition:background .12s,padding-left .12s}
 .mv-lib .it:hover,.row:hover{padding-left:9px}
-.row:hover{background:rgba(255,47,61,.07)}
+.row:hover{background:rgba(var(--acc-rgb),.07)}
 
 /* staggered panel boot-in - the HQ assembles instead of appearing */
 #hq > .blk,#hq > #b-main,#hq > #b-logo{animation:blkin .55s cubic-bezier(.16,1,.3,1) backwards}
 @keyframes blkin{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
 /* a fresh event sliding into the thought stream */
-@keyframes evin{from{opacity:0;transform:translateX(-14px);background:rgba(0,255,156,.14)}
+@keyframes evin{from{opacity:0;transform:translateX(-14px);background:rgba(var(--grn-rgb),.14)}
   to{opacity:1;transform:none;background:transparent}}
 #hq > *:nth-child(1){animation-delay:.02s}  #hq > *:nth-child(2){animation-delay:.06s}
 #hq > *:nth-child(3){animation-delay:.10s}  #hq > *:nth-child(4){animation-delay:.14s}
@@ -392,14 +393,14 @@ input:focus,select:focus{border-color:var(--grn);box-shadow:0 0 12px rgba(0,255,
 /* zoom tab strip - move between views without returning to HQ */
 #ztabs{display:flex;gap:0;flex:none;border-bottom:1px solid var(--acc-dim);overflow-x:auto}
 #ztabs button{font-family:var(--disp);font-weight:700;font-size:13.5px;letter-spacing:.14em;
-  color:var(--mut);background:transparent;border:0;border-right:1px solid rgba(255,47,61,.25);
+  color:var(--mut);background:transparent;border:0;border-right:1px solid rgba(var(--acc-rgb),.25);
   padding:6px 13px;cursor:pointer;white-space:nowrap;transition:color .18s,background .18s}
-#ztabs button:hover{color:var(--grn);background:rgba(0,255,156,.06)}
+#ztabs button:hover{color:var(--grn);background:rgba(var(--grn-rgb),.06)}
 #ztabs button.on{color:#000;background:var(--acc)}
 .zp,.row,.tile{transition:border-color .2s,background .2s}
 #zh{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--acc);padding-bottom:5px;flex:none}
 #zh .zt{font-family:var(--disp);font-weight:700;font-size:26px;letter-spacing:.2em;color:var(--acc);
-  text-shadow:0 0 18px rgba(255,47,61,.7)}
+  text-shadow:0 0 18px rgba(var(--acc-rgb),.7)}
 #zh .zj{font-size:10.5px;letter-spacing:.24em;color:var(--mut)}
 #zclose{margin-left:auto;font-family:var(--disp);font-weight:700;font-size:15px;letter-spacing:.18em;
   color:var(--acc);background:#1a0407;border:2px solid var(--acc-dim);padding:5px 16px;cursor:pointer}
@@ -424,7 +425,7 @@ input[type=checkbox]{accent-color:var(--acc)}
 label.f{display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:10.5px;color:var(--mut)}
 label.f span{min-width:132px;letter-spacing:.12em}
 label.f input,label.f select{flex:1}
-.row{padding:4px 2px;border-bottom:1px solid rgba(255,47,61,.14);font-size:11px}
+.row{padding:4px 2px;border-bottom:1px solid rgba(var(--acc-rgb),.14);font-size:11px}
 .tag{font-size:9px;padding:0 5px;border:1px solid currentColor;white-space:nowrap;margin-left:4px}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .tile{border:1px solid var(--acc-dim);padding:6px 4px;text-align:center;background:#080203}
@@ -716,10 +717,10 @@ function hexfield(){const c=$('#hexfield');if(c.width){const d=c.getContext('2d'
   d.clearRect(0,0,W,H);const s=34,hh=s*Math.sqrt(3)/2;
   for(let row=0,y=0;y<H+s;row++,y+=hh)for(let x=(row%2?s*1.5:0);x<W+s;x+=s*3){
     const p=(Math.sin(tt*1.5+x*.01+y*.02)+1)/2;
-    d.strokeStyle='rgba(255,47,61,'+(.10+p*.30)+')';d.lineWidth=1.2;d.beginPath();
+    d.strokeStyle='rgba(var(--acc-rgb),'+(.10+p*.30)+')';d.lineWidth=1.2;d.beginPath();
     for(let i=0;i<6;i++){const a=Math.PI/3*i,px=x+Math.cos(a)*s*.6,py=y+Math.sin(a)*s*.6;i?d.lineTo(px,py):d.moveTo(px,py)}
     d.closePath();d.stroke();
-    if(p>.86){d.fillStyle='rgba(255,47,61,.5)';d.font='700 9px '+'Consolas,monospace';
+    if(p>.86){d.fillStyle='rgba(var(--acc-rgb),.5)';d.font='700 9px '+'Consolas,monospace';
       d.textAlign='center';d.fillText('EMERGENCY',x,y+3)}}}
   requestAnimationFrame(hexfield);}
 hexfield();
@@ -920,7 +921,7 @@ function unit(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
       const a=proj(EDG[i][0]),b=proj(EDG[i][1]);
       d.moveTo(a[0],a[1]);d.lineTo(b[0],b[1]);}
     d.stroke();d.globalAlpha=1;
-    d.strokeStyle='rgba(255,47,61,.35)';d.lineWidth=1;
+    d.strokeStyle='rgba(var(--acc-rgb),.35)';d.lineWidth=1;
     [[6,6],[W-6,6],[6,H-6],[W-6,H-6]].forEach(([x,y],i)=>{const sx=i%2?-1:1,sy=i<2?1:-1;
       d.beginPath();d.moveTo(x,y);d.lineTo(x+sx*18,y);d.moveTo(x,y);d.lineTo(x,y+sy*18);d.stroke();});
     return;
@@ -941,7 +942,7 @@ function unit(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
   d.globalAlpha=0.55+pl*0.45;d.fill();
   d.globalAlpha=1;d.shadowBlur=0;
   // frame ticks
-  d.strokeStyle='rgba(255,47,61,.35)';d.lineWidth=1;
+  d.strokeStyle='rgba(var(--acc-rgb),.35)';d.lineWidth=1;
   [[6,6],[W-6,6],[6,H-6],[W-6,H-6]].forEach(([x,y],i)=>{const sx=i%2?-1:1,sy=i<2?1:-1;
     d.beginPath();d.moveTo(x,y);d.lineTo(x+sx*18,y);d.moveTo(x,y);d.lineTo(x,y+sy*18);d.stroke();});}
 
@@ -993,10 +994,10 @@ function magi(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
   pos.forEach(p=>{
     if(p.act){
       const grad=d.createLinearGradient(p.x,p.y,cx,cy);
-      grad.addColorStop(0,'rgba(0,255,156,.25)');
-      grad.addColorStop(1,'rgba(0,255,156,.85)');
+      grad.addColorStop(0,'rgba(var(--grn-rgb),.25)');
+      grad.addColorStop(1,'rgba(var(--grn-rgb),.85)');
       d.strokeStyle=grad;d.lineWidth=2.2;
-    }else{d.strokeStyle='rgba(255,47,61,.22)';d.lineWidth=1.2;}
+    }else{d.strokeStyle='rgba(var(--acc-rgb),.22)';d.lineWidth=1.2;}
     d.beginPath();d.moveTo(cx,cy);d.lineTo(p.x,p.y);d.stroke();
   });
 
@@ -1101,7 +1102,7 @@ function planet(cid){const c=document.getElementById(cid);if(!c||!c.width)return
       d.globalAlpha=1;
       if(r===5)PLANET_HIT.push({slug:S.slug,x:x,y:y,r:Math.max(w,h)});
     }}
-  d.strokeStyle='rgba(255,47,61,.55)';d.lineWidth=1.6;
+  d.strokeStyle='rgba(var(--acc-rgb),.55)';d.lineWidth=1.6;
   d.beginPath();d.arc(cx,cy,R,0,7);d.stroke();
 
   // callouts: the selection first, then whatever is in flight
@@ -1148,7 +1149,7 @@ let pk=[];                 // in-flight packets on the code map
    generated disassembly (/api/callgraph). Pulses travel along real edges. */
 function codemap(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
   const d=c.getContext('2d'),W=c.width,H=c.height;d.clearRect(0,0,W,H);
-  d.strokeStyle='rgba(255,47,61,.10)';d.lineWidth=1;
+  d.strokeStyle='rgba(var(--acc-rgb),.10)';d.lineWidth=1;
   for(let x=0;x<W;x+=W/18){d.beginPath();d.moveTo(x,0);d.lineTo(x,H);d.stroke()}
   for(let y=0;y<H;y+=H/9){d.beginPath();d.moveTo(0,y);d.lineTo(W,y);d.stroke()}
   const G=CALLGRAPH||{nodes:[],edges:[]};
@@ -1168,7 +1169,7 @@ function codemap(cid){const c=document.getElementById(cid);if(!c||!c.width)retur
   const live=(ST.runtime&&ST.runtime.func)||null;
   (G.edges||[]).forEach(e=>{const a=P[e[0]],b=P[e[1]];if(!a||!b)return;
     const mx=(a.x+b.x)/2,my=(a.y+b.y)/2-Math.hypot(b.x-a.x,b.y-a.y)*0.12;
-    d.strokeStyle='rgba(0,255,156,.16)';d.lineWidth=1;
+    d.strokeStyle='rgba(var(--grn-rgb),.16)';d.lineWidth=1;
     d.beginPath();d.moveTo(a.x,a.y);d.quadraticCurveTo(mx,my,b.x,b.y);d.stroke();});
 
   // pulses along real edges (call flow). One pool, phase-cycled.
@@ -1201,7 +1202,7 @@ function codemap(cid){const c=document.getElementById(cid);if(!c||!c.width)retur
     d.fillStyle='rgba(255,106,114,.7)';
     d.fillText('0x'+p.u.addr.toString(16),p.x,p.y+rad+FS);});
   // legend
-  d.fillStyle='rgba(0,255,156,.6)';d.textAlign='left';d.font="600 10px Consolas,monospace";
+  d.fillStyle='rgba(var(--grn-rgb),.6)';d.textAlign='left';d.font="600 10px Consolas,monospace";
   d.fillText((G.n_edges||0)+' real call edges', 6, H-8);}
 
 /* BURN-UP CHART — cumulative findings + commits */
@@ -1209,7 +1210,7 @@ function chart(cid){const c=document.getElementById(cid);if(!c||!c.width||!CHART
   const d=c.getContext('2d'),W=c.width,H=c.height,P={l:52,r:16,t:14,b:30};
   const pts=CHART.points;d.clearRect(0,0,W,H);if(!pts.length)return;
   const iw=W-P.l-P.r, ih=H-P.t-P.b, maxF=Math.max(1,CHART.total_findings);
-  d.strokeStyle='rgba(255,47,61,.16)';d.lineWidth=1;
+  d.strokeStyle='rgba(var(--acc-rgb),.16)';d.lineWidth=1;
   d.font="600 11px Consolas,monospace";d.fillStyle='rgba(255,106,114,.6)';d.textAlign='right';
   for(let i=0;i<=4;i++){const y=P.t+ih-(i/4)*ih;
     d.beginPath();d.moveTo(P.l,y);d.lineTo(W-P.r,y);d.stroke();
@@ -1219,7 +1220,7 @@ function chart(cid){const c=document.getElementById(cid);if(!c||!c.width||!CHART
   d.beginPath();d.moveTo(X(0),P.t+ih);
   pts.forEach((p,i)=>d.lineTo(X(i),P.t+ih-p.cum_findings/maxF*ih));
   d.lineTo(X(pts.length-1),P.t+ih);d.closePath();
-  d.fillStyle='rgba(0,255,156,.13)';d.fill();
+  d.fillStyle='rgba(var(--grn-rgb),.13)';d.fill();
   d.beginPath();pts.forEach((p,i)=>{const x=X(i),y=P.t+ih-p.cum_findings/maxF*ih;i?d.lineTo(x,y):d.moveTo(x,y)});
   d.strokeStyle='#00ff9c';d.lineWidth=2.4;d.shadowColor='#00ff9c';d.shadowBlur=9;d.stroke();d.shadowBlur=0;
   // cumulative commits, scaled to its own max
@@ -1273,17 +1274,20 @@ const VIEW={
    <div class="zp" style="grid-column:span 2"><h3>Pulse</h3><canvas class="cv" id="z-ecg" style="height:120px"></canvas></div>
    <div class="zp"><h3>Host</h3><div class="grid4" id="zk-vit"></div></div>
    <div class="zp"><h3>Detail</h3><div class="kv" id="zk-vit2"></div></div></div>`,
- user:()=>`<div class="zgrid" style="grid-template-columns:1fr 1fr">
-   <div class="zp"><h3>Operator Profile</h3><div id="zk-form"></div>
-     <div style="display:flex;gap:6px;margin-top:8px"><button class="act" id="saveSet">SAVE</button>
-     <span id="setMsg" class="kv"></span></div></div>
-   <div class="zp"><h3>Silhouette</h3>
-     <div class="kv">Upload a PNG with transparency. It is masked into the operator block.</div>
-     <input type="file" id="silIn" accept="image/*" style="margin:8px 0">
-     <div style="flex:1;background:#000;border:1px solid var(--acc-dim);position:relative">
+ user:()=>`<div class="zgrid" style="grid-template-columns:1fr 1.15fr">
+   <div class="zp" style="gap:8px">
+     <h3>Operator Profile</h3><div id="zk-form"></div>
+     <div style="display:flex;gap:6px;margin:6px 0"><button class="act" id="saveSet">SAVE</button>
+       <span id="setMsg" class="kv"></span></div>
+     <h3 style="margin-top:6px">Silhouette</h3>
+     <div class="kv">Upload a transparent PNG; it is masked into the operator block.</div>
+     <input type="file" id="silIn" accept="image/*" style="margin:6px 0">
+     <div style="flex:1;min-height:120px;background:#000;border:1px solid var(--acc-dim);position:relative">
        <div id="silPrev" style="position:absolute;inset:10px;background:linear-gradient(180deg,#3a0c12,#160406);
          -webkit-mask:var(--silm) center/contain no-repeat;mask:var(--silm) center/contain no-repeat"></div>
-     </div></div></div>`,
+     </div></div>
+   <div class="zp"><h3>Theme Studio <span class="kx" id="themeMsg"></span></h3>
+     <div class="scroll" id="themeBox"></div></div></div>`,
  planet:()=>`<div class="zgrid" style="grid-template-columns:1.3fr 1fr">
    <div class="zp"><h3>Recompile Sphere</h3><canvas class="cv" id="z-planet"></canvas></div>
    <div class="zp"><h3>Sectors</h3><div class="grid4" id="zk-pt" style="flex:none;margin-bottom:8px"></div>
@@ -1414,7 +1418,8 @@ const POST={
      SET=await post('/api/settings',p);applySettings();$('#setMsg').textContent='saved.';};
    $('#silIn').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
      r.onload=async()=>{await post('/api/silhouette',{data:r.result});applySil();$('#setMsg').textContent='silhouette saved.';};
-     r.readAsDataURL(f);};},
+     r.readAsDataURL(f);};
+   try{renderTheme();}catch(e){}},
  planet:()=>{paintSectors();
    const cv=$('#z-planet');if(cv)cv.onclick=e=>planetPick(cv,e);},
  _planetOld:()=>{const s=PLANET.sectors||[];
@@ -1518,7 +1523,7 @@ const POST={
         `<div class="row"><span style="color:var(--amb)">${esc(c.hash)}</span>
          <span style="color:var(--mut)">${esc(c.repo)}</span> ${esc(c.subject)}</div>`).join(''):''}`;
      document.querySelectorAll('.sess').forEach(e=>e.style.background=
-       e.dataset.i==i?'rgba(255,47,61,.14)':'');};
+       e.dataset.i==i?'rgba(var(--acc-rgb),.14)':'');};
    document.querySelectorAll('.sess').forEach(e=>e.onclick=()=>show(+e.dataset.i));
    if(S.length)show(0);},
  progress:async()=>{const T=await api('/api/timeline');CHART=T;
@@ -1768,8 +1773,115 @@ function health(){const p=ST.proc||{},g=ST.git||{},s=ST.sys||{};return[
  {name:'HOST TELEMETRY',ok:s.cpu!=null,note:s.cpu!=null?'sampling':'no data'},
  {name:'CLAUDE BRIDGE',ok:true,note:CL.running?'busy':'ready'}];}
 
+/* ============================ THEME ENGINE ============================
+   Every colour and font is a live, persisted CSS variable. SET.theme holds
+   overrides; empty falls back to the :root defaults. Also supports a word-by-
+   word colour PATTERN and CAPS for new finds/fixes. */
+const THEME_VARS=[
+  ['acc','Accent / alert','#ff2f3d'],['acc-dim','Accent dim','#8e1520'],
+  ['grn','Green / OK','#00ff9c'],['grn-dim','Green dim','#0b6b45'],
+  ['amb','Amber / active','#ff8a00'],['yel','Yellow / warn','#ffe000'],
+  ['cyan','Cyan / info','#00e5ff'],['ink','Body text','#ff6a72'],
+  ['mut','Muted text','#6d2229'],['void','Background','#050203'],
+  ['pnl','Panel','#0a0305']];
+const FONT_DISP=[
+  ["'Arial Narrow','Roboto Condensed',Impact,sans-serif","Condensed (default)"],
+  ["Impact,Haettenschweiler,sans-serif","Impact heavy"],
+  ["'Bahnschrift','DIN',sans-serif","Bahnschrift / DIN"],
+  ["'Orbitron','Arial Narrow',sans-serif","Orbitron techno"],
+  ["'Consolas',monospace","Mono display"],
+  ["'Georgia',serif","Serif"],
+  ["'Segoe UI','Helvetica',sans-serif","Clean sans"]];
+const FONT_MONO=[
+  ["'Consolas','DejaVu Sans Mono','Courier New',monospace","Consolas (default)"],
+  ["'Courier New',monospace","Courier"],
+  ["'Cascadia Code','Fira Code',monospace","Cascadia / Fira"],
+  ["'Lucida Console',monospace","Lucida Console"],
+  ["'OCR A Extended','Consolas',monospace","OCR-A terminal"]];
+const PRESETS={
+  'EVA (default)':{acc:'#ff2f3d','acc-dim':'#8e1520',grn:'#00ff9c','grn-dim':'#0b6b45',amb:'#ff8a00',yel:'#ffe000',cyan:'#00e5ff',ink:'#ff6a72',mut:'#6d2229',void:'#050203',pnl:'#0a0305'},
+  'Amber terminal':{acc:'#ff9000','acc-dim':'#7a4300',grn:'#ffb64a','grn-dim':'#6b4a0b',amb:'#ffd070',yel:'#fff0a0',cyan:'#ffcf8a',ink:'#ffb050',mut:'#6d4a22',void:'#0a0600',pnl:'#120a02'},
+  'Ice / MAGI blue':{acc:'#39c0ff','acc-dim':'#155a7a',grn:'#7dffea','grn-dim':'#0b5a55',amb:'#8ad7ff',yel:'#d0f4ff',cyan:'#aef0ff',ink:'#8ecbe6',mut:'#2c5566',void:'#020508',pnl:'#04080d'},
+  'Phosphor green':{acc:'#00ff66','acc-dim':'#0a7a2f',grn:'#7dffa0','grn-dim':'#0b6b3a',amb:'#b6ff00',yel:'#e0ff70',cyan:'#00ffc8',ink:'#79ff9a',mut:'#1f5a33',void:'#000600',pnl:'#021003'},
+  'Blood red mono':{acc:'#ff0033','acc-dim':'#7a0018',grn:'#ff5a6e','grn-dim':'#6b0b1a',amb:'#ff8a90',yel:'#ffd0d5',cyan:'#ff9aa5',ink:'#ff5a6e',mut:'#5a1f26',void:'#080000',pnl:'#100202'}};
+
+function hexRGB(hex){const m=/^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex||'');
+  return m?parseInt(m[1],16)+','+parseInt(m[2],16)+','+parseInt(m[3],16):null;}
+function applyTheme(){
+  const t=(SET.theme)||{}, R=document.documentElement.style;
+  THEME_VARS.forEach(([v])=>{ if(t[v]) R.setProperty('--'+v, t[v]); else R.removeProperty('--'+v); });
+  // keep the RGB-triplet vars (used by every glow/border alpha) in sync so the
+  // whole UI - not just solid fills - follows the chosen colours
+  const trip={'acc':'--acc-rgb','grn':'--grn-rgb','amb':'--amb-rgb'};
+  Object.entries(trip).forEach(([k,rv])=>{const rgb=hexRGB(t[k]);
+    if(rgb)R.setProperty(rv,rgb);else R.removeProperty(rv);});
+  R.setProperty('--disp', t.disp || "'Arial Narrow','Roboto Condensed','Haettenschweiler','Impact',sans-serif");
+  R.setProperty('--mono', t.mono || "'Consolas','DejaVu Sans Mono','Courier New',monospace");
+  if(t.acc){SET.accent=t.acc;}                    // keep legacy --acc in sync
+  applyPattern();
+}
+function patternizeEl(el,cols){
+  if(!el.dataset.raw) el.dataset.raw=el.textContent;
+  const words=el.dataset.raw.trim().split(/\s+/);
+  el.innerHTML=words.map((w,i)=>`<span style="color:${cols[i%cols.length]}">${esc(w)}</span>`).join(' ');
+}
+function applyPattern(){
+  const t=(SET.theme)||{}, on=t.pattern_on && (t.pattern||[]).length>=2;
+  document.querySelectorAll('.wel, #welTxt, .bt').forEach(el=>{
+    if(on) patternizeEl(el, t.pattern);
+    else if(el.dataset.raw){ el.textContent=el.dataset.raw; delete el.dataset.raw; }
+  });
+}
+function themeNewCaps(){return !!((SET.theme||{}).newcaps);}
+function themeSet(k,v){
+  SET.theme=Object.assign({}, SET.theme||{}, {[k]:v});
+  applyTheme();
+  post('/api/settings',{theme:{[k]:v}}).then(s=>{SET=s;}).catch(()=>{});
+  const m=$('#themeMsg');if(m)m.textContent='saved';
+}
+function renderTheme(){
+  const box=$('#themeBox');if(!box)return;
+  const t=SET.theme||{};
+  const cur=v=>t[v]||(THEME_VARS.find(x=>x[0]===v)||[])[2]||'#000000';
+  const q=s=>String(s).replace(/"/g,'&quot;');
+  let h='';
+  h+=`<label class="f"><span>PRESET</span><select id="thPreset"><option value="">— pick a preset —</option>`+
+     Object.keys(PRESETS).map(p=>`<option>${p}</option>`).join('')+`</select></label>`;
+  h+=`<label class="f"><span>DISPLAY FONT</span><select id="thDisp">`+
+     FONT_DISP.map(f=>`<option value="${q(f[0])}"${t.disp===f[0]?' selected':''}>${f[1]}</option>`).join('')+`</select></label>`;
+  h+=`<label class="f"><span>MONO FONT</span><select id="thMono">`+
+     FONT_MONO.map(f=>`<option value="${q(f[0])}"${t.mono===f[0]?' selected':''}>${f[1]}</option>`).join('')+`</select></label>`;
+  h+=`<div class="kv" style="margin:8px 0 3px;color:var(--mut)">COLOURS — every token is live &amp; saved on change</div>`;
+  h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px">`+
+     THEME_VARS.map(([v,l])=>`<label class="f" style="margin:0;gap:5px"><span style="min-width:auto;font-size:9px">${l}</span>
+       <input type="color" data-col="${v}" value="${cur(v)}" style="width:32px;height:22px;padding:0;flex:none"></label>`).join('')+`</div>`;
+  h+=`<div class="kv" style="margin:8px 0 3px;color:var(--mut)">TEXT COLOUR PATTERN — titles cycle these colours word-by-word</div>`;
+  h+=`<label class="f"><span>ENABLE PATTERN</span><input type="checkbox" id="thPatOn"${t.pattern_on?' checked':''} style="flex:none"></label>`;
+  const pat=(t.pattern&&t.pattern.length)?t.pattern:['#00ff9c','#ff8a00','#00e5ff','#ffe000'];
+  h+=`<div id="thPatRow" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">`+
+     pat.map((c,i)=>`<input type="color" data-pat="${i}" value="${c}" style="width:32px;height:22px;padding:0">`).join('')+
+     `<button class="act sm" id="thPatAdd">+ colour</button><button class="act sm" id="thPatDel">−</button></div>`;
+  h+=`<label class="f" style="margin-top:8px"><span>CAPS FOR NEW FINDS/FIXES</span><input type="checkbox" id="thCaps"${t.newcaps?' checked':''} style="flex:none"></label>`;
+  h+=`<div style="margin-top:8px"><button class="act" id="thReset">RESET TO DEFAULT</button></div>`;
+  box.innerHTML=h;
+  $('#thPreset').onchange=e=>{const p=PRESETS[e.target.value];if(!p)return;
+    SET.theme=Object.assign({},SET.theme||{},p);applyTheme();
+    post('/api/settings',{theme:p}).then(s=>{SET=s;renderTheme();});};
+  $('#thDisp').onchange=e=>themeSet('disp',e.target.value);
+  $('#thMono').onchange=e=>themeSet('mono',e.target.value);
+  box.querySelectorAll('[data-col]').forEach(i=>i.oninput=e=>themeSet(e.target.dataset.col,e.target.value));
+  $('#thPatOn').onchange=e=>themeSet('pattern_on',e.target.checked);
+  const patCols=()=>[...box.querySelectorAll('[data-pat]')].map(x=>x.value);
+  box.querySelectorAll('[data-pat]').forEach(i=>i.oninput=()=>themeSet('pattern',patCols()));
+  $('#thPatAdd').onclick=()=>{const c=patCols();if(c.length<8){c.push('#ffffff');SET.theme=Object.assign({},SET.theme||{},{pattern:c});renderTheme();}};
+  $('#thPatDel').onclick=()=>{const c=patCols();if(c.length>2){c.pop();themeSet('pattern',c);renderTheme();}};
+  $('#thCaps').onchange=e=>themeSet('newcaps',e.target.checked);
+  $('#thReset').onclick=()=>{SET.theme={};applyTheme();post('/api/settings',{theme:{}}).then(s=>{SET=s;renderTheme();});};
+}
+
 function applySettings(){try{applyLabels();}catch(e){}
-  document.documentElement.style.setProperty('--acc',SET.accent||'#ff2f3d');
+  try{applyTheme();}catch(e){}
+  document.documentElement.style.setProperty('--acc',((SET.theme||{}).acc)||SET.accent||'#ff2f3d');
   document.body.classList.toggle('noscan',SET.scanlines===false);
   $('#t-name').textContent=SET.terminal||'TERMINAL-01';
   $('#t-path').textContent=SET.project_path||'';

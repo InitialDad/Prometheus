@@ -501,6 +501,9 @@ _DEFAULT_SETTINGS = {
     #   plan / default    : read-only / refuses writes in headless
     "claude_perm": "bypassPermissions",
     "claude_model": "",       # blank = whatever `claude` defaults to
+    # --- theme: every colour + font is user-controllable, persisted here.
+    # Empty by default -> the CSS :root values apply; any key set overrides it.
+    "theme": {},              # {var:'#hex' | font | 'pattern':[...] | 'newcaps':bool}
 }
 
 
@@ -521,10 +524,13 @@ def save_settings(patch):
     for k, v in (patch or {}).items():
         if k not in _DEFAULT_SETTINGS:
             continue
-        if k == "labels" and isinstance(v, dict):
-            merged = dict(s.get("labels") or {})
-            merged.update(v)          # merge so one edit cannot drop the rest
-            s[k] = merged
+        if k in ("labels", "theme") and isinstance(v, dict):
+            if v == {}:               # explicit reset -> clear the whole dict
+                s[k] = {}
+            else:
+                merged = dict(s.get(k) or {})
+                merged.update(v)      # merge so one edit cannot drop the rest
+                s[k] = merged
         else:
             s[k] = v
     with open(SETTINGS_F, "w", encoding="utf-8") as f:
