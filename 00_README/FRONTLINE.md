@@ -5,28 +5,30 @@
 
 ---
 
-## CURRENT HYPOTHESIS  (one sentence)
+## CURRENT HYPOTHESIS  (one sentence)   [narrowed 2026-07-25]
 
-The title screen is black because the game's textured sprites either sample an
-all-zero texture (broken PSMT4HH/CLUT sampler) or are fed a zero vertex colour —
-the rasterizer runs but its INPUT is wrong; only 2,559 solid-black pixels are
-written in the whole boot.
+The title art is 8-bit CLUT-palettized (PSMT8, tpsm=0x13) and our texture
+sampler returns opaque BLACK for every texel — so the rasterizer draws the
+title correctly but with an all-black palette; the bug is in the PSMT8 index
+read or the CLUT lookup, nothing downstream.
 
-## NEXT EXPERIMENT  (the one build/test to run)
+PROVEN: [p4:texel] shows texel=0x80000000 (opaque black) for all samples from
+tbp=0x1A40; 479/514 sprites are textured; coords/scissor/test/present all
+correct. The INPUT is black, not the pipeline.
 
-Boot the port with the new per-sprite probes and grep the log:
+## NEXT EXPERIMENT  (the one build/test to run)   [CLUT probe building now]
 
-    grep "p4:spx"   boot_trap_*.log.err   # tme + vertex colour per sprite
-    grep "p4:texel" boot_trap_*.log.err   # first 16 sampled texels + result
+    grep "p4:clut" boot_trap_*.log.err   # raw 8-bit index + cbp/csa + result
 
 DECISION TABLE:
-  - texels are all 0x00000000        -> the SAMPLER is the bug (PSMT4HH/CLUT).
-                                         Fix sampleTexture; the screen likely
-                                         fixes itself.
-  - texels are nonzero, result black -> combineTexture is the bug.
-  - tme=0 everywhere + vtxRGBA=0      -> the game feeds black; trace BACKWARD
-                                         (why does it think it's not ready?) with
-                                         the differential harness, not forward.
+  - rawIndex is always 0x00        -> the TEXTURE READ is wrong. The PSMT8 index
+                                      isn't at tbp0 (upload dest vs tbp0 mismatch)
+                                      or ReadVram's PSMT8 swizzle is wrong.
+  - rawIndex varies, result black  -> the CLUT LOOKUP is wrong. cbp/csa point
+                                      away from the uploaded 256-entry CLUT
+                                      (seen at [p4:gs-trx] dst=0xED100, 16x16=256),
+                                      or the CLUT read address/swizzle is wrong.
+  Either way it is a small, specific fix in sampleTexture/lookupCLUT/ReadVram.
 
 ## AFTER THAT  (the decisive rendering tool)
 
