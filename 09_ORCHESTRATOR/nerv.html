@@ -1082,74 +1082,94 @@ const rgba=(hex,a)=>'rgba('+(RGB[hex]||'255,47,61')+','+a+')';
 function planet(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
   const d=c.getContext('2d'),W=c.width,H=c.height,cx=W/2,cy=H*0.46,R=Math.min(W,H*1.3)*0.38;
   d.clearRect(0,0,W,H);
-  const sec=PLANET.sectors||[];
-  const spin=tt*0.22, tilt=0.34, restored=(PLANET.pct||0)/100;
+  const spin=tt*0.16, tilt=0.34, restored=(PLANET.pct||0)/100;
   const ca=Math.cos(spin),sa=Math.sin(spin),ct=Math.cos(tilt),stt=Math.sin(tilt);
-  const proj=(x,y,z)=>{                       // unit-sphere pt -> screen + depth
-    const rx=x*ca+z*sa, rz=-x*sa+z*ca;
+  const proj=(x,y,z)=>{const rx=x*ca+z*sa, rz=-x*sa+z*ca;
     const ry2=y*ct-rz*stt, rz2=y*stt+rz*ct, f=1/(1-rz2*0.30);
-    return {sx:cx+rx*R*f, sy:cy-ry2*R*f, dep:rz2};   // dep>0 = toward camera
-  };
-  const gcol=SECCOL.restored;
-  // latitude rings
-  for(let li=1;li<9;li++){const lat=-Math.PI/2+li/9*Math.PI, ry=Math.sin(lat), rr=Math.cos(lat);
-    let pv=null;
-    for(let a=0;a<=44;a++){const an=a/44*Math.PI*2,p=proj(Math.cos(an)*rr,ry,Math.sin(an)*rr);
-      if(pv){const dp=(pv.dep+p.dep)/2;d.strokeStyle=rgba(gcol,(0.04+Math.max(0,dp)*(0.14+restored*0.2)).toFixed(3));
+    return {sx:cx+rx*R*f, sy:cy-ry2*R*f, dep:rz2};};
+  const gcol=SECCOL.restored, GRN='0,255,156';
+
+  // hexagonal patterning, clipped to the globe disc (the "green hex" look)
+  d.save();d.beginPath();d.arc(cx,cy,R,0,7);d.clip();
+  const hs=Math.max(9,R*0.085), hh=hs*Math.sqrt(3)/2;
+  for(let row=0,y=cy-R; y<cy+R+hs; row++,y+=hh){
+    for(let x=cx-R+((row%2)?hs*1.5:0); x<cx+R+hs; x+=hs*3){
+      const dd=Math.hypot(x-cx,y-cy)/R, pl=(Math.sin(tt*1.2+x*0.02+y*0.02)+1)/2;
+      d.strokeStyle='rgba('+GRN+','+(0.035+(1-dd)*0.07+pl*0.04).toFixed(3)+')';d.lineWidth=1;
+      d.beginPath();for(let i=0;i<6;i++){const a=Math.PI/3*i,px=x+Math.cos(a)*hs*0.55,py=y+Math.sin(a)*hs*0.55;
+        i?d.lineTo(px,py):d.moveTo(px,py);}d.closePath();d.stroke();}}
+  d.restore();
+
+  // faint wireframe sphere behind the network
+  for(let li=1;li<7;li++){const lat=-Math.PI/2+li/7*Math.PI, ry=Math.sin(lat), rr=Math.cos(lat);
+    let pv=null;for(let a=0;a<=40;a++){const an=a/40*Math.PI*2,p=proj(Math.cos(an)*rr,ry,Math.sin(an)*rr);
+      if(pv){const dp=(pv.dep+p.dep)/2;d.strokeStyle='rgba('+GRN+','+(0.03+Math.max(0,dp)*0.09).toFixed(3)+')';
         d.lineWidth=1;d.beginPath();d.moveTo(pv.sx,pv.sy);d.lineTo(p.sx,p.sy);d.stroke();}pv=p;}}
-  // longitude meridians
-  for(let mi=0;mi<12;mi++){const lon=mi/12*Math.PI*2;let pv=null;
-    for(let a=0;a<=30;a++){const lat=-Math.PI/2+a/30*Math.PI,rr=Math.cos(lat);
-      const p=proj(Math.cos(lon)*rr,Math.sin(lat),Math.sin(lon)*rr);
-      if(pv){const dp=(pv.dep+p.dep)/2;d.strokeStyle=rgba(gcol,(0.03+Math.max(0,dp)*(0.11+restored*0.16)).toFixed(3));
-        d.lineWidth=1;d.beginPath();d.moveTo(pv.sx,pv.sy);d.lineTo(p.sx,p.sy);d.stroke();}pv=p;}}
-  // rim + core glow scale with progress
-  d.strokeStyle=rgba(gcol,(0.25+restored*0.45).toFixed(3));d.lineWidth=1.5;
+  d.strokeStyle='rgba('+GRN+','+(0.22+restored*0.4).toFixed(3)+')';d.lineWidth=1.4;
   d.beginPath();d.arc(cx,cy,R,0,7);d.stroke();
-  if(restored>0){d.beginPath();d.arc(cx,cy,R*0.5,0,7);
-    d.fillStyle=rgba(gcol,(restored*0.06).toFixed(3));d.fill();}
 
-  // data nodes = roadmap sectors, Fibonacci-distributed on the surface
+  // ---- the REAL network: recompiled functions as nodes, real jal calls as strings ----
+  const G=CALLGRAPH||{nodes:[],edges:[]};
+  const useGraph=(G.nodes&&G.nodes.length>=4);
   PLANET_HIT=[];
-  const N=Math.max(1,sec.length), GA=Math.PI*(3-Math.sqrt(5));
-  const nodes=sec.map((S,i)=>{const y=1-(i/Math.max(1,N-1))*2, rr=Math.sqrt(Math.max(0,1-y*y)), th=i*GA;
-    return {S, p:proj(Math.cos(th)*rr, y, Math.sin(th)*rr)};});
-  nodes.sort((a,b)=>a.p.dep-b.p.dep);          // back to front
-  nodes.forEach(({S,p})=>{
-    const col=SECCOL[S.state]||SECCOL.raw, sel=(PLANET_SEL===S.slug);
-    const dep=Math.max(0.12,(p.dep+1)/2), front=p.dep>-0.1;
-    const rad=(S.state==='raw'?2:3)+dep*2.6+(sel?3:0);
-    if(S.state==='restored'||S.state==='active'){
-      const pl=(Math.sin(tt*2.5+S.slug.length)+1)/2;
+  const items = useGraph ? G.nodes.map(u=>({key:u.addr,name:u.name,kind:u.kind,bytes:u.bytes||1,st:'restored'}))
+                         : (PLANET.sectors||[]).map(x=>({key:x.slug,name:x.slug,kind:'sector',bytes:1,st:x.state}));
+  const cnt=Math.max(1,items.length), GA=Math.PI*(3-Math.sqrt(5)), mxB=Math.max(1,...items.map(i=>i.bytes));
+  const POS={};
+  items.forEach((it,i)=>{const y=1-(i/Math.max(1,cnt-1))*2, rr=Math.sqrt(Math.max(0,1-y*y)), th=i*GA;
+    POS[it.key]={p:proj(Math.cos(th)*rr,y,Math.sin(th)*rr), it};});
+
+  // strings (real call edges) as arcs bulging outward over the sphere
+  const edges=useGraph?(G.edges||[]):[];
+  edges.forEach(e=>{const a=POS[e[0]],b=POS[e[1]];if(!a||!b)return;
+    if(a.p.dep<-0.35&&b.p.dep<-0.35)return;                 // both far side
+    const mx=(a.p.sx+b.p.sx)/2,my=(a.p.sy+b.p.sy)/2, dx=mx-cx,dy=my-cy;
+    const dl=Math.hypot(dx,dy)||1, cr=Math.min(R*0.9, dl*1.05), ctrlx=cx+dx/dl*cr, ctrly=cy+dy/dl*cr;
+    const dep=(a.p.dep+b.p.dep)/2;
+    d.strokeStyle='rgba('+GRN+','+(0.14+Math.max(0,dep)*0.42).toFixed(3)+')';d.lineWidth=1.3;
+    d.shadowColor=gcol;d.shadowBlur=Math.max(0,dep)*5;
+    d.beginPath();d.moveTo(a.p.sx,a.p.sy);d.quadraticCurveTo(ctrlx,ctrly,b.p.sx,b.p.sy);d.stroke();d.shadowBlur=0;});
+
+  // pulses travelling along real edges (call flow)
+  if(edges.length){for(let k=0;k<Math.min(edges.length,8);k++){
+    const e=edges[(k*5+Math.floor(tt*0.4))%edges.length],a=POS[e[0]],b=POS[e[1]];if(!a||!b)continue;
+    if(a.p.dep<-0.2||b.p.dep<-0.2)continue;
+    const ph=(tt*0.5+k*0.2)%1, mx=(a.p.sx+b.p.sx)/2,my=(a.p.sy+b.p.sy)/2,dx=mx-cx,dy=my-cy,dl=Math.hypot(dx,dy)||1;
+    const cr=Math.min(R*0.9,dl*1.05),ctrlx=cx+dx/dl*cr,ctrly=cy+dy/dl*cr,uu=1-ph;
+    const x=uu*uu*a.p.sx+2*uu*ph*ctrlx+ph*ph*b.p.sx, y=uu*uu*a.p.sy+2*uu*ph*ctrly+ph*ph*b.p.sy;
+    d.beginPath();d.arc(x,y,2.2,0,7);d.fillStyle='#aeffd0';d.shadowColor=gcol;d.shadowBlur=8;d.fill();d.shadowBlur=0;}}
+
+  // nodes: a lit dot for every real piece, depth-sorted, front clickable
+  const drawn=Object.values(POS).sort((a,b)=>a.p.dep-b.p.dep);
+  drawn.forEach(({p,it})=>{
+    const col=it.st==='active'?'#ff8a00':it.st==='raw'?'#ff2f3d':(it.kind==='hle'?'#ff8a00':gcol);
+    const sel=(PLANET_SEL===it.key), dep=Math.max(0.12,(p.dep+1)/2), front=p.dep>-0.1;
+    const rad=Math.max(1.6,(2.6+(it.bytes/mxB)*4.4)*dep)+(sel?3:0);
+    if(it.st==='raw'){d.beginPath();d.arc(p.sx,p.sy,rad,0,7);
+      d.strokeStyle='rgba(255,47,61,'+(0.2+dep*0.4).toFixed(3)+')';d.lineWidth=1;d.stroke();}
+    else{const pl=it.st==='active'?(Math.sin(tt*3)+1)/2:0;
       d.beginPath();d.arc(p.sx,p.sy,rad,0,7);
-      d.fillStyle=rgba(col,(0.4+dep*0.5).toFixed(3));
-      d.shadowColor=col;d.shadowBlur=(front?9:2)+(S.state==='active'?pl*8:0);d.fill();d.shadowBlur=0;
-    }else{d.beginPath();d.arc(p.sx,p.sy,rad,0,7);
-      d.strokeStyle=rgba(col,(0.22+dep*0.4).toFixed(3));d.lineWidth=1;d.stroke();}
+      d.fillStyle=(col===gcol)?('rgba('+GRN+','+(0.6+dep*0.4).toFixed(3)+')'):col;
+      d.shadowColor=col;d.shadowBlur=(front?14:3)+pl*8;d.fill();
+      if(front){d.beginPath();d.arc(p.sx,p.sy,rad*0.45,0,7);d.fillStyle='#eafff4';d.fill();}d.shadowBlur=0;}
     if(sel){d.strokeStyle='#fff';d.lineWidth=1.5;d.beginPath();d.arc(p.sx,p.sy,rad+3,0,7);d.stroke();}
-    if(front)PLANET_HIT.push({slug:S.slug,x:p.sx,y:p.sy,r:rad+4});
-  });
+    if(front)PLANET_HIT.push({slug:it.key,x:p.sx,y:p.sy,r:rad+4});});
 
-  // callouts: selected + active, only when on the front face
-  const fs=Math.max(9,Math.min(13,R*.05));
-  d.font="700 "+fs+"px 'Arial Narrow',Impact,sans-serif";
-  const show=[];
-  if(PLANET_SEL){const n=nodes.find(x=>x.S.slug===PLANET_SEL);if(n&&n.p.dep>-0.2)show.push(n);}
-  nodes.filter(x=>x.S.state==='active'&&x.S.slug!==PLANET_SEL&&x.p.dep>0.1).slice(0,2).forEach(x=>show.push(x));
-  show.slice(0,3).forEach(({S,p})=>{
-    const txt=S.slug.slice(0,20).toUpperCase(), tw=d.measureText(txt).width;
-    const col=(S.slug===PLANET_SEL)?'#fff':(SECCOL[S.state]||'#ff8a00');
-    const rightSide=p.sx>cx, lx=rightSide?Math.min(p.sx+14,W-tw-4):Math.max(p.sx-14-tw,4);
-    d.strokeStyle=col;d.lineWidth=1;d.beginPath();d.moveTo(p.sx,p.sy);
-    d.lineTo(rightSide?lx-3:lx+tw+3,p.sy);d.stroke();
-    d.fillStyle=col;d.textAlign='left';d.textBaseline='alphabetic';d.fillText(txt,lx,p.sy+fs*.34);});
+  // callout for the selected node
+  if(PLANET_SEL&&POS[PLANET_SEL]&&POS[PLANET_SEL].p.dep>-0.2){const {p,it}=POS[PLANET_SEL];
+    const fs=Math.max(9,Math.min(13,R*.05));d.font="700 "+fs+"px 'Arial Narrow',Impact,sans-serif";
+    const txt=String(it.name).slice(0,22).toUpperCase(),tw=d.measureText(txt).width,rightSide=p.sx>cx;
+    const lx=rightSide?Math.min(p.sx+14,W-tw-4):Math.max(p.sx-14-tw,4);
+    d.strokeStyle='#fff';d.lineWidth=1;d.beginPath();d.moveTo(p.sx,p.sy);d.lineTo(rightSide?lx-3:lx+tw+3,p.sy);d.stroke();
+    d.fillStyle='#fff';d.textAlign='left';d.textBaseline='alphabetic';d.fillText(txt,lx,p.sy+fs*.34);}
 
-  // progress readout
+  // readouts
   d.fillStyle=gcol;d.font="700 "+Math.max(13,R*.15)+"px 'Arial Narrow',Impact,sans-serif";
-  d.textAlign='center';d.textBaseline='alphabetic';
-  d.fillText((PLANET.pct||0).toFixed(0)+'%',cx,cy+R*1.28);
-  d.fillStyle=rgba('#ff2f3d',0.75);d.font="700 "+Math.max(8,R*.062)+"px 'Arial Narrow',Impact,sans-serif";
-  d.fillText(PLANET.restored+' / '+PLANET.total+' SECTORS RESTORED',cx,cy+R*1.28+Math.max(11,R*.10));
+  d.textAlign='center';d.textBaseline='alphabetic';d.fillText((PLANET.pct||0).toFixed(0)+'%',cx,cy+R*1.28);
+  d.fillStyle='rgba(255,106,114,.75)';d.font="700 "+Math.max(8,R*.06)+"px 'Arial Narrow',Impact,sans-serif";
+  const sub=useGraph?(items.length+' NODES · '+(G.n_edges||edges.length)+' REAL CALLS')
+                    :(PLANET.restored+' / '+PLANET.total+' SECTORS');
+  d.fillText(sub,cx,cy+R*1.28+Math.max(11,R*.10));
 }
 
 /* click the globe to select the sector under the pointer */
@@ -1971,7 +1991,7 @@ async function refresh(){
     RECOMP.units&&RECOMP.units.length?Promise.resolve(RECOMP):api('/api/recomp?limit=26'),
     api('/api/runtime'), api('/api/events?limit=18')]);
   ST=ov;ST.sys=sys;PLANET=pl;TOOLS=tl;FLOW=fl;RECOMP=rc;ST.runtime=rt;EVENTS=events.events||[];
-  if(!CALLGRAPH){api('/api/callgraph?limit=26').then(g=>CALLGRAPH=g).catch(()=>{});}
+  if(!CALLGRAPH){api('/api/callgraph?limit=60').then(g=>CALLGRAPH=g).catch(()=>{});}
   const wasRun=CL.running;CL=cl;
   pumpActivity();                    // light up the MAGI tools doing real work
   if(rt&&rt.alive)markActive('PS2RECOMP'),markActive('PCSX2');   // port is live
