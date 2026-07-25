@@ -717,10 +717,10 @@ function hexfield(){const c=$('#hexfield');if(c.width){const d=c.getContext('2d'
   d.clearRect(0,0,W,H);const s=34,hh=s*Math.sqrt(3)/2;
   for(let row=0,y=0;y<H+s;row++,y+=hh)for(let x=(row%2?s*1.5:0);x<W+s;x+=s*3){
     const p=(Math.sin(tt*1.5+x*.01+y*.02)+1)/2;
-    d.strokeStyle='rgba(var(--acc-rgb),'+(.10+p*.30)+')';d.lineWidth=1.2;d.beginPath();
+    d.strokeStyle='rgba(255,47,61,'+(.10+p*.30)+')';d.lineWidth=1.2;d.beginPath();
     for(let i=0;i<6;i++){const a=Math.PI/3*i,px=x+Math.cos(a)*s*.6,py=y+Math.sin(a)*s*.6;i?d.lineTo(px,py):d.moveTo(px,py)}
     d.closePath();d.stroke();
-    if(p>.86){d.fillStyle='rgba(var(--acc-rgb),.5)';d.font='700 9px '+'Consolas,monospace';
+    if(p>.86){d.fillStyle='rgba(255,47,61,.5)';d.font='700 9px '+'Consolas,monospace';
       d.textAlign='center';d.fillText('EMERGENCY',x,y+3)}}}
   requestAnimationFrame(hexfield);}
 hexfield();
@@ -921,7 +921,7 @@ function unit(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
       const a=proj(EDG[i][0]),b=proj(EDG[i][1]);
       d.moveTo(a[0],a[1]);d.lineTo(b[0],b[1]);}
     d.stroke();d.globalAlpha=1;
-    d.strokeStyle='rgba(var(--acc-rgb),.35)';d.lineWidth=1;
+    d.strokeStyle='rgba(255,47,61,.35)';d.lineWidth=1;
     [[6,6],[W-6,6],[6,H-6],[W-6,H-6]].forEach(([x,y],i)=>{const sx=i%2?-1:1,sy=i<2?1:-1;
       d.beginPath();d.moveTo(x,y);d.lineTo(x+sx*18,y);d.moveTo(x,y);d.lineTo(x,y+sy*18);d.stroke();});
     return;
@@ -942,7 +942,7 @@ function unit(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
   d.globalAlpha=0.55+pl*0.45;d.fill();
   d.globalAlpha=1;d.shadowBlur=0;
   // frame ticks
-  d.strokeStyle='rgba(var(--acc-rgb),.35)';d.lineWidth=1;
+  d.strokeStyle='rgba(255,47,61,.35)';d.lineWidth=1;
   [[6,6],[W-6,6],[6,H-6],[W-6,H-6]].forEach(([x,y],i)=>{const sx=i%2?-1:1,sy=i<2?1:-1;
     d.beginPath();d.moveTo(x,y);d.lineTo(x+sx*18,y);d.moveTo(x,y);d.lineTo(x,y+sy*18);d.stroke();});}
 
@@ -994,10 +994,10 @@ function magi(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
   pos.forEach(p=>{
     if(p.act){
       const grad=d.createLinearGradient(p.x,p.y,cx,cy);
-      grad.addColorStop(0,'rgba(var(--grn-rgb),.25)');
-      grad.addColorStop(1,'rgba(var(--grn-rgb),.85)');
+      grad.addColorStop(0,'rgba(0,255,156,.25)');
+      grad.addColorStop(1,'rgba(0,255,156,.85)');
       d.strokeStyle=grad;d.lineWidth=2.2;
-    }else{d.strokeStyle='rgba(var(--acc-rgb),.22)';d.lineWidth=1.2;}
+    }else{d.strokeStyle='rgba(255,47,61,.22)';d.lineWidth=1.2;}
     d.beginPath();d.moveTo(cx,cy);d.lineTo(p.x,p.y);d.stroke();
   });
 
@@ -1102,7 +1102,7 @@ function planet(cid){const c=document.getElementById(cid);if(!c||!c.width)return
       d.globalAlpha=1;
       if(r===5)PLANET_HIT.push({slug:S.slug,x:x,y:y,r:Math.max(w,h)});
     }}
-  d.strokeStyle='rgba(var(--acc-rgb),.55)';d.lineWidth=1.6;
+  d.strokeStyle='rgba(255,47,61,.55)';d.lineWidth=1.6;
   d.beginPath();d.arc(cx,cy,R,0,7);d.stroke();
 
   // callouts: the selection first, then whatever is in flight
@@ -1149,7 +1149,7 @@ let pk=[];                 // in-flight packets on the code map
    generated disassembly (/api/callgraph). Pulses travel along real edges. */
 function codemap(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
   const d=c.getContext('2d'),W=c.width,H=c.height;d.clearRect(0,0,W,H);
-  d.strokeStyle='rgba(var(--acc-rgb),.10)';d.lineWidth=1;
+  d.strokeStyle='rgba(255,47,61,.10)';d.lineWidth=1;
   for(let x=0;x<W;x+=W/18){d.beginPath();d.moveTo(x,0);d.lineTo(x,H);d.stroke()}
   for(let y=0;y<H;y+=H/9){d.beginPath();d.moveTo(0,y);d.lineTo(W,y);d.stroke()}
   const G=CALLGRAPH||{nodes:[],edges:[]};
@@ -1169,7 +1169,7 @@ function codemap(cid){const c=document.getElementById(cid);if(!c||!c.width)retur
   const live=(ST.runtime&&ST.runtime.func)||null;
   (G.edges||[]).forEach(e=>{const a=P[e[0]],b=P[e[1]];if(!a||!b)return;
     const mx=(a.x+b.x)/2,my=(a.y+b.y)/2-Math.hypot(b.x-a.x,b.y-a.y)*0.12;
-    d.strokeStyle='rgba(var(--grn-rgb),.16)';d.lineWidth=1;
+    d.strokeStyle='rgba(0,255,156,.16)';d.lineWidth=1;
     d.beginPath();d.moveTo(a.x,a.y);d.quadraticCurveTo(mx,my,b.x,b.y);d.stroke();});
 
   // pulses along real edges (call flow). One pool, phase-cycled.
@@ -1202,7 +1202,7 @@ function codemap(cid){const c=document.getElementById(cid);if(!c||!c.width)retur
     d.fillStyle='rgba(255,106,114,.7)';
     d.fillText('0x'+p.u.addr.toString(16),p.x,p.y+rad+FS);});
   // legend
-  d.fillStyle='rgba(var(--grn-rgb),.6)';d.textAlign='left';d.font="600 10px Consolas,monospace";
+  d.fillStyle='rgba(0,255,156,.6)';d.textAlign='left';d.font="600 10px Consolas,monospace";
   d.fillText((G.n_edges||0)+' real call edges', 6, H-8);}
 
 /* BURN-UP CHART — cumulative findings + commits */
@@ -1210,7 +1210,7 @@ function chart(cid){const c=document.getElementById(cid);if(!c||!c.width||!CHART
   const d=c.getContext('2d'),W=c.width,H=c.height,P={l:52,r:16,t:14,b:30};
   const pts=CHART.points;d.clearRect(0,0,W,H);if(!pts.length)return;
   const iw=W-P.l-P.r, ih=H-P.t-P.b, maxF=Math.max(1,CHART.total_findings);
-  d.strokeStyle='rgba(var(--acc-rgb),.16)';d.lineWidth=1;
+  d.strokeStyle='rgba(255,47,61,.16)';d.lineWidth=1;
   d.font="600 11px Consolas,monospace";d.fillStyle='rgba(255,106,114,.6)';d.textAlign='right';
   for(let i=0;i<=4;i++){const y=P.t+ih-(i/4)*ih;
     d.beginPath();d.moveTo(P.l,y);d.lineTo(W-P.r,y);d.stroke();
@@ -1220,7 +1220,7 @@ function chart(cid){const c=document.getElementById(cid);if(!c||!c.width||!CHART
   d.beginPath();d.moveTo(X(0),P.t+ih);
   pts.forEach((p,i)=>d.lineTo(X(i),P.t+ih-p.cum_findings/maxF*ih));
   d.lineTo(X(pts.length-1),P.t+ih);d.closePath();
-  d.fillStyle='rgba(var(--grn-rgb),.13)';d.fill();
+  d.fillStyle='rgba(0,255,156,.13)';d.fill();
   d.beginPath();pts.forEach((p,i)=>{const x=X(i),y=P.t+ih-p.cum_findings/maxF*ih;i?d.lineTo(x,y):d.moveTo(x,y)});
   d.strokeStyle='#00ff9c';d.lineWidth=2.4;d.shadowColor='#00ff9c';d.shadowBlur=9;d.stroke();d.shadowBlur=0;
   // cumulative commits, scaled to its own max
@@ -1523,7 +1523,7 @@ const POST={
         `<div class="row"><span style="color:var(--amb)">${esc(c.hash)}</span>
          <span style="color:var(--mut)">${esc(c.repo)}</span> ${esc(c.subject)}</div>`).join(''):''}`;
      document.querySelectorAll('.sess').forEach(e=>e.style.background=
-       e.dataset.i==i?'rgba(var(--acc-rgb),.14)':'');};
+       e.dataset.i==i?'rgba(255,47,61,.14)':'');};
    document.querySelectorAll('.sess').forEach(e=>e.onclick=()=>show(+e.dataset.i));
    if(S.length)show(0);},
  progress:async()=>{const T=await api('/api/timeline');CHART=T;
