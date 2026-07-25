@@ -1,0 +1,12 @@
+{
+  "SLUS-20461": {
+    "title": "BloodRayne",
+    "code": "SLUS-20461",
+    "color": "#9c1313",
+    "iso": "C:\\Emulation\\PS2_Games\\BloodRayne.iso",
+    "project_dir": "C:\\Users\\owner\\pcsx2_modder_bloodrayne",
+    "db": "C:\\Users\\owner\\pcsx2_modder_bloodrayne\\db\\mods.db",
+    "engine": "Terminal Reality",
+    "onboarded_ts": 1782165333.8525665
+  }
+}

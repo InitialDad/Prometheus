@@ -1,0 +1,1798 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PROMETHEUS HEADQUARTERS</title>
+<link rel="icon" href="/assets/icon.png" type="image/png">
+<style>
+:root{
+  --acc:#ff2f3d; --acc-dim:#8e1520; --acc-deep:#2a060a;
+  --grn:#00ff9c; --grn-dim:#0b6b45; --amb:#ff8a00; --yel:#ffe000;
+  --ink:#ff6a72; --mut:#6d2229; --void:#050203; --pnl:#0a0305;
+  --mono:'Consolas','DejaVu Sans Mono','Courier New',monospace;
+  --disp:'Arial Narrow','Roboto Condensed','Haettenschweiler','Impact',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#000}
+body{font-family:var(--mono);font-size:12px;color:var(--ink);letter-spacing:.03em}
+#scan{position:fixed;inset:0;z-index:9000;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.32) 0 1px,transparent 1px 3px)}
+#vig{position:fixed;inset:0;z-index:8999;pointer-events:none;
+  background:radial-gradient(125% 110% at 50% 45%,transparent 48%,rgba(0,0,0,.92) 100%)}
+body.noscan #scan{display:none}
+
+
+/* ---------- labels / language ----------
+   Titles are authored in English and rendered with an accurate, deliberately
+   SIMPLE Japanese counterpart. Both sides are user-editable in Settings, and
+   the language mode decides which is shown. */
+const L0={
+  term:      {en:'PROMETHEUS ONLY',      jp:'立入禁止'},
+  terminal:  {en:'TERMINAL LINK',        jp:'端末接続'},
+  syslog:    {en:'SYSTEM LOG',           jp:'記録'},
+  magi:      {en:'MAGI',                 jp:'マギ'},
+  main:      {en:'MAIN SYSTEM',          jp:'主系統'},
+  welcome:   {en:'WELCOME TO PROMETHEUS HEADQUARTERS', jp:'プロメテウス本部へようこそ'},
+  gate_lock: {en:'GATE LOCKED',          jp:'閉鎖中'},
+  gate_open: {en:'GATE UNLOCKED',        jp:'開放'},
+  start:     {en:'START',                jp:'起動'},
+  media:     {en:'VIEWPORT',             jp:'副画面'},
+  unit:      {en:'UNIT-01 CONTROL',      jp:'壱号機制御'},
+  plug:      {en:'ENTRY PLUG',           jp:'搭乗部'},
+  vitals:    {en:'VITALS',               jp:'機体状態'},
+  user:      {en:'OPERATOR',             jp:'操縦者'},
+  planet:    {en:'RECOMPILE SPHERE',     jp:'再構築'},
+  codemap:   {en:'CODE MAP',             jp:'コード地図'},
+  alert:     {en:'BLOCKER ALERT',        jp:'障害警報'},
+  emerg:     {en:'SYSTEM HEALTH',        jp:'状態監視'},
+  sessions:  {en:'SESSION LOGBOOK',      jp:'作業記録'},
+  progress:  {en:'PROGRESS',             jp:'進捗'},
+  needed:    {en:'WHAT IS STILL NEEDED', jp:'残作業'},
+  browser:   {en:'BROWSER',              jp:'閲覧'},
+  console:   {en:'OPERATOR CONSOLE',     jp:'操作卓'},
+};
+function lbl(k){const o=(SET.labels&&SET.labels[k])||{};const d=L0[k]||{};
+  return {en:(o.en!==undefined&&o.en!=='')?o.en:(d.en||k),
+          jp:(o.jp!==undefined&&o.jp!=='')?o.jp:(d.jp||'')};}
+function applyLabels(){
+  const mode=SET.lang||'both';
+  document.querySelectorAll('[data-lk]').forEach(el=>{
+    const L=lbl(el.dataset.lk);
+    const t=el.querySelector('.bt'), j=el.querySelector('.bj');
+    if(t)t.textContent=(mode==='jp'&&L.jp)?L.jp:L.en;
+    if(j){j.textContent=(mode==='en')?'':(mode==='jp'?'':L.jp);
+          j.style.display=(mode==='en'||(mode==='jp'))?'none':'';}
+  });
+  // things outside the block-title pattern
+  const w=$('#welTxt'); if(w)w.textContent=(mode==='jp')?lbl('welcome').jp:lbl('welcome').en;
+  const wj=$('#welJp'); if(wj){wj.textContent=lbl('welcome').jp;
+    wj.style.display=(mode==='both')?'':'none';}
+  const sb=$('#startBtn');
+  if(sb)sb.innerHTML=((mode==='jp')?lbl('start').jp:lbl('start').en)+
+    ((mode==='both')?'<small>'+lbl('start').jp+'</small>':'');
+  TITLE.needed=lbl('needed').en; TITLE.progress=lbl('progress').en;
+  TITLE.sessions=lbl('sessions').en; TITLE.planet=lbl('planet').en;
+  TITLE.codemap=lbl('codemap').en; TITLE.vitals=lbl('vitals').en;
+  TITLE.unit=lbl('unit').en; TITLE.emerg=lbl('emerg').en;
+  TITLE.term=lbl('terminal').en; TITLE.browser=lbl('browser').en;
+  JP.needed=lbl('needed').jp; JP.progress=lbl('progress').jp;
+  JP.sessions=lbl('sessions').jp; JP.planet=lbl('planet').jp;
+  JP.codemap=lbl('codemap').jp; JP.vitals=lbl('vitals').jp;
+  JP.unit=lbl('unit').jp; JP.emerg=lbl('emerg').jp;
+  JP.term=lbl('terminal').jp; JP.browser=lbl('browser').jp;
+}
+
+/* ---------- boot ---------- */
+#boot{position:fixed;inset:0;z-index:10000;background:#000;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;gap:4px;color:var(--grn);font-size:12px;transition:opacity .5s}
+#boot.done{opacity:0;pointer-events:none}
+#boot div{opacity:0;animation:fi .05s forwards}
+@keyframes fi{to{opacity:1}}
+
+/* ---------- transition wipe ---------- */
+#wipe{position:fixed;inset:0;z-index:9500;pointer-events:none;opacity:0}
+#wipe.go{animation:wf .5s cubic-bezier(.22,.61,.36,1) forwards}
+#wipe b{position:absolute;left:0;right:0;height:10%;background:linear-gradient(90deg,
+  transparent,var(--acc) 18%,var(--acc) 82%,transparent);transform:scaleX(0);transform-origin:left;
+  will-change:transform;opacity:.9}
+#wipe.go b{animation:wb .5s cubic-bezier(.65,0,.35,1) forwards}
+/* each bar is nudged a frame apart so the sweep reads as motion, not a flash */
+#wipe.go b:nth-child(2){animation-delay:.02s}#wipe.go b:nth-child(3){animation-delay:.04s}
+#wipe.go b:nth-child(4){animation-delay:.06s}#wipe.go b:nth-child(5){animation-delay:.08s}
+#wipe.go b:nth-child(6){animation-delay:.10s}#wipe.go b:nth-child(7){animation-delay:.12s}
+#wipe.go b:nth-child(8){animation-delay:.14s}#wipe.go b:nth-child(9){animation-delay:.16s}
+#wipe.go b:nth-child(10){animation-delay:.18s}
+@keyframes wf{0%{opacity:1}78%{opacity:1}100%{opacity:0}}
+@keyframes wb{0%{transform:scaleX(0)}46%{transform:scaleX(1);transform-origin:left}
+  47%{transform:scaleX(1);transform-origin:right}100%{transform:scaleX(0);transform-origin:right}}
+@media (prefers-reduced-motion:reduce){#wipe.go{animation:none;opacity:0}}
+
+/* ---------- grid ---------- */
+#hq{height:100%;display:grid;gap:6px;padding:6px 6px 0;
+  grid-template-columns:250px 1fr 1fr 340px;
+  grid-template-rows:108px minmax(0,1fr) minmax(0,1fr) 150px 92px 26px;
+  grid-template-areas:
+    "term   logo   logo    media"
+    "syslog main   main    media"
+    "magi   main   main    unit"
+    "user   planet codemap vitals"
+    "alert  planet codemap vitals"
+    "tick   tick   tick    tick";}
+.blk{position:relative;border:1px solid var(--acc-dim);background:linear-gradient(180deg,rgba(10,3,5,.80),rgba(5,1,2,.86));
+  padding:5px 8px;min-height:0;overflow:hidden;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.blk:hover{border-color:var(--acc);box-shadow:0 0 22px rgba(255,47,61,.28),inset 0 0 22px rgba(255,47,61,.07)}
+.blk:hover .exp{opacity:1}
+.blk::after{content:'';position:absolute;right:0;top:0;border-left:9px solid transparent;
+  border-top:9px solid var(--acc-dim)}
+.exp{position:absolute;right:5px;bottom:3px;font-size:9px;letter-spacing:.18em;color:var(--acc);opacity:0;transition:.15s}
+.bt{font-family:var(--disp);font-weight:700;font-size:15px;letter-spacing:.16em;color:var(--acc);line-height:1.05}
+.bj{font-size:9.5px;letter-spacing:.2em;color:var(--mut);margin-bottom:4px}
+.stripe{height:7px;background:repeating-linear-gradient(45deg,var(--acc) 0 9px,transparent 9px 18px);opacity:.55;margin:3px 0}
+.hz{height:7px;background:repeating-linear-gradient(45deg,var(--yel) 0 10px,#000 10px 20px);opacity:.8}
+
+/* areas */
+#b-term{grid-area:term}#b-logo{grid-area:logo;cursor:default;border-color:transparent;background:none}
+#b-media{grid-area:media;cursor:default}#b-syslog{grid-area:syslog}#b-main{grid-area:main;cursor:default}
+#b-unit{grid-area:unit}#b-magi{grid-area:magi}#b-vitals{grid-area:vitals}
+#b-user{grid-area:user}#b-planet{grid-area:planet}#b-codemap{grid-area:codemap}#b-alert{grid-area:alert}
+#tick{grid-area:tick}
+
+/* logo strip */
+#b-logo{display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+#hexfield{position:absolute;inset:0;width:100%;height:100%}
+.logo-wrap{position:relative;z-index:2;text-align:center}
+.logo-wrap .pl{font-family:var(--disp);font-weight:700;font-size:40px;letter-spacing:.2em;color:var(--acc);
+  text-shadow:0 0 26px rgba(255,47,61,.85);line-height:.92}
+.logo-wrap .pm{font-size:9px;letter-spacing:.42em;color:var(--acc-dim)}
+
+/* main system */
+#b-main{border:1px solid var(--acc-dim);display:flex;flex-direction:column;background:rgba(3,1,2,.72)}
+.ms-h{display:flex;justify-content:space-between;font-size:10.5px;color:var(--grn);
+  border-bottom:1px solid var(--grn-dim);padding-bottom:3px}
+.ms-b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:0}
+.wel{font-family:var(--disp);font-weight:700;font-size:clamp(20px,2.5vw,36px);letter-spacing:.13em;color:var(--grn);
+  text-shadow:0 0 20px rgba(0,255,156,.6)}
+.wel-jp{font-size:14px;letter-spacing:.28em;color:var(--grn-dim)}
+.gate{font-size:11px;letter-spacing:.2em;color:var(--acc);margin-top:6px}
+.startrow{display:flex;align-items:center;gap:10px;width:78%;justify-content:center}
+.startrow .sl{flex:1;height:15px;background:repeating-linear-gradient(45deg,var(--acc) 0 9px,transparent 9px 18px);opacity:.55}
+#startBtn{font-family:var(--disp);font-weight:700;font-size:clamp(26px,3.4vw,50px);letter-spacing:.14em;
+  color:#fff;background:linear-gradient(180deg,#4d0a11,#22050a);border:2px solid var(--acc);
+  padding:5px 46px;cursor:pointer;text-shadow:0 0 18px rgba(255,47,61,.95);position:relative;
+  box-shadow:0 0 34px rgba(255,47,61,.4),inset 0 0 24px rgba(255,47,61,.28);animation:bp 2.4s infinite}
+@keyframes bp{50%{box-shadow:0 0 54px rgba(255,47,61,.72),inset 0 0 30px rgba(255,47,61,.42)}}
+#startBtn:hover{background:linear-gradient(180deg,#7d1119,#3a070d)}
+#startBtn small{display:block;font-size:14px;letter-spacing:.3em;opacity:.85}
+.ms-f{display:flex;justify-content:space-between;font-size:10px;color:var(--grn-dim);
+  border-top:1px solid var(--grn-dim);padding-top:3px}
+/* inline console inside the main panel */
+.ms-b,.ms-c{animation:msin .38s cubic-bezier(.16,1,.3,1)}
+@keyframes msin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.ms-c{flex:1;display:flex;flex-direction:column;min-height:0;padding:5px 2px 2px}
+/* a class-level display: wins over the [hidden] attribute, so state it explicitly */
+.ms-b[hidden],.ms-c[hidden]{display:none}
+.ms-ch{display:flex;align-items:center;gap:10px;font-size:10.5px;letter-spacing:.16em;
+  color:var(--grn);border-bottom:1px solid var(--grn-dim);padding-bottom:4px;margin-bottom:5px}
+.ms-ch #cliState{margin-left:auto;color:var(--mut)}
+.ms-ch #cliState.busy{color:var(--amb)}
+.mirror-ind{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:9.5px;
+  letter-spacing:.12em;color:var(--grn);border:1px solid var(--grn-dim);padding:1px 6px}
+.mirror-ind i{width:7px;height:7px;border-radius:50%;background:var(--grn);
+  box-shadow:0 0 8px var(--grn);animation:pulse 1.4s infinite}
+.mirror-ind.off{color:var(--mut);border-color:var(--mut)}
+.mirror-ind.off i{background:var(--mut);box-shadow:none;animation:none}
+@keyframes pulse{50%{opacity:.25}}
+#cliOut .m{color:var(--ink);opacity:.92}
+.ms-ch button{padding:2px 9px;font-size:11px}
+#cli{display:flex;gap:6px;flex:none;margin-top:6px}
+#cliIn{flex:1;font-size:12px}
+#cliOut b{color:var(--grn);font-weight:400}
+
+/* small type helpers */
+.kv{font-size:10.5px;line-height:1.65;color:var(--ink)}
+.kv b{color:var(--mut);font-weight:400}
+.kv u{color:var(--grn);text-decoration:none}
+.big{font-family:var(--disp);font-weight:700;font-size:26px;color:var(--acc);line-height:1}
+.big.g{color:var(--grn)}
+.tiny{font-size:9px;letter-spacing:.14em;color:var(--mut)}
+.logline{font-size:10px;line-height:1.5;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logline.ok{color:var(--grn)}.logline.warn{color:var(--amb)}.logline.bad{color:var(--acc)}
+.bar{height:5px;background:#1a0407;border:1px solid var(--acc-dim);position:relative;overflow:hidden}
+.bar>i{position:absolute;inset:0 auto 0 0;background:var(--grn);box-shadow:0 0 8px var(--grn)}
+.bar.a>i{background:var(--amb);box-shadow:0 0 8px var(--amb)}
+.bar.r>i{background:var(--acc);box-shadow:0 0 8px var(--acc)}
+canvas.cv{width:100%;flex:1;min-height:0;display:block}
+.col{display:flex;flex-direction:column;height:100%;min-height:0}
+
+/* user block */
+#b-user .sil{position:absolute;right:4px;top:14px;bottom:22px;width:42%;
+  background:linear-gradient(180deg,#3a0c12,#160406);opacity:.62;
+  -webkit-mask:var(--silm) center/contain no-repeat;mask:var(--silm) center/contain no-repeat}
+#b-user .nm{font-family:var(--disp);font-weight:700;font-size:24px;color:#fff;letter-spacing:.06em;
+  text-shadow:0 0 14px rgba(255,47,61,.7)}
+.barcode{height:16px;margin-top:3px;background:repeating-linear-gradient(90deg,
+  var(--acc) 0 2px,transparent 2px 4px,var(--acc) 4px 5px,transparent 5px 9px,
+  var(--acc) 9px 12px,transparent 12px 13px);opacity:.75}
+
+/* health chip (compact, in the terminal block) */
+.healthchip{position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:3;
+  display:flex;align-items:center;gap:7px;padding:4px 7px;
+  border:2px solid var(--acc);background:rgba(10,2,4,.9);cursor:pointer}
+.healthchip:hover{border-color:var(--acc)}
+.hc-badge{font-family:var(--disp);font-weight:700;font-size:13px;background:var(--acc);
+  color:#000;padding:0 4px;letter-spacing:.08em}
+.hc-txt{display:flex;flex-direction:column;line-height:1.15}
+.hc-txt b{font-family:var(--disp);font-size:14px;letter-spacing:.12em;color:var(--grn)}
+.hc-txt span{font-size:9.5px;color:var(--mut)}
+.healthchip.warn .hc-txt b{color:var(--amb)}
+.healthchip.bad .hc-txt b{color:var(--acc)}
+.healthchip.bad{animation:hcp 1.1s infinite}
+@keyframes hcp{50%{background:#2a060a}}
+
+/* VIEWPORT / second screen */
+.mv-bar{display:flex;gap:5px;margin-top:4px;flex:none}
+.mv-bar input{flex:1;min-width:0;font-size:11px;padding:4px 6px}
+button.act.sm{font-size:11px;padding:3px 9px}
+.mv-stage{flex:1;min-height:0;position:relative;background:rgba(0,0,0,.55);
+  border:1px solid var(--acc-dim);overflow:hidden}
+.mv-stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+.mv-empty{position:absolute;inset:0;padding:10px;overflow:auto;
+  display:flex;flex-direction:column;justify-content:center}
+.mv-stage video{position:absolute;inset:0;width:100%;height:100%;background:#000}
+.mv-lib{position:absolute;inset:0;overflow:auto;background:#000;padding:6px 8px}
+.mv-lib .it{padding:4px 5px;border-bottom:1px solid rgba(255,47,61,.16);cursor:pointer;
+  font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mv-lib .it:hover{background:rgba(255,47,61,.14)}
+.mv-lib .d{color:var(--amb)} .mv-lib .f{color:var(--grn)}
+.mv-lib h4{margin:2px 0 6px;font-family:var(--disp);font-size:13px;letter-spacing:.14em;
+  color:var(--acc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pipHost{display:none}
+
+
+/* ============ 2.5D PARALLAX BACKDROP ============
+   Three fixed layers at different depths. They shift against the pointer, so
+   the panels read as floating in front of a deeper machine rather than being
+   pasted onto a flat page. No starfields - industrial plate, hex, chevrons. */
+.bgl{position:fixed;inset:-12%;z-index:0;pointer-events:none;will-change:transform;
+  transform:translate3d(calc(var(--px,0)*var(--d)*1px),calc(var(--py,0)*var(--d)*1px),0);
+  transition:transform .55s cubic-bezier(.16,1,.3,1)}
+#bg-deep{--d:7;opacity:.5;
+  background-image:
+    repeating-linear-gradient(60deg,rgba(255,47,61,.055) 0 1px,transparent 1px 26px),
+    repeating-linear-gradient(-60deg,rgba(255,47,61,.055) 0 1px,transparent 1px 26px),
+    repeating-linear-gradient(0deg,rgba(255,47,61,.045) 0 1px,transparent 1px 45px)}
+#bg-mid{--d:17;opacity:.5;
+  background-image:
+    repeating-linear-gradient(135deg,rgba(255,47,61,.075) 0 2px,transparent 2px 30px),
+    repeating-linear-gradient(45deg,rgba(0,255,156,.035) 0 1px,transparent 1px 64px)}
+#bg-near{--d:32;opacity:.45;
+  background-image:
+    repeating-linear-gradient(90deg,rgba(255,47,61,.10) 0 1px,transparent 1px 128px),
+    repeating-linear-gradient(0deg,rgba(255,47,61,.10) 0 1px,transparent 1px 128px)}
+/* slow vertical sweep across the whole plate - the one moving backdrop element */
+/* the sigil: large, centred, very faint, sitting deepest in the plate.
+   Tinted toward the accent (sepia first, because hue-rotate does nothing to a
+   greyscale source) and vignetted so its edges dissolve into the background. */
+#bg-logo{--d:4;opacity:.30;
+  background-image:url('/assets/logo.png');
+  background-repeat:no-repeat;background-position:center 44%;background-size:auto 118%;
+  filter:grayscale(.35) brightness(.72) contrast(1.18);
+  -webkit-mask:radial-gradient(62% 62% at 50% 44%,#000 46%,transparent 82%);
+  mask:radial-gradient(62% 62% at 50% 44%,#000 46%,transparent 82%)}
+#bg-sweep{position:fixed;left:0;right:0;height:34vh;z-index:0;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(255,47,61,.045) 45%,transparent);
+  animation:sweep 13s linear infinite}
+@keyframes sweep{0%{top:-40vh}100%{top:110vh}}
+#hq{position:relative;z-index:1}
+@media (prefers-reduced-motion:reduce){
+  .bgl{transition:none}#bg-sweep{animation:none;opacity:0}}
+
+/* ============ PANEL CHROME ============
+   Four corner brackets drawn as eight background gradients (no extra DOM per
+   corner), a tick ruler along the top edge, and a slot index. */
+.blk::after{content:none}                       /* replaces the old notch */
+.chrome{position:absolute;inset:-1px;pointer-events:none;z-index:4;opacity:.85;
+  transition:opacity .18s;
+  background:
+    linear-gradient(var(--acc),var(--acc)) left 0 top 0/13px 2px no-repeat,
+    linear-gradient(var(--acc),var(--acc)) left 0 top 0/2px 13px no-repeat,
+    linear-gradient(var(--acc),var(--acc)) right 0 top 0/13px 2px no-repeat,
+    linear-gradient(var(--acc),var(--acc)) right 0 top 0/2px 13px no-repeat,
+    linear-gradient(var(--acc),var(--acc)) left 0 bottom 0/13px 2px no-repeat,
+    linear-gradient(var(--acc),var(--acc)) left 0 bottom 0/2px 13px no-repeat,
+    linear-gradient(var(--acc),var(--acc)) right 0 bottom 0/13px 2px no-repeat,
+    linear-gradient(var(--acc),var(--acc)) right 0 bottom 0/2px 13px no-repeat}
+.blk:hover .chrome{opacity:1}
+.ruler{position:absolute;left:14px;right:14px;top:0;height:5px;pointer-events:none;z-index:3;
+  background:repeating-linear-gradient(90deg,rgba(255,47,61,.55) 0 1px,transparent 1px 7px);
+  opacity:.42;transition:opacity .18s}
+.blk:hover .ruler{opacity:.8}
+.slot{position:absolute;right:8px;top:5px;z-index:3;font-family:var(--disp);font-weight:700;
+  font-size:10px;letter-spacing:.16em;color:var(--mut);pointer-events:none;transition:color .18s}
+.blk:hover .slot{color:var(--acc)}
+
+/* ============ INTERACTION FEEL ============ */
+.blk{transition:border-color .18s,box-shadow .22s,background .22s}
+.blk:hover{border-color:var(--acc);
+  box-shadow:0 0 30px rgba(255,47,61,.22),inset 0 0 34px rgba(255,47,61,.055)}
+.blk:active{box-shadow:0 0 12px rgba(255,47,61,.4),inset 0 0 40px rgba(255,47,61,.10)}
+button.act,nav button,#ztabs button,.healthchip,.mirror-ind{transition:
+  background .16s,color .16s,border-color .16s,box-shadow .16s,transform .08s}
+button.act:active{transform:translateY(1px)}
+button.act:focus-visible,input:focus-visible,select:focus-visible,
+.blk:focus-visible,#ztabs button:focus-visible{outline:2px solid var(--grn);
+  outline-offset:2px;box-shadow:0 0 14px rgba(0,255,156,.45)}
+input:focus,select:focus{border-color:var(--grn);box-shadow:0 0 12px rgba(0,255,156,.22)}
+.mv-lib .it,.row{transition:background .12s,padding-left .12s}
+.mv-lib .it:hover,.row:hover{padding-left:9px}
+.row:hover{background:rgba(255,47,61,.07)}
+
+/* staggered panel boot-in - the HQ assembles instead of appearing */
+#hq > .blk,#hq > #b-main,#hq > #b-logo{animation:blkin .55s cubic-bezier(.16,1,.3,1) backwards}
+@keyframes blkin{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+/* a fresh event sliding into the thought stream */
+@keyframes evin{from{opacity:0;transform:translateX(-14px);background:rgba(0,255,156,.14)}
+  to{opacity:1;transform:none;background:transparent}}
+#hq > *:nth-child(1){animation-delay:.02s}  #hq > *:nth-child(2){animation-delay:.06s}
+#hq > *:nth-child(3){animation-delay:.10s}  #hq > *:nth-child(4){animation-delay:.14s}
+#hq > *:nth-child(5){animation-delay:.18s}  #hq > *:nth-child(6){animation-delay:.22s}
+#hq > *:nth-child(7){animation-delay:.26s}  #hq > *:nth-child(8){animation-delay:.30s}
+#hq > *:nth-child(9){animation-delay:.34s}  #hq > *:nth-child(10){animation-delay:.38s}
+#hq > *:nth-child(11){animation-delay:.42s} #hq > *:nth-child(12){animation-delay:.46s}
+/* panels inside a fullscreen view reveal in sequence too */
+#zb .zp{animation:blkin .42s cubic-bezier(.16,1,.3,1) backwards}
+#zb .zp:nth-child(2){animation-delay:.07s}
+#zb .zp:nth-child(3){animation-delay:.14s}
+#zb .zp:nth-child(4){animation-delay:.21s}
+@media (prefers-reduced-motion:reduce){
+  #hq > *,#zb .zp{animation:none!important}}
+
+/* ticker */
+#tick{display:flex;align-items:center;gap:14px;border-top:1px solid var(--acc-dim);
+  font-size:10px;letter-spacing:.2em;color:var(--mut);overflow:hidden;white-space:nowrap}
+#tick .mv{flex:1;overflow:hidden}
+#tick .mv span{display:inline-block;animation:mv 34s linear infinite;padding-left:100%}
+@keyframes mv{to{transform:translateX(-100%)}}
+
+/* ---------- fullscreen zoom tabs ---------- */
+#zoom{position:fixed;inset:0;z-index:9200;background:#030001;display:none;
+  flex-direction:column;padding:10px}
+#zoom.on{display:flex;animation:zi .42s cubic-bezier(.16,1,.3,1)}
+@keyframes zi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* zoom tab strip - move between views without returning to HQ */
+#ztabs{display:flex;gap:0;flex:none;border-bottom:1px solid var(--acc-dim);overflow-x:auto}
+#ztabs button{font-family:var(--disp);font-weight:700;font-size:13.5px;letter-spacing:.14em;
+  color:var(--mut);background:transparent;border:0;border-right:1px solid rgba(255,47,61,.25);
+  padding:6px 13px;cursor:pointer;white-space:nowrap;transition:color .18s,background .18s}
+#ztabs button:hover{color:var(--grn);background:rgba(0,255,156,.06)}
+#ztabs button.on{color:#000;background:var(--acc)}
+.zp,.row,.tile{transition:border-color .2s,background .2s}
+#zh{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--acc);padding-bottom:5px;flex:none}
+#zh .zt{font-family:var(--disp);font-weight:700;font-size:26px;letter-spacing:.2em;color:var(--acc);
+  text-shadow:0 0 18px rgba(255,47,61,.7)}
+#zh .zj{font-size:10.5px;letter-spacing:.24em;color:var(--mut)}
+#zclose{margin-left:auto;font-family:var(--disp);font-weight:700;font-size:15px;letter-spacing:.18em;
+  color:var(--acc);background:#1a0407;border:2px solid var(--acc-dim);padding:5px 16px;cursor:pointer}
+#zclose:hover{background:var(--acc);color:#000}
+#zb{flex:1;min-height:0;overflow:auto;padding-top:8px;display:flex;flex-direction:column;gap:8px}
+.zgrid{display:grid;gap:8px;flex:1;min-height:0}
+.zp{border:1px solid var(--acc-dim);background:var(--pnl);padding:7px 10px;display:flex;
+  flex-direction:column;min-height:0;overflow:hidden}
+.zp h3{margin:0 0 5px;font-family:var(--disp);font-weight:700;font-size:15px;letter-spacing:.16em;
+  color:var(--acc);border-bottom:1px solid var(--acc-dim);padding-bottom:3px;flex:none}
+.term{background:#000;border:1px solid var(--acc-dim);padding:8px 10px;font-size:12px;line-height:1.5;
+  white-space:pre-wrap;word-break:break-word;overflow:auto;flex:1;min-height:0;color:var(--grn)}
+.term .u{color:var(--amb)}.term .s{color:var(--mut)}.term .e{color:var(--acc)}
+.scroll{overflow:auto;min-height:0;flex:1}
+button.act{font-family:var(--disp);font-weight:700;font-size:12px;letter-spacing:.14em;color:var(--acc);
+  background:#150406;border:2px solid var(--acc-dim);padding:5px 12px;cursor:pointer}
+button.act:hover{background:var(--acc);color:#000}
+button.act:disabled{opacity:.35;cursor:not-allowed}
+input,select,textarea{font-family:var(--mono);font-size:11px;background:#000;color:var(--grn);
+  border:1px solid var(--acc-dim);padding:5px 7px}
+input[type=checkbox]{accent-color:var(--acc)}
+label.f{display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:10.5px;color:var(--mut)}
+label.f span{min-width:132px;letter-spacing:.12em}
+label.f input,label.f select{flex:1}
+.row{padding:4px 2px;border-bottom:1px solid rgba(255,47,61,.14);font-size:11px}
+.tag{font-size:9px;padding:0 5px;border:1px solid currentColor;white-space:nowrap;margin-left:4px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.tile{border:1px solid var(--acc-dim);padding:6px 4px;text-align:center;background:#080203}
+.tile b{display:block;font-family:var(--disp);font-weight:700;font-size:26px;color:var(--grn);line-height:1}
+.tile span{font-size:9px;letter-spacing:.12em;color:var(--mut)}
+#cli{display:flex;gap:6px;flex:none;margin-top:6px}
+#cliIn{flex:1;font-size:12px}
+</style>
+</head>
+<body>
+<div class="bgl" id="bg-logo"></div><div class="bgl" id="bg-deep"></div><div class="bgl" id="bg-mid"></div><div class="bgl" id="bg-near"></div><div id="bg-sweep"></div>
+<div id="scan"></div><div id="vig"></div>
+<div id="wipe"><b style="top:0"></b><b style="top:10%"></b><b style="top:20%"></b><b style="top:30%"></b>
+<b style="top:40%"></b><b style="top:50%"></b><b style="top:60%"></b><b style="top:70%"></b>
+<b style="top:80%"></b><b style="top:90%"></b></div>
+<div id="boot"></div>
+
+<div id="hq">
+  <!-- TERMINAL -->
+  <div class="blk" id="b-term" data-lk="term" data-z="term">
+    <div class="bt">PROMETHEUS ONLY</div>
+    <div class="bj">立入禁止 · UNAUTHORIZED ACCESS</div>
+    <div class="stripe"></div>
+    <div class="bt" style="font-size:15px" id="t-name">TERMINAL-01</div>
+    <div class="kv"><u id="t-conn">CONNECTED</u>
+      <br><b id="t-path" style="font-size:9px;word-break:break-all"></b></div>
+    <div class="exp">▸ EXPAND</div>
+  </div>
+
+  <!-- LOGO -->
+  <div id="b-logo"><canvas id="hexfield"></canvas>
+    <div class="logo-wrap"><div class="pl">PROMETHEUS</div>
+      <div class="pm">FIRE TAKEN FROM THE MACHINE, RETURNED TO THE PLAYER</div></div>
+    <div class="healthchip" id="healthChip" title="System health — click for detail">
+      <span class="hc-badge">警報</span>
+      <span class="hc-txt"><b id="e-en">NOMINAL</b><span id="e-jp">正常</span></span>
+      <span class="tiny">CODE <span id="e-code">000</span></span>
+    </div>
+  </div>
+
+  <!-- VIEWPORT: media / second screen -->
+  <div class="blk col" id="b-media" data-lk="media">
+    <div style="display:flex;align-items:baseline;gap:7px">
+      <span class="bt">VIEWPORT</span><span class="bj" style="margin:0">副画面</span>
+      <span class="tiny" id="mv-note" style="margin-left:auto"></span></div>
+    <div class="mv-bar">
+      <input id="mvUrl" placeholder="search, url, or YouTube link…" autocomplete="off">
+      <button class="act" id="mvGo">LOAD</button>
+    </div>
+    <div class="mv-bar" style="margin-bottom:4px">
+      <button class="act sm" id="mvPip" title="Float above every window">FLOAT</button>
+      <button class="act sm" id="mvPop" title="Open in its own window">POP OUT</button>
+      <button class="act sm" id="mvLocal" title="Play your own video files">LIBRARY</button>
+      <button class="act sm" id="mvBig" title="Open the full browser">EXPAND</button>
+      <button class="act sm" id="mvClear">CLEAR</button>
+    </div>
+    <div class="mv-stage" id="mvStage">
+      <div class="mv-empty" id="mvEmpty">
+        <div style="font-family:var(--disp);font-size:17px;letter-spacing:.14em;color:var(--acc)">SECOND SCREEN</div>
+        <div class="kv" style="margin-top:5px">Type a <b style="color:var(--grn)">search</b>, a
+        <b style="color:var(--grn)">URL</b>, or a <b style="color:var(--grn)">YouTube</b> link.
+        Search runs on Bing and Wikipedia loads, because those permit embedding.
+        <br><br>Google, DuckDuckGo, Crunchyroll and the big streaming services send
+        <b style="color:var(--acc)">X-Frame-Options</b>, so no page may embed them — those
+        open in their own window automatically. <b style="color:var(--grn)">FLOAT</b> pins
+        a window above everything else.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SYSTEM LOG -->
+  <div class="blk col" id="b-syslog" data-lk="syslog" data-z="sessions">
+    <div class="bt">▸ SYSTEM LOG</div><div class="bj">記録</div>
+    <div class="scroll" id="s-log"></div>
+    <div class="exp">▸ EXPAND</div>
+  </div>
+
+  <!-- MAIN SYSTEM -->
+  <div id="b-main">
+    <div class="ms-h"><span>MAIN SYSTEM<br><span style="color:var(--grn-dim)">主系統</span></span>
+      <span id="m-clock">--:--:--</span></div>
+    <div class="ms-b" id="msWelcome">
+      <div class="wel" id="welTxt">WELCOME TO PROMETHEUS HEADQUARTERS</div>
+      <div class="wel-jp" id="welJp">プロメテウス本部へようこそ</div>
+      <div class="gate" id="m-gate">GATE LOCKED / 閉鎖中</div>
+      <div class="startrow"><div class="sl"></div>
+        <button id="startBtn">START<small>起動</small></button><div class="sl"></div></div>
+      <div class="tiny" style="color:var(--grn-dim)">▸ CLICK TO OPEN OPERATOR CONSOLE / クリックで起動</div>
+    </div>
+    <!-- the console lives INSIDE the main panel; START swaps it in place -->
+    <div class="ms-c" id="msConsole" hidden>
+      <div class="ms-ch"><span>OPERATOR CONSOLE / 操作卓</span>
+        <span id="cliCwd" class="tiny"></span>
+        <span class="mirror-ind" id="mirrorInd" title="Live mirror of the active Claude Code session">
+          <i></i><span id="mirrorTxt">MIRROR</span></span>
+        <span id="cliState" class="tiny">READY</span>
+        <button class="act" id="cliStop" hidden>■ STOP</button>
+        <button class="act" id="cliClose">◀ BACK</button></div>
+      <div class="term" id="cliOut"><span class="s">This console drives the real <b>claude</b> CLI in your home directory with full
+tool access — files, Bash, git, everything a Claude Code window has. <b>MIRROR</b> projects the
+active editor session here live; typing a prompt continues that same session.
+
+Type a prompt and press ENTER.</span></div>
+      <div id="cli"><input id="cliIn" placeholder="prompt claude…  (drives the same session as VS Code)" autocomplete="off">
+        <button class="act" id="cliGo">SEND</button></div>
+    </div>
+    <div class="ms-f"><span>PROMETHEUS OS v2.0.1</span><span id="m-status">SYSTEM STATUS: ---</span></div>
+  </div>
+
+  <!-- UNIT-01 -->
+  <div class="blk col" id="b-unit" data-lk="unit" data-z="unit">
+    <div class="bt">UNIT-01 CONTROL</div><div class="bj">壱号機制御</div>
+    <canvas class="cv" id="cv-unit"></canvas>
+    <div class="kv" style="border:1px solid var(--acc-dim);padding:2px 5px">ENTRY PLUG 搭乗部<br>
+      STATUS: <u id="u-state">STANDBY</u></div>
+    <div class="exp">▸ EXPAND</div>
+  </div>
+
+  <!-- MAGI / tools -->
+  <div class="blk col" id="b-magi" data-lk="magi" data-z="magi">
+    <div class="bt">MAGI</div><div class="bj">マギ</div>
+    <canvas class="cv" id="cv-magi"></canvas>
+    <div class="kv" id="magi-list" style="font-size:10px"></div>
+    <div class="exp">▸ EXPAND</div>
+  </div>
+
+  <!-- VITALS -->
+  <div class="blk col" id="b-vitals" data-lk="vitals" data-z="vitals">
+    <div class="bt">VITALS</div><div class="bj">機体状態</div>
+    <canvas class="cv" id="cv-ecg" style="max-height:36px;flex:none"></canvas>
+    <div class="tiny">CPU LOAD</div><div class="big g"><span id="v-cpu">--</span><span style="font-size:11px">%</span></div>
+    <div class="tiny">MEMORY</div><div class="big g" style="font-size:20px"><span id="v-ram">--</span><span style="font-size:10px">%</span></div>
+    <div class="tiny">GPU / TEMP</div><div class="big" style="font-size:19px"><span id="v-gpu">--</span><span style="font-size:10px">% / </span><span id="v-tmp">--</span><span style="font-size:10px">°C</span></div>
+    <div class="exp">▸ EXPAND</div>
+  </div>
+
+  <!-- USER -->
+  <div class="blk" id="b-user" data-z="user">
+    <div class="sil" id="silhouette"></div>
+    <div class="kv" style="position:relative;z-index:2">USER: <u id="u-name">OPERATOR</u><br>
+      <span style="color:var(--acc)" id="u-kanji">操縦者</span><br>
+      <b>ID: <span id="u-id"></span></b><br><b>CLEARANCE: <span id="u-clr"></span></b></div>
+    <div class="nm" id="u-kanji-big" style="position:relative;z-index:2;margin-top:6px">操縦者</div>
+    <div class="kv" id="u-nm-en" style="position:relative;z-index:2"></div>
+    <div class="barcode"></div>
+    <div class="exp">▸ SETTINGS</div>
+  </div>
+
+  <!-- PLANET -->
+  <div class="blk col" id="b-planet" data-lk="planet" data-z="planet">
+    <div class="bt">RECOMPILE SPHERE</div><div class="bj">再構築 · <span id="p-pct">0%</span></div>
+    <canvas class="cv" id="cv-planet"></canvas>
+    <div class="exp">▸ EXPAND</div>
+  </div>
+
+  <!-- CODE MAP -->
+  <div class="blk col" id="b-codemap" data-lk="codemap" data-z="codemap">
+    <div class="bt">CODE MAP</div><div class="bj" id="cm-sub">コード地図</div>
+    <canvas class="cv" id="cv-map"></canvas>
+    <div class="exp">▸ EXPAND</div>
+  </div>
+
+  <!-- ALERT -->
+  <div class="blk col" id="b-alert" data-lk="alert" data-z="needed">
+    <div class="bt">BLOCKER ALERT</div><div class="bj">障害警報</div>
+    <div class="kv">STATUS: <u id="a-state">SCANNING</u> ·
+      <span id="a-count" style="color:var(--amb)"></span><br>
+      <b>FRONTIER</b> <span id="a-front" style="color:var(--grn)">—</span></div>
+    <div class="exp">▸ EXPAND</div>
+  </div>
+
+  <div id="tick"><span style="color:var(--acc)">▶▶▶</span>
+    <div class="mv"><span id="tick-txt"></span></div>
+    <span style="color:var(--grn)" id="tick-clock">00:00:00</span></div>
+</div>
+
+<!-- ---------- fullscreen zoom ---------- -->
+<div id="zoom"><div id="zh"><span class="zt" id="zt"></span><span class="zj" id="zj"></span>
+  <button id="zclose">◀ RETURN TO HQ  [ESC]</button></div>
+  <div id="ztabs"></div><div id="zb"></div></div>
+
+<script>
+const $=s=>document.querySelector(s), api=async(p,o)=>(await fetch(p,o)).json();
+/* Bind a handler only if the element exists. A single missing id used to throw
+   a TypeError at top level and kill every statement after it - clock, refresh
+   intervals and deep links all died silently. */
+function on(sel,ev,fn){const e=typeof sel==='string'?$(sel):sel;if(e)e[ev]=fn;return e;}
+const esc=s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const post=(p,b)=>api(p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+const T0=Date.now(); let ST={}, SET={}, PLANET={sectors:[]}, TOOLS=[], FLOW=[], SEQ=[], RECOMP={units:[]};
+
+/* ---------- boot ---------- */
+const NOBOOT=/[?&]noboot/.test(location.search);   // skip the intro: /?noboot=1
+(()=>{const b=$('#boot');
+ if(NOBOOT){b.remove();return;}
+ const L=['PROMETHEUS OS v2.0.1','> BOOT SEQUENCE INITIATED','> MAGI LINK ............ OK',
+ '> KNOWLEDGE BASE ....... OK','> TELEMETRY BUS ........ ONLINE','> SECURITY PROTOCOL .... ENGAGED',
+ '> ALL SYSTEMS NOMINAL'];
+ L.forEach((t,i)=>{const d=document.createElement('div');d.style.animationDelay=(i*.13)+'s';d.textContent=t;b.appendChild(d)});
+ setTimeout(()=>b.classList.add('done'),L.length*130+400);})();
+
+/* ---------- zoom tabs ---------- */
+const JP={stream:'思考',assets:'資産庫',browser:'閲覧',term:'端末接続',emerg:'システム健全性',syslog:'記録',unit:'壱号機制御',magi:'マギ・連携ツール',
+ vitals:'ホスト生体情報',user:'操縦者設定',planet:'再構築球体',codemap:'コード転送',alert:'障害警報',
+ sessions:'セッション記録',progress:'進捗',needed:'残作業'};
+const TITLE={stream:'AI THOUGHT STREAM',assets:'ASSET LIBRARY',browser:'BROWSER',term:'TERMINAL LINK',emerg:'SYSTEM HEALTH',syslog:'SYSTEM LOG',unit:'UNIT-01 CONTROL',
+ magi:'MAGI — LINKED TOOLING',vitals:'HOST VITALS',user:'OPERATOR SETTINGS',planet:'RECOMPILE SPHERE',
+ codemap:'CODE MAP',alert:'BLOCKER ALERT',sessions:'SESSION LOGBOOK',
+ progress:'PROGRESS',needed:'WHAT IS STILL NEEDED'};
+/* order of the strip along the top of every fullscreen view */
+const TABS=['stream','needed','progress','sessions','assets','planet','browser','magi','codemap','vitals','unit',
+ 'syslog','emerg','term','user'];
+let ZOOM=null,CHART=null,BW_HIST=[];
+function wipe(fn){const w=$('#wipe');w.classList.remove('go');void w.offsetWidth;w.classList.add('go');setTimeout(fn,190);}
+function paintTabs(){$('#ztabs').innerHTML=TABS.map(k=>
+  `<button data-t="${k}"${k===ZOOM?' class="on"':''}>${TITLE[k]||k}</button>`).join('');
+  document.querySelectorAll('#ztabs button').forEach(b=>b.onclick=()=>swapZ(b.dataset.t));}
+/* swapping between views inside the overlay skips the wipe - it would fight
+   the panel crossfade and read as a stutter */
+function swapZ(k){if(k===ZOOM)return;ZOOM=k;render();}
+function render(){const k=ZOOM;$('#zt').textContent=TITLE[k]||k;$('#zj').textContent=JP[k]||'';
+  $('#zb').innerHTML=VIEW[k]?VIEW[k]():'<div class="zp">no view</div>';
+  paintTabs();if(POST[k])POST[k]();fitAll();
+  requestAnimationFrame(fitAll);setTimeout(fitAll,120);setTimeout(fitAll,480);
+  if(history.replaceState)history.replaceState(null,'','#'+k);}
+function openZ(k){wipe(()=>{ZOOM=k;render();$('#zoom').classList.add('on');});}
+function closeZ(){if(!ZOOM)return;wipe(()=>{ZOOM=null;$('#zoom').classList.remove('on');
+  $('#zb').innerHTML='';if(history.replaceState)history.replaceState(null,'',location.pathname+location.search);
+  fitAll();});}
+$('#zclose').onclick=closeZ;
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&ZOOM){closeZ();return;}
+  if(!ZOOM)return;
+  if(e.key==='ArrowRight'||e.key==='ArrowLeft'){        // cycle views with the arrows
+    const i=TABS.indexOf(ZOOM);if(i<0)return;
+    swapZ(TABS[(i+(e.key==='ArrowRight'?1:TABS.length-1))%TABS.length]);}});
+document.querySelectorAll('.blk[data-z]').forEach(b=>b.onclick=()=>openZ(b.dataset.z));
+/* the health chip sits inside the terminal block - don't let it open that view */
+$('#healthChip').onclick=e=>{e.stopPropagation();openZ('emerg');};
+
+
+/* ---------- 2.5D parallax + panel chrome ---------- */
+(function(){
+  // chrome/ruler/slot are injected rather than hand-written into every block
+  const blocks=document.querySelectorAll('#hq .blk');
+  blocks.forEach((b,i)=>{
+    const c=document.createElement('i');c.className='chrome';b.appendChild(c);
+    const r=document.createElement('i');r.className='ruler';b.appendChild(r);
+    const n=document.createElement('i');n.className='slot';
+    n.textContent=String(i+1).padStart(2,'0');b.appendChild(n);
+    if(b.dataset.z)b.tabIndex=0;                       // keyboard reachable
+    b.addEventListener('keydown',e=>{
+      if((e.key==='Enter'||e.key===' ')&&b.dataset.z){e.preventDefault();openZ(b.dataset.z);}});
+  });
+  // pointer parallax, throttled to one write per frame
+  let tx=0,ty=0,queued=false;
+  function apply(){queued=false;
+    document.documentElement.style.setProperty('--px',tx.toFixed(3));
+    document.documentElement.style.setProperty('--py',ty.toFixed(3));}
+  addEventListener('pointermove',e=>{
+    tx=(e.clientX/innerWidth-0.5)*2; ty=(e.clientY/innerHeight-0.5)*2;
+    if(!queued){queued=true;requestAnimationFrame(apply);}
+  },{passive:true});
+})();
+
+/* ---------- canvas fit ---------- */
+/* Canvas backing stores are driven by a ResizeObserver, not by a one-shot
+   measurement. render() used to call fitAll() synchronously right after
+   injecting panels - before layout had settled - so canvases got an
+   undersized backing store that CSS then stretched. That was the haze, and
+   it also collapsed the MAGI label test (which needs min(W,H) > 440). */
+const DPR=Math.min(3,Math.max(2,window.devicePixelRatio||1));
+const RO=new ResizeObserver(es=>{for(const e of es){
+  const c=e.target,b=e.contentRect;
+  const w=Math.round(b.width*DPR),h=Math.round(b.height*DPR);
+  if(w>0&&h>0&&(c.width!==w||c.height!==h)){c.width=w;c.height=h;}
+}});
+function fitAll(){document.querySelectorAll('canvas').forEach(c=>{
+  if(!c.__obs){c.__obs=1;RO.observe(c);}
+  const r=c.getBoundingClientRect();
+  const w=Math.round(r.width*DPR),h=Math.round(r.height*DPR);
+  if(w>0&&h>0&&(c.width!==w||c.height!==h)){c.width=w;c.height=h;}});}
+addEventListener('resize',fitAll);setTimeout(fitAll,120);
+
+/* ---------- ambient canvases ---------- */
+let tt=0;
+function hexfield(){const c=$('#hexfield');if(c.width){const d=c.getContext('2d'),W=c.width,H=c.height;
+  d.clearRect(0,0,W,H);const s=34,hh=s*Math.sqrt(3)/2;
+  for(let row=0,y=0;y<H+s;row++,y+=hh)for(let x=(row%2?s*1.5:0);x<W+s;x+=s*3){
+    const p=(Math.sin(tt*1.5+x*.01+y*.02)+1)/2;
+    d.strokeStyle='rgba(255,47,61,'+(.10+p*.30)+')';d.lineWidth=1.2;d.beginPath();
+    for(let i=0;i<6;i++){const a=Math.PI/3*i,px=x+Math.cos(a)*s*.6,py=y+Math.sin(a)*s*.6;i?d.lineTo(px,py):d.moveTo(px,py)}
+    d.closePath();d.stroke();
+    if(p>.86){d.fillStyle='rgba(255,47,61,.5)';d.font='700 9px '+'Consolas,monospace';
+      d.textAlign='center';d.fillText('EMERGENCY',x,y+3)}}}
+  requestAnimationFrame(hexfield);}
+hexfield();
+
+/* ---------------------------------------------------------------------------
+   UNIT-01 : 3D wireframe mobile suit (Zaku-type - mono-eye, spiked shoulder
+   dome, ribbed power cables, flared calves).
+
+   Real geometry, not a flat drawing: primitives emit 3D edges once, then each
+   frame rotates, perspective-projects and depth-fades them, so nearer edges
+   are bright and thick and far ones recede. Colour tracks the job state.
+--------------------------------------------------------------------------- */
+const UCOL={idle:'#8e1520',active:'#00ff9c',build:'#ff8a00',error:'#ff2f3d'};
+let MECH=null, MECH_EYE=[0,3.55,0.52];
+/* Imported mesh option: the Sinanju FBX, reduced in Blender to its structural
+   edges (sharp creases + boundaries) so it draws in one pass per frame. */
+let SIN=null, SIN_STATE=0;          // 0 unloaded, 1 loading, 2 ready, 3 failed
+function loadSinanju(){
+  if(SIN_STATE)return;
+  SIN_STATE=1;
+  fetch('/mech/sinanju.json').then(r=>r.json()).then(m=>{
+    const V=m.v, E=m.e, out=new Array(E.length);
+    for(let i=0;i<E.length;i++)out[i]=[V[E[i][0]],V[E[i][1]]];
+    SIN=out;SIN_STATE=2;
+  }).catch(()=>{SIN_STATE=3;});
+}
+function mechEdges(){
+  const want=(SET&&SET.mech_model)||'sinanju';
+  if(want==='sinanju'){
+    if(SIN_STATE===0)loadSinanju();
+    if(SIN_STATE===2)return SIN;
+    if(SIN_STATE===1)return null;            // still loading - draw nothing yet
+  }
+  if(!MECH)MECH=buildMech();
+  return MECH;
+}
+
+function buildMech(){
+  const E=[];                                   // edges: [[x,y,z],[x,y,z]]
+  const ln=(a,b)=>E.push([a,b]);
+
+  // cuboid with panel-line subdivision (gives the quad-mesh look)
+  function box(cx,cy,cz,w,h,dp,sub){
+    const X=[cx-w/2,cx+w/2],Y=[cy-h/2,cy+h/2],Z=[cz-dp/2,cz+dp/2];
+    const V=[];for(const z of Z)for(const y of Y)for(const x of X)V.push([x,y,z]);
+    [[0,1],[2,3],[0,2],[1,3],[4,5],[6,7],[4,6],[5,7],[0,4],[1,5],[2,6],[3,7]]
+      .forEach(e=>ln(V[e[0]],V[e[1]]));
+    const n=sub||0;
+    for(let i=1;i<n;i++){const t=i/n;
+      const y=Y[0]+(Y[1]-Y[0])*t, x=X[0]+(X[1]-X[0])*t;
+      ln([X[0],y,Z[0]],[X[1],y,Z[0]]); ln([X[0],y,Z[1]],[X[1],y,Z[1]]);
+      ln([X[0],y,Z[0]],[X[0],y,Z[1]]); ln([X[1],y,Z[0]],[X[1],y,Z[1]]);
+      ln([x,Y[0],Z[0]],[x,Y[1],Z[0]]); ln([x,Y[0],Z[1]],[x,Y[1],Z[1]]);
+    }
+  }
+  // ring lying in the XZ plane, optionally tipped upright about X
+  function ring(cx,cy,cz,r,n,upright){
+    const P=[];
+    for(let i=0;i<n;i++){const a=i/n*Math.PI*2;
+      const u=Math.cos(a)*r, v=Math.sin(a)*r;
+      P.push(upright?[cx+u,cy+v,cz]:[cx+u,cy,cz+v]);}
+    for(let i=0;i<n;i++)ln(P[i],P[(i+1)%n]);
+    return P;
+  }
+  // dome / sphere from latitude + longitude rings
+  function sphere(cx,cy,cz,r,nlat,nlon,squashY){
+    const sy=squashY||1, rows=[];
+    for(let i=0;i<=nlat;i++){
+      const la=i/nlat*Math.PI, rr=Math.sin(la)*r, y=Math.cos(la)*r*sy;
+      const row=[];
+      for(let j=0;j<nlon;j++){const lo=j/nlon*Math.PI*2;
+        row.push([cx+Math.cos(lo)*rr,cy+y,cz+Math.sin(lo)*rr]);}
+      rows.push(row);
+      if(rr>1e-4)for(let j=0;j<nlon;j++)ln(row[j],row[(j+1)%nlon]);
+    }
+    for(let i=0;i<nlat;i++)for(let j=0;j<nlon;j++)ln(rows[i][j],rows[i+1][j]);
+  }
+  // two rings of different radius joined - the flared Zaku calf
+  function frustum(cx,cy0,cy1,cz,r0,r1,n){
+    const A=[],B=[];
+    for(let i=0;i<n;i++){const a=i/n*Math.PI*2,c=Math.cos(a),s=Math.sin(a);
+      A.push([cx+c*r0,cy0,cz+s*r0]); B.push([cx+c*r1,cy1,cz+s*r1]);}
+    for(let i=0;i<n;i++){ln(A[i],A[(i+1)%n]);ln(B[i],B[(i+1)%n]);ln(A[i],B[i]);}
+  }
+  // ribbed power cable: upright rings threaded along a quadratic arc
+  function cable(p0,p1,bulge,rt,segs,nring){
+    let prev=null,prevPt=null;
+    const c=[(p0[0]+p1[0])/2+bulge[0],(p0[1]+p1[1])/2+bulge[1],(p0[2]+p1[2])/2+bulge[2]];
+    for(let i=0;i<=segs;i++){
+      const t=i/segs,u=1-t;
+      const pt=[u*u*p0[0]+2*u*t*c[0]+t*t*p1[0],
+                u*u*p0[1]+2*u*t*c[1]+t*t*p1[1],
+                u*u*p0[2]+2*u*t*c[2]+t*t*p1[2]];
+      const R=ring(pt[0],pt[1],pt[2],rt,nring,true);
+      if(prev)for(let j=0;j<nring;j++)ln(prev[j],R[j]);
+      prev=R;prevPt=pt;
+    }
+  }
+  // cone spike: base ring around a centre, apex offset along dir
+  function spike(cx,cy,cz,r,len,dir,n){
+    const L=Math.hypot(dir[0],dir[1],dir[2])||1;
+    const u=[dir[0]/L,dir[1]/L,dir[2]/L];
+    const apex=[cx+u[0]*len,cy+u[1]*len,cz+u[2]*len];
+    // any two axes perpendicular to u
+    let t=Math.abs(u[1])<0.9?[0,1,0]:[1,0,0];
+    const e1=[u[1]*t[2]-u[2]*t[1],u[2]*t[0]-u[0]*t[2],u[0]*t[1]-u[1]*t[0]];
+    const l1=Math.hypot(e1[0],e1[1],e1[2])||1;
+    const a1=[e1[0]/l1,e1[1]/l1,e1[2]/l1];
+    const a2=[u[1]*a1[2]-u[2]*a1[1],u[2]*a1[0]-u[0]*a1[2],u[0]*a1[1]-u[1]*a1[0]];
+    const base=[];
+    for(let i=0;i<n;i++){const a=i/n*Math.PI*2,cc=Math.cos(a)*r,ss=Math.sin(a)*r;
+      base.push([cx+a1[0]*cc+a2[0]*ss,cy+a1[1]*cc+a2[1]*ss,cz+a1[2]*cc+a2[2]*ss]);}
+    for(let i=0;i<n;i++){ln(base[i],base[(i+1)%n]);ln(base[i],apex);}
+  }
+
+  // ============================ the suit ============================
+  // head: domed skull, mono-eye rail, crown antenna
+  sphere(0,3.62,0,0.50,7,14,1.08);
+  ring(0,3.55,0.26,0.30,14,true);
+  box(0,3.52,0.36,0.66,0.15,0.10,2);
+  box(0,4.06,-0.08,0.14,0.24,0.14,0);
+
+  // neck + torso
+  box(0,3.10,0,0.34,0.30,0.30,0);
+  box(0,2.35,0,1.42,1.30,0.94,3);
+  box(0,2.62,0.50,0.90,0.52,0.12,2);
+  box(0,1.62,0,1.05,0.44,0.80,2);
+  ring(0,2.28,0.52,0.17,12,true);
+
+  // backpack + thrusters
+  box(0,2.55,-0.62,0.85,0.95,0.34,2);
+  [-0.30,0.30].forEach(x=>frustum(x,2.05,1.72,-0.74,0.15,0.24,10));
+
+  // shoulders: spiked dome one side, smooth dome the other
+  sphere(-1.34,2.72,0,0.62,5,12,0.92);
+  [[0,1,0],[-0.75,0.65,0],[-0.6,0.15,0.65],[-0.6,0.15,-0.65]].forEach(dv=>{
+    const L=Math.hypot(dv[0],dv[1],dv[2]);
+    const u=[dv[0]/L,dv[1]/L,dv[2]/L];
+    spike(-1.34+u[0]*0.50,2.72+u[1]*0.50,u[2]*0.50,0.17,0.55,u,6);});
+  sphere(1.34,2.72,0,0.60,5,12,0.92);
+  ring(1.34,2.72,0.40,0.22,10,true);
+
+  // arms + the iconic shoulder cables
+  [-1,1].forEach(sx=>{
+    box(sx*1.26,1.92,0,0.44,0.66,0.44,2);
+    cable([sx*0.66,2.96,-0.12],[sx*1.16,2.26,-0.12],[sx*0.34,0.16,0],0.085,5,6);
+    ring(sx*1.28,1.54,0,0.24,10,true);
+    box(sx*1.28,1.02,0.02,0.44,0.76,0.44,2);
+    box(sx*1.28,0.56,0.02,0.30,0.28,0.34,0);
+  });
+
+  // waist cable + skirt armour
+  cable([-0.60,1.46,0.34],[0.60,1.46,0.34],[0,-0.24,0.18],0.075,8,6);
+  box(0,1.32,0,0.86,0.26,0.72,0);
+  box(0,0.92,0.44,0.52,0.62,0.14,2);
+  [-1,1].forEach(sx=>box(sx*0.62,0.92,0.10,0.30,0.66,0.52,2));
+  box(0,0.92,-0.42,0.52,0.60,0.14,2);
+
+  // legs: thigh, knee, flared calf, ankle, foot
+  [-1,1].forEach(sx=>{
+    box(sx*0.40,0.30,0,0.52,0.86,0.56,2);
+    ring(sx*0.40,-0.16,0,0.28,10,true);
+    box(sx*0.40,-0.20,0.26,0.40,0.34,0.16,0);
+    frustum(sx*0.42,-0.36,-1.34,0,0.30,0.40,12);
+    box(sx*0.42,-1.46,0,0.54,0.20,0.62,1);
+    box(sx*0.42,-1.66,0.14,0.62,0.22,0.92,2);
+  });
+  return E;
+}
+
+function unit(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
+  const d=c.getContext('2d'),W=c.width,H=c.height;
+  d.clearRect(0,0,W,H);
+  const EDG=mechEdges();
+  const col=UCOL[jobState()];
+  if(!EDG){                                   // loading the imported mesh
+    d.fillStyle=col;d.font="700 13px 'Arial Narrow',Impact,sans-serif";
+    d.textAlign='center';d.fillText('LOADING UNIT…',W/2,H/2);return;}
+  const isImported=(EDG===SIN);
+  // slow turntable sway so the form reads as solid 3D rather than a decal
+  const ang=Math.sin(tt*0.28)*0.85-0.18, tilt=0.16;
+  const bob=Math.sin(tt*1.1)*0.045;
+  const S=Math.min(W/4.6,H/7.6)*(isImported?1.28:1), cx=W/2, cy=H/2+S*(isImported?0.10:0.55);
+  const ca=Math.cos(ang),sa=Math.sin(ang),ct=Math.cos(tilt),stt=Math.sin(tilt);
+  function proj(p){
+    const x=p[0]*ca+p[2]*sa, z=-p[0]*sa+p[2]*ca, y=p[1]+bob;
+    const y2=y*ct-z*stt, z2=y*stt+z*ct;
+    const f=7/(7+z2);
+    return [cx+x*S*f, cy-y2*S*f, z2];
+  }
+  d.lineCap='round';d.shadowColor=col;d.strokeStyle=col;
+  // an imported mesh has thousands of thin edges: draw it in one path with a
+  // flat alpha instead of per-edge state changes, or the frame rate collapses
+  if(isImported){
+    d.globalAlpha=0.55;d.lineWidth=Math.max(0.5,S/90);d.shadowBlur=0;
+    d.beginPath();
+    for(let i=0;i<EDG.length;i++){
+      const a=proj(EDG[i][0]),b=proj(EDG[i][1]);
+      d.moveTo(a[0],a[1]);d.lineTo(b[0],b[1]);}
+    d.stroke();d.globalAlpha=1;
+    d.strokeStyle='rgba(255,47,61,.35)';d.lineWidth=1;
+    [[6,6],[W-6,6],[6,H-6],[W-6,H-6]].forEach(([x,y],i)=>{const sx=i%2?-1:1,sy=i<2?1:-1;
+      d.beginPath();d.moveTo(x,y);d.lineTo(x+sx*18,y);d.moveTo(x,y);d.lineTo(x,y+sy*18);d.stroke();});
+    return;
+  }
+  for(let i=0;i<EDG.length;i++){
+    const e=EDG[i], a=proj(e[0]), b=proj(e[1]);
+    const t=Math.max(0,Math.min(1,((a[2]+b[2])/2+2.2)/4.4));   // 0 near .. 1 far
+    d.globalAlpha=0.92-t*0.62;
+    d.lineWidth=Math.max(0.5,(1.7-t*1.0)*(S/34));
+    d.shadowBlur=(1-t)*5;
+    d.beginPath();d.moveTo(a[0],a[1]);d.lineTo(b[0],b[1]);d.stroke();
+  }
+  d.globalAlpha=1;d.shadowBlur=0;
+  // mono-eye: the single lit element
+  const eye=proj(MECH_EYE), pl=(Math.sin(tt*2.6)+1)/2;
+  d.beginPath();d.arc(eye[0],eye[1],Math.max(2.2,S*0.075),0,7);
+  d.fillStyle=col;d.shadowColor=col;d.shadowBlur=10+pl*16;
+  d.globalAlpha=0.55+pl*0.45;d.fill();
+  d.globalAlpha=1;d.shadowBlur=0;
+  // frame ticks
+  d.strokeStyle='rgba(255,47,61,.35)';d.lineWidth=1;
+  [[6,6],[W-6,6],[6,H-6],[W-6,H-6]].forEach(([x,y],i)=>{const sx=i%2?-1:1,sy=i<2?1:-1;
+    d.beginPath();d.moveTo(x,y);d.lineTo(x+sx*18,y);d.moveTo(x,y);d.lineTo(x,y+sy*18);d.stroke();});}
+
+function jobState(){if(!ST.proc)return'idle';
+  if(ST.action&&ST.action.running)return ST.action.name==='build'?'build':'active';
+  if(ST.proc.build_active)return'build';if(ST.proc.runner_alive)return'active';
+  if(CL.running)return'active';return'idle';}
+
+/* MAGI tool graph.
+   Tool names are never squeezed inside the node: the label is drawn OUTSIDE,
+   radially, at a fixed readable size, so the full program name always shows. */
+/* ---------- live tool-activity tracker ----------
+   A tool is "active" when it is genuinely doing work right now, derived from
+   real hub state. refresh() calls markActive(); a tool stays lit for a short
+   window after its last signal so brief bursts are visible. */
+const ACT={};                                  // name -> last-active ms
+function markActive(name){ACT[name]=performance.now();}
+// window > refresh interval (4s) so continuously-working tools stay lit between
+// polls; a tool that stops fades out ~4.5s after its last signal
+function toolActive(name){return (performance.now()-(ACT[name]||0))<4500;}
+function pumpActivity(){
+  // the orchestrator itself is python reading sqlite; pulse them each refresh
+  markActive('PYTHON'); markActive('SQLITE');
+  const p=ST.proc||{}, a=ST.action||{};
+  if(p.build_active){markActive('CMAKE');markActive('PS2RECOMP');}
+  if(p.runner_alive){markActive('PS2RECOMP');markActive('PCSX2');}
+  if(CL&&CL.running){markActive('CLAUDE');}
+  if(a.running){markActive('PS2RECOMP');                       // a drive/build/catch action
+    if(/drive|catch/.test(a.name||''))markActive('PCSX2');}
+  if(ST.git&&ST.git.dirty)markActive('GIT');
+}
+
+function magi(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
+  const d=c.getContext('2d'),W=c.width,H=c.height,cx=W/2,cy=H/2;
+  d.clearRect(0,0,W,H);
+  const on=TOOLS.filter(t=>t.online),n=Math.max(on.length,3);
+  const FS=Math.max(13,Math.min(20,Math.min(W,H)*.030));      // readable floor
+  d.font='700 '+FS+"px 'Arial Narrow','Roboto Condensed',Impact,sans-serif";
+  const showLabels=Math.min(W,H)>440 && H/n>FS*1.6;
+  let widest=0;on.forEach(t=>widest=Math.max(widest,d.measureText(t.name).width));
+  if(!showLabels)widest=0;
+  const rr=Math.max(5,Math.min(W,H)*.022);
+  const R=Math.max(Math.min(W,H)*.20,
+                   Math.min(Math.min(W,H)*.40, W/2-widest-rr-16));
+  const pos=on.map((t,i)=>{const a=-Math.PI/2+i/n*Math.PI*2;
+    return {t:t,a:a,x:cx+Math.cos(a)*R,y:cy+Math.sin(a)*R,act:toolActive(t.name)};});
+
+  // spokes: dim when idle, bright + energised when the tool is working
+  pos.forEach(p=>{
+    if(p.act){
+      const grad=d.createLinearGradient(p.x,p.y,cx,cy);
+      grad.addColorStop(0,'rgba(0,255,156,.25)');
+      grad.addColorStop(1,'rgba(0,255,156,.85)');
+      d.strokeStyle=grad;d.lineWidth=2.2;
+    }else{d.strokeStyle='rgba(255,47,61,.22)';d.lineWidth=1.2;}
+    d.beginPath();d.moveTo(cx,cy);d.lineTo(p.x,p.y);d.stroke();
+  });
+
+  // ACTIVE nodes send a particle DOWN the spoke into the core (data feeding the
+  // pipeline). Multiple pips per spoke, phase-offset, so flow reads as motion.
+  d.save();
+  pos.forEach((p,i)=>{
+    if(!p.act)return;
+    for(let k=0;k<3;k++){
+      const ph=((tt*0.9)+i*0.13+k/3)%1;         // 0 at node -> 1 at core
+      const x=p.x+(cx-p.x)*ph, y=p.y+(cy-p.y)*ph;
+      const fade=1-Math.abs(ph-0.5)*1.2;
+      d.beginPath();d.arc(x,y,rr*0.55,0,7);
+      d.fillStyle='#7dffb8';d.shadowColor='#00ff9c';d.shadowBlur=10;
+      d.globalAlpha=Math.max(0,fade);d.fill();
+    }
+  });
+  d.globalAlpha=1;d.shadowBlur=0;d.restore();
+
+  // nodes
+  d.textBaseline='middle';
+  pos.forEach((p,i)=>{
+    const pulse=(Math.sin(tt*2+i)+1)/2;
+    const col=p.act?'#7dffb8':'#00a86b';
+    d.beginPath();d.arc(p.x,p.y,rr*(p.act?1.25:1),0,7);
+    d.fillStyle=p.act?'#0d2a1c':'#0a0305';d.fill();
+    d.strokeStyle=col;d.lineWidth=p.act?2.4:1.8;
+    d.shadowColor='#00ff9c';d.shadowBlur=p.act?(12+pulse*14):(4+pulse*6);
+    d.stroke();d.shadowBlur=0;
+    if(p.act){                                    // ring burst on active nodes
+      const b=(tt*1.6+i)%1;
+      d.strokeStyle='#00ff9c';d.globalAlpha=0.5*(1-b);d.lineWidth=2;
+      d.beginPath();d.arc(p.x,p.y,rr+ b*rr*2.4,0,7);d.stroke();d.globalAlpha=1;
+    }
+    if(!showLabels)return;
+    const right=Math.cos(p.a)>=-0.01;
+    d.textAlign=right?'left':'right';
+    d.fillStyle=p.act?'#aeffd0':'#00a86b';
+    d.fillText(p.t.name,p.x+(right?rr+6:-(rr+6)),p.y);});
+
+  // MAGI core - brightens with how many tools are active
+  const nAct=pos.filter(p=>p.act).length;
+  const cr=Math.max(20,R*.30), heat=Math.min(1,nAct/4);
+  d.beginPath();d.arc(cx,cy,cr,0,7);d.fillStyle='#1a0407';d.fill();
+  d.strokeStyle='#ff2f3d';d.lineWidth=2.4;d.shadowColor='#ff2f3d';
+  d.shadowBlur=14+heat*20;d.stroke();d.shadowBlur=0;
+  if(nAct){const cb=(tt*2)%1;d.strokeStyle='#ff6a72';d.globalAlpha=0.6*(1-cb);
+    d.lineWidth=2;d.beginPath();d.arc(cx,cy,cr+cb*14,0,7);d.stroke();d.globalAlpha=1;}
+  d.fillStyle='#ff2f3d';d.font='700 '+Math.max(14,cr*.52)+"px 'Arial Narrow',Impact,sans-serif";
+  d.textAlign='center';d.textBaseline='middle';d.fillText('中枢',cx,cy);}
+
+/* ECG */
+let ecg=[];
+function ecgDraw(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
+  const d=c.getContext('2d'),W=c.width,H=c.height;d.clearRect(0,0,W,H);
+  if(!ecg.length)for(let i=0;i<220;i++)ecg.push(0);
+  d.beginPath();ecg.forEach((v,i)=>{const x=i/ecg.length*W,y=H/2-v*H*.42;i?d.lineTo(x,y):d.moveTo(x,y)});
+  d.strokeStyle='#00ff9c';d.lineWidth=2;d.shadowColor='#00ff9c';d.shadowBlur=8;d.stroke();d.shadowBlur=0;}
+function ecgTick(){const ph=(tt*2.2)%1,load=(ST.sys&&ST.sys.cpu!=null?ST.sys.cpu:20)/100;
+  let v=0;if(ph<.05)v=.18;else if(ph<.10)v=-.30;else if(ph<.15)v=1;else if(ph<.20)v=-.42;else if(ph<.30)v=.22;
+  ecg.push(v*(.45+load*.75));if(ecg.length>220)ecg.shift();}
+
+/* RECOMPILE SPHERE — tiles fill in as roadmap sectors are restored */
+/* RECOMPILE SPHERE
+   Every roadmap item owns a contiguous longitude wedge of the globe. A wedge
+   fills in when its item reaches done/verified, so the sphere literally
+   rebuilds as the port progresses, and the pattern is specific to this game's
+   roadmap rather than a decorative hash. */
+let PLANET_SEL=null, PLANET_HIT=[];      // hit map: {slug,x,y,r} in canvas px
+const SECCOL={restored:'#00ff9c',active:'#ff8a00',raw:'#ff2f3d'};
+const RGB={'#00ff9c':'0,255,156','#ff8a00':'255,138,0','#ff2f3d':'255,47,61'};
+const rgba=(hex,a)=>'rgba('+(RGB[hex]||'255,47,61')+','+a+')';
+
+function planet(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
+  const d=c.getContext('2d'),W=c.width,H=c.height,cx=W/2,cy=H/2,R=Math.min(W,H)*.42;
+  d.clearRect(0,0,W,H);
+  const sec=PLANET.sectors||[], nSec=Math.max(1,sec.length);
+  const rows=11, cols=nSec*2;                 // two columns per sector
+  const spin=tt*.16;
+  PLANET_HIT=[];
+  for(let r=0;r<rows;r++){
+    const la=(r+.5)/rows*Math.PI, y=cy-Math.cos(la)*R, rr=Math.sin(la)*R;
+    for(let k=0;k<cols;k++){
+      const lo=(k/cols)*Math.PI*2+spin, cl=Math.cos(lo);
+      if(cl<0)continue;                        // back face
+      const x=cx+Math.sin(lo)*rr;
+      const si=Math.floor(k/2)%nSec, S=sec[si];
+      if(!S)continue;
+      const w=Math.max(2,(R*2/cols)*cl*1.7), h=Math.max(2,R/rows*1.1);
+      const dep=.30+cl*.70, isSel=(PLANET_SEL===S.slug);
+      const col=SECCOL[S.state]||SECCOL.raw;
+      if(S.state==='restored'||S.state==='active'){
+        const p=(Math.sin(tt*2+si*.5)+1)/2;
+        const a=(S.state==='active'?(.18+p*.30):(.22+dep*.45));
+        d.fillStyle=rgba(col,a.toFixed(3));
+        d.fillRect(x-w/2,y-h/2,w,h);
+      }
+      d.strokeStyle=isSel?'#ffffff':col;
+      d.globalAlpha=isSel?.95:(S.state==='raw'?dep*.30:dep*.65);
+      d.lineWidth=isSel?1.8:1;
+      d.strokeRect(x-w/2,y-h/2,w,h);
+      d.globalAlpha=1;
+      if(r===5)PLANET_HIT.push({slug:S.slug,x:x,y:y,r:Math.max(w,h)});
+    }}
+  d.strokeStyle='rgba(255,47,61,.55)';d.lineWidth=1.6;
+  d.beginPath();d.arc(cx,cy,R,0,7);d.stroke();
+
+  // callouts: the selection first, then whatever is in flight
+  const fs=Math.max(10,Math.min(14,R*.055));
+  d.font="700 "+fs+"px 'Arial Narrow',Impact,sans-serif";
+  const show=[];
+  if(PLANET_SEL){const S=sec.find(x=>x.slug===PLANET_SEL);if(S)show.push(S);}
+  sec.filter(x=>x.state==='active'&&x.slug!==PLANET_SEL).slice(0,2).forEach(x=>show.push(x));
+  show.slice(0,3).forEach((S,i)=>{
+    const a=-.7+i*.62,x=cx+Math.cos(a)*R*1.02,y=cy+Math.sin(a)*R*1.02;
+    const txt=S.slug.slice(0,22).toUpperCase(), tw=d.measureText(txt).width;
+    const col=(S.slug===PLANET_SEL)?'#ffffff':(SECCOL[S.state]||'#ff8a00');
+    const endX=Math.min(cx+R*1.16,W-tw-10), lx=Math.max(endX+5,x+6);
+    d.strokeStyle=col;d.lineWidth=1.4;d.beginPath();d.moveTo(x,y);d.lineTo(endX,y);d.stroke();
+    d.beginPath();d.arc(x,y,4,0,7);d.fillStyle=col;d.fill();
+    d.fillStyle=col;d.textAlign='left';d.textBaseline='alphabetic';
+    d.fillText(txt,Math.min(lx,W-tw-4),y+fs*.34);});
+
+  d.fillStyle='#00ff9c';d.font="700 "+Math.max(13,R*.16)+"px 'Arial Narrow',Impact,sans-serif";
+  d.textAlign='center';d.fillText((PLANET.pct||0).toFixed(0)+'%',cx,cy+R*1.34);
+  d.fillStyle='rgba(255,106,114,.8)';d.font="700 "+Math.max(9,R*.07)+"px 'Arial Narrow',Impact,sans-serif";
+  d.fillText(PLANET.restored+' / '+PLANET.total+' SECTORS RESTORED',cx,cy+R*1.34+Math.max(12,R*.11));
+}
+
+/* click the globe to select the sector under the pointer */
+function planetPick(c,ev){
+  const b=c.getBoundingClientRect();
+  const mx=(ev.clientX-b.left)*(c.width/b.width);
+  const my=(ev.clientY-b.top)*(c.height/b.height);
+  let best=null,bd=1e9;
+  for(const h of PLANET_HIT){
+    const dx=h.x-mx,dy=h.y-my,dd=dx*dx+dy*dy;
+    if(dd<bd){bd=dd;best=h;}
+  }
+  if(best&&bd<(best.r*3)*(best.r*3)){
+    PLANET_SEL=(PLANET_SEL===best.slug)?null:best.slug;
+    if(typeof paintSectors==='function')paintSectors();
+  }
+}
+
+let pk=[];                 // in-flight packets on the code map
+function codemap(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
+  const d=c.getContext('2d'),W=c.width,H=c.height;d.clearRect(0,0,W,H);
+  d.strokeStyle='rgba(255,47,61,.13)';d.lineWidth=1;
+  for(let x=0;x<W;x+=W/18){d.beginPath();d.moveTo(x,0);d.lineTo(x,H);d.stroke()}
+  for(let y=0;y<H;y+=H/9){d.beginPath();d.moveTo(0,y);d.lineTo(W,y);d.stroke()}
+  const U=(RECOMP.units||[]).slice(0,14);if(!U.length)return;
+  const mx=Math.max(1,...U.map(u=>u.bytes));
+  const FS=Math.max(10,Math.min(15,Math.min(W,H)*.028));
+  d.font='700 '+FS+"px 'Arial Narrow',Impact,sans-serif";
+  // golden-angle placement: even spread, no clustering from modular repeats
+  const pos=U.map((u,i)=>{const a=i*2.39996, r=Math.sqrt((i+0.6)/U.length);
+    return {x:W*(.5+.40*r*Math.cos(a)), y:H*(.5+.38*r*Math.sin(a)), u:u};});
+  pos.forEach(p=>{const mag=p.u.bytes/mx, hle=p.u.kind==='hle';
+    const col=hle?'#ff8a00':'#00ff9c';
+    d.beginPath();d.arc(p.x,p.y,3+mag*7,0,7);d.fillStyle=col;
+    d.shadowColor=col;d.shadowBlur=8;d.fill();d.shadowBlur=0;
+    d.fillStyle=col;d.textAlign='center';
+    const nm=p.u.sym||p.u.file.replace(/\.cpp$/,'');
+    d.fillText(nm.slice(0,20).toUpperCase(),p.x,p.y-9);
+    if(p.u.addr){d.fillStyle='rgba(255,106,114,.75)';
+      d.fillText('0x'+p.u.addr.toString(16),p.x,p.y+FS+6);}});
+  if(pk.length<14&&pos.length>1&&Math.random()<.10){
+    const a=pos[(Math.random()*pos.length)|0],b=pos[(Math.random()*pos.length)|0];
+    if(a!==b)pk.push({a:a,b:b,t:0,sp:.006+Math.random()*.010});}
+  pk=pk.filter(p=>p.t<1);
+  pk.forEach(p=>{p.t+=p.sp;
+    const mx=(p.a.x+p.b.x)/2,my=Math.min(p.a.y,p.b.y)-H*.20,u=1-p.t;
+    const x=u*u*p.a.x+2*u*p.t*mx+p.t*p.t*p.b.x, y=u*u*p.a.y+2*u*p.t*my+p.t*p.t*p.b.y;
+    d.strokeStyle='rgba(255,138,0,.30)';d.lineWidth=1;d.beginPath();d.moveTo(p.a.x,p.a.y);
+    d.quadraticCurveTo(mx,my,p.b.x,p.b.y);d.stroke();
+    d.beginPath();d.arc(x,y,3.2,0,7);d.fillStyle='#ffe000';
+    d.shadowColor='#ffe000';d.shadowBlur=11;d.fill();d.shadowBlur=0;});}
+
+/* BURN-UP CHART — cumulative findings + commits */
+function chart(cid){const c=document.getElementById(cid);if(!c||!c.width||!CHART)return;
+  const d=c.getContext('2d'),W=c.width,H=c.height,P={l:52,r:16,t:14,b:30};
+  const pts=CHART.points;d.clearRect(0,0,W,H);if(!pts.length)return;
+  const iw=W-P.l-P.r, ih=H-P.t-P.b, maxF=Math.max(1,CHART.total_findings);
+  d.strokeStyle='rgba(255,47,61,.16)';d.lineWidth=1;
+  d.font="600 11px Consolas,monospace";d.fillStyle='rgba(255,106,114,.6)';d.textAlign='right';
+  for(let i=0;i<=4;i++){const y=P.t+ih-(i/4)*ih;
+    d.beginPath();d.moveTo(P.l,y);d.lineTo(W-P.r,y);d.stroke();
+    d.fillText(Math.round(maxF*i/4),P.l-6,y+4);}
+  const X=i=>P.l+(pts.length<2?iw/2:i/(pts.length-1)*iw);
+  // cumulative findings area
+  d.beginPath();d.moveTo(X(0),P.t+ih);
+  pts.forEach((p,i)=>d.lineTo(X(i),P.t+ih-p.cum_findings/maxF*ih));
+  d.lineTo(X(pts.length-1),P.t+ih);d.closePath();
+  d.fillStyle='rgba(0,255,156,.13)';d.fill();
+  d.beginPath();pts.forEach((p,i)=>{const x=X(i),y=P.t+ih-p.cum_findings/maxF*ih;i?d.lineTo(x,y):d.moveTo(x,y)});
+  d.strokeStyle='#00ff9c';d.lineWidth=2.4;d.shadowColor='#00ff9c';d.shadowBlur=9;d.stroke();d.shadowBlur=0;
+  // cumulative commits, scaled to its own max
+  const maxC=Math.max(1,CHART.total_commits);
+  d.beginPath();pts.forEach((p,i)=>{const x=X(i),y=P.t+ih-p.cum_commits/maxC*ih*.82;i?d.lineTo(x,y):d.moveTo(x,y)});
+  d.strokeStyle='#ff8a00';d.lineWidth=2;d.setLineDash([7,5]);d.stroke();d.setLineDash([]);
+  // per-day finding bars
+  pts.forEach((p,i)=>{if(!p.findings)return;const x=X(i),h=p.findings/maxF*ih*3.4;
+    d.fillStyle='rgba(255,224,0,.5)';d.fillRect(x-2.5,P.t+ih-h,5,h);});
+  // day labels (thinned so they never collide)
+  d.textAlign='center';d.fillStyle='rgba(255,106,114,.65)';
+  const step=Math.ceil(pts.length/9);
+  pts.forEach((p,i)=>{if(i%step)return;d.fillText(p.day.slice(5),X(i),H-9);});
+  d.textAlign='left';d.fillStyle='#00ff9c';d.fillText('■ cumulative findings',P.l+4,P.t+12);
+  d.fillStyle='#ff8a00';d.fillText('■ cumulative commits',P.l+150,P.t+12);}
+
+function loop(){tt+=.012;ecgTick();
+  if(!ZOOM){unit('cv-unit');magi('cv-magi');ecgDraw('cv-ecg');planet('cv-planet');codemap('cv-map');}
+  else{unit('z-unit');magi('z-magi');ecgDraw('z-ecg');planet('z-planet');codemap('z-map');chart('z-chart');}
+  requestAnimationFrame(loop);}
+loop();
+
+/* ---------- zoom views ---------- */
+const VIEW={
+ stream:()=>`<div class="zgrid" style="grid-template-columns:1.3fr 1fr">
+   <div class="zp"><h3>AI Thought Stream <span class="kx" id="stCount"></span></h3>
+     <div class="scroll" id="stFeed" style="font-size:12px"></div></div>
+   <div class="zp"><h3>Project DNA <span class="kx">理解度</span></h3>
+     <div class="scroll" id="stDna"></div></div></div>`,
+ term:()=>`<div class="zgrid" style="grid-template-columns:1fr 1fr">
+   <div class="zp"><h3>Link Status</h3><div class="kv" id="zk-term"></div></div>
+   <div class="zp"><h3>Project Paths</h3><div class="kv scroll" id="zk-path"></div></div></div>`,
+ emerg:()=>`<div class="zgrid" style="grid-template-columns:1fr 1fr">
+   <div class="zp"><h3>Component Health</h3><div class="scroll" id="zk-health"></div></div>
+   <div class="zp"><h3>Recent Activity</h3><div class="term" id="zk-act"></div></div></div>`,
+ syslog:()=>`<div class="zp" style="flex:1"><h3>System Log / Activated Sequences</h3>
+   <div class="term" id="zk-syslog"></div></div>`,
+ unit:()=>`<div class="zgrid" style="grid-template-columns:1fr 1fr">
+   <div class="zp"><h3>Unit-01 <span style="margin-left:auto;display:flex;gap:5px">
+     <button class="act sm" data-mech="sinanju">SINANJU</button>
+     <button class="act sm" data-mech="zaku">ZAKU</button></span></h3>
+     <canvas class="cv" id="z-unit"></canvas></div>
+   <div class="zp"><h3>Job Control</h3><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+     <button class="act" data-act="build">BUILD</button><button class="act" data-act="drive">DRIVE</button>
+     <button class="act" data-act="catch">CATCH</button></div>
+     <div class="kv" id="zk-job"></div><div class="term" style="margin-top:8px" id="zk-jobtail"></div></div></div>`,
+ magi:()=>`<div class="zgrid" style="grid-template-columns:1.2fr 1fr">
+   <div class="zp"><h3>MAGI — Linked Tooling</h3><canvas class="cv" id="z-magi"></canvas></div>
+   <div class="zp"><h3>Inventory</h3><div class="scroll" id="zk-tools"></div></div></div>`,
+ vitals:()=>`<div class="zgrid" style="grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr">
+   <div class="zp" style="grid-column:span 2"><h3>Pulse</h3><canvas class="cv" id="z-ecg" style="height:120px"></canvas></div>
+   <div class="zp"><h3>Host</h3><div class="grid4" id="zk-vit"></div></div>
+   <div class="zp"><h3>Detail</h3><div class="kv" id="zk-vit2"></div></div></div>`,
+ user:()=>`<div class="zgrid" style="grid-template-columns:1fr 1fr">
+   <div class="zp"><h3>Operator Profile</h3><div id="zk-form"></div>
+     <div style="display:flex;gap:6px;margin-top:8px"><button class="act" id="saveSet">SAVE</button>
+     <span id="setMsg" class="kv"></span></div></div>
+   <div class="zp"><h3>Silhouette</h3>
+     <div class="kv">Upload a PNG with transparency. It is masked into the operator block.</div>
+     <input type="file" id="silIn" accept="image/*" style="margin:8px 0">
+     <div style="flex:1;background:#000;border:1px solid var(--acc-dim);position:relative">
+       <div id="silPrev" style="position:absolute;inset:10px;background:linear-gradient(180deg,#3a0c12,#160406);
+         -webkit-mask:var(--silm) center/contain no-repeat;mask:var(--silm) center/contain no-repeat"></div>
+     </div></div></div>`,
+ planet:()=>`<div class="zgrid" style="grid-template-columns:1.3fr 1fr">
+   <div class="zp"><h3>Recompile Sphere</h3><canvas class="cv" id="z-planet"></canvas></div>
+   <div class="zp"><h3>Sectors</h3><div class="grid4" id="zk-pt" style="flex:none;margin-bottom:8px"></div>
+     <div class="scroll" id="zk-sec"></div></div></div>`,
+ codemap:()=>`<div class="zgrid" style="grid-template-columns:1.3fr 1fr">
+   <div class="zp"><h3>Transit Map</h3><canvas class="cv" id="z-map"></canvas></div>
+   <div class="zp"><h3>Churn (14d)</h3><div class="scroll" id="zk-flow"></div></div></div>`,
+ alert:()=>`<div class="zgrid" style="grid-template-columns:1fr 1fr">
+   <div class="zp"><h3>Blockers</h3><div class="scroll" id="zk-block"></div></div>
+   <div class="zp"><h3>Roadmap</h3><div class="scroll" id="zk-road"></div></div></div>`,
+  browser:()=>`<div class="zp" style="flex:1">
+   <h3>Browser <span class="kx" style="margin-left:auto;font-size:10px" id="bwNote"></span></h3>
+   <div class="mv-bar" style="margin-bottom:6px">
+     <button class="act sm" id="bwBack">◀</button>
+     <button class="act sm" id="bwHome">HOME</button>
+     <input id="bwUrl" placeholder="search or url…" style="flex:1">
+     <button class="act sm" id="bwGo">GO</button>
+     <button class="act sm" id="bwPop">OPEN IN WINDOW</button>
+   </div>
+   <div class="mv-stage" id="bwStage" style="flex:1"></div></div>`,
+ sessions:()=>`<div class="zgrid" style="grid-template-columns:1fr 1.15fr">
+   <div class="zp"><h3>Session Logbook</h3><div class="scroll" id="zk-sess"></div></div>
+   <div class="zp"><h3>Detail</h3><div class="scroll" id="zk-sessd">
+     <div class="kv">select a session on the left</div></div></div></div>`,
+ progress:()=>`<div class="zgrid" style="grid-template-rows:1.25fr 1fr">
+   <div class="zp"><h3>Burn-up — findings &amp; commits over time</h3>
+     <canvas class="cv" id="z-chart"></canvas></div>
+   <div class="zp"><h3>Totals</h3><div class="grid4" id="zk-tot" style="flex:none"></div>
+     <div class="scroll" id="zk-days" style="margin-top:8px"></div></div></div>`,
+ needed:()=>`<div class="zgrid" style="grid-template-columns:1fr 1fr">
+   <div class="zp"><h3>Actionable Now</h3><div class="scroll" id="zk-now"></div></div>
+   <div class="zp"><h3>Blocked — and by what</h3><div class="scroll" id="zk-blk"></div></div></div>`,
+ assets:()=>`<div class="zgrid" style="grid-template-columns:1.15fr 1fr">
+   <div class="zp"><h3>Asset Library <span class="kx" id="asTot"></span></h3>
+     <div class="grid4" id="asTiles" style="flex:none;margin-bottom:8px"></div>
+     <div class="scroll" id="asGroups"></div></div>
+   <div class="zp"><h3>Harvested Capabilities</h3>
+     <div class="scroll" id="asCaps"></div></div></div>`,
+};
+
+const POST={
+ stream:async()=>{
+   const KIND={discovery:['◆','var(--cyan,#00e5ff)'],hypothesis:['◈','var(--amb)'],
+     fix:['✓','var(--grn)'],fail:['✕','var(--acc)'],commit:['⎇','var(--grn-dim)'],
+     milestone:['★','var(--yel,#ffe000)'],runtime:['●','var(--grn)']};
+   const render=async()=>{
+     const d=await api('/api/events?limit=70');
+     $('#stCount').textContent=(d.events||[]).length+' events';
+     const now=d.now||Math.floor(Date.now()/1000);
+     const ago=t=>{const s=now-t;return s<60?s+'s':s<3600?((s/60)|0)+'m':s<86400?((s/3600)|0)+'h':((s/86400)|0)+'d';};
+     $('#stFeed').innerHTML=(d.events||[]).map((e,i)=>{
+       const[ic,col]=KIND[e.kind]||['·','var(--mut)'];
+       const fresh=(now-e.ts)<20;
+       return `<div class="ev" style="border-left:2px solid ${col};padding:3px 0 3px 9px;margin:0 0 5px 4px;
+         ${fresh?'animation:evin .5s':''}">
+         <span style="color:${col};font-weight:700">${ic}</span>
+         <b style="font-family:var(--disp);letter-spacing:.06em;color:${col}">${esc(e.agent)}</b>
+         <span style="color:var(--mut);font-size:9px">· ${ago(e.ts)} ago</span>
+         <span style="float:right;opacity:${0.3+e.weight*0.7}">${'▮'.repeat(Math.round(e.weight*5))}</span>
+         <br><span style="color:var(--ink)">${esc(e.title)}</span></div>`;}).join('')
+       ||'<div class="kv">no events yet</div>';
+   };
+   await render();
+   if(POST._streamTimer)clearInterval(POST._streamTimer);
+   POST._streamTimer=setInterval(()=>{if(ZOOM==='stream')render();else{clearInterval(POST._streamTimer);POST._streamTimer=0;}},3000);
+   // DNA bars - real counts
+   const dna=await api('/api/dna');
+   const bars=[['functions named',dna.functions_named,dna.functions_total],
+     ['findings',dna.findings,dna.findings],['fixes verified',dna.fixes,dna.findings],
+     ['strings',dna.strings,dna.strings],['addresses',dna.addresses,dna.addresses],
+     ['structures',dna.structures,Math.max(dna.structures,200)],
+     ['characters',dna.characters,Math.max(dna.characters,100)],
+     ['engine patterns',dna.engine_patterns,dna.engine_patterns]];
+   const mx=Math.max(...bars.map(b=>b[2]||1));
+   $('#stDna').innerHTML=bars.map(b=>{const pct=Math.min(100,(b[1]/(mx||1))*100);
+     return `<div style="margin:0 0 7px">
+       <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--mut)">
+         <span>${b[0]}</span><b style="color:var(--grn)">${(b[1]||0).toLocaleString()}</b></div>
+       <div class="bar"><i style="width:${Math.max(3,pct)}%"></i></div></div>`;}).join('')+
+     (dna.by_game?`<div class="kv" style="margin-top:8px;color:var(--mut)">by game: `+
+       Object.entries(dna.by_game).map(g=>esc(g[0])+' '+g[1]).join(' · ')+'</div>':'');
+ },
+ term:()=>{$('#zk-term').innerHTML=`<b>TERMINAL</b> <u>${esc(SET.terminal)}</u><br>
+   <b>ENDPOINT</b> <u>${esc(location.host)}</u><br><b>STATE</b> <u>CONNECTED</u><br>
+   <b>UPTIME</b> <u>${Math.floor((Date.now()-T0)/1000)}s</u><br>
+   <b>RUNNER</b> <u>${ST.proc&&ST.proc.runner_alive?'ALIVE':'down'}</u><br>
+   <b>GIT</b> <u>${ST.git?(ST.git.dirty?'DIRTY':'clean')+' '+esc(ST.git.head||''):'—'}</u>`;
+   $('#zk-path').innerHTML=`<b>PROJECT</b><br><u>${esc(SET.project_path)}</u><br><br>
+   <b>ORCHESTRATOR</b><br><u>Prometheus_Master\\09_ORCHESTRATOR</u><br><br>
+   <b>CLASSIC HUB</b><br><a href="/hub" style="color:var(--grn)">/hub</a>`;},
+ emerg:()=>{const h=health();
+   $('#zk-health').innerHTML=h.map(x=>`<div class="row"><span style="color:${x.ok?'var(--grn)':'var(--acc)'}">
+     ${x.ok?'● OK  ':'● FAIL'}</span> ${esc(x.name)} <span style="color:var(--mut)">${esc(x.note||'')}</span></div>`).join('');
+   $('#zk-act').innerHTML=SEQ.map(s=>`<span class="${s.cls}">${esc(s.t)}</span>`).join('\n');},
+ syslog:()=>{$('#zk-syslog').innerHTML=SEQ.map(s=>`<span class="${s.cls}">${esc(s.t)}</span>`).join('\n');},
+ unit:()=>{bindActs();
+   document.querySelectorAll('[data-mech]').forEach(b=>{
+     b.style.opacity=((SET.mech_model||'sinanju')===b.dataset.mech)?1:.45;
+     b.onclick=async()=>{SET=await post('/api/settings',{mech_model:b.dataset.mech});
+       document.querySelectorAll('[data-mech]').forEach(x=>
+         x.style.opacity=(SET.mech_model===x.dataset.mech)?1:.45);};});
+   const a=ST.action||{};$('#zk-job').innerHTML=`<b>STATE</b> <u>${jobState().toUpperCase()}</u><br>
+     <b>JOB</b> <u>${esc(a.name||'—')}</u><br><b>ELAPSED</b> <u>${a.elapsed||0}s</u><br>
+     <b>RC</b> <u>${a.rc==null?'—':a.rc}</u>`;
+   $('#zk-jobtail').textContent=(a.tail||[]).join('');},
+ magi:()=>{$('#zk-tools').innerHTML=TOOLS.map(t=>`<div class="row">
+   <span style="color:${t.online?'var(--grn)':'var(--mut)'}">${t.online?'● ONLINE ':'○ ABSENT '}</span>
+   <b style="font-family:var(--disp);font-size:13px;letter-spacing:.1em">${esc(t.name)}</b>
+   <span style="color:var(--mut)"> — ${esc(t.role)}</span></div>`).join('');},
+ vitals:()=>renderVitals(),
+ user:()=>{const F=[['user_name','NAME'],['user_kanji','KANJI'],['user_id','ID'],['clearance','CLEARANCE'],
+   ['terminal','TERMINAL'],['project_path','PROJECT PATH'],['motto','MOTTO'],['motto_jp','MOTTO (JP)'],['accent','ACCENT']];
+   $('#zk-form').innerHTML=F.map(([k,l])=>`<label class="f"><span>${l}</span>
+     <input data-set="${k}" value="${esc(SET[k])}"></label>`).join('')+
+     `<label class="f"><span>PERMISSIONS</span><select data-set="claude_perm">`+
+       ['bypassPermissions','acceptEdits','default','plan'].map(m=>
+         `<option${SET.claude_perm===m?' selected':''}>${m}</option>`).join('')+
+     `</select></label>`+
+     `<label class="f"><span>SCANLINES</span><input type="checkbox" data-set="scanlines"
+       ${SET.scanlines?'checked':''} style="flex:none"></label>`+
+     `<div class="kv" style="margin-top:6px;color:var(--mut)">CONSOLE CWD is where the console runs
+      <b style="color:var(--grn)">claude --continue</b>. Point it at the same folder your Claude Code
+      window is open in and they share one session. PERMISSIONS must not be
+      <b style="color:var(--acc)">default</b> or <b style="color:var(--acc)">plan</b> headlessly &mdash;
+      there is no approval prompt, so tool calls are refused and the model reports it has no access.</div>`;
+   $('#saveSet').onclick=async()=>{const p={};
+     document.querySelectorAll('[data-set]').forEach(i=>p[i.dataset.set]=i.type==='checkbox'?i.checked:i.value);
+     SET=await post('/api/settings',p);applySettings();$('#setMsg').textContent='saved.';};
+   $('#silIn').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+     r.onload=async()=>{await post('/api/silhouette',{data:r.result});applySil();$('#setMsg').textContent='silhouette saved.';};
+     r.readAsDataURL(f);};},
+ planet:()=>{paintSectors();
+   const cv=$('#z-planet');if(cv)cv.onclick=e=>planetPick(cv,e);},
+ _planetOld:()=>{const s=PLANET.sectors||[];
+   $('#zk-pt').innerHTML=[['restored',PLANET.restored],['total',PLANET.total],
+     ['active',s.filter(x=>x.state==='active').length],['pct',(PLANET.pct||0)+'%']]
+     .map(x=>`<div class="tile"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');
+   $('#zk-sec').innerHTML=s.map(x=>`<div class="row"><span style="color:${
+     x.state==='restored'?'var(--grn)':x.state==='active'?'var(--amb)':'var(--mut)'}">
+     ${x.state==='restored'?'█':x.state==='active'?'▓':'░'}</span>
+     <b>${esc(x.phase)}</b> ${esc(x.title||x.slug)}</div>`).join('');},
+ codemap:()=>{$('#zk-flow').innerHTML=FLOW.map(f=>`<div class="row">
+   <span style="color:var(--grn)">+${f.add}</span> <span style="color:var(--acc)">-${f.del}</span>
+   ${esc(f.file)} <span style="color:var(--mut)">${esc(f.repo)} · ${esc(f.ago)}</span></div>`).join('')
+   ||'<div class="kv">no recent churn</div>';},
+ alert:()=>{const R=(ST.roadmap||{}).items||[];
+   $('#zk-block').innerHTML=R.filter(i=>i.status==='blocked'||i.actionable).map(i=>`<div class="row">
+     <span style="color:${i.actionable?'var(--amb)':'var(--mut)'}">${i.actionable?'▶':'■'}</span>
+     <b>${esc(i.slug)}</b><br><span style="color:var(--mut)">${esc(i.title||'')}</span></div>`).join('')
+     ||'<div class="kv">no blockers</div>';
+   $('#zk-road').innerHTML=R.map(i=>`<div class="row"><span style="color:${
+     i.status==='verified'||i.status==='done'?'var(--grn)':i.status==='in_progress'?'var(--amb)':'var(--mut)'}">
+     ${esc(i.status)}</span> ${esc(i.slug)}</div>`).join('');},
+
+ browser:()=>{
+   const stage=$('#bwStage');
+   const go=(raw,push)=>{
+     const src=mediaSrc(raw); if(!src)return;
+     const host=hostOf(src);
+     stage.innerHTML='';
+     if(REFUSES.test(host)){
+       stage.innerHTML='<div class="kv" style="padding:14px">'+esc(host)+
+         ' sends <b style="color:var(--acc)">X-Frame-Options</b>, so no page may embed it.'+
+         '<br><br>Opening a private Prometheus window instead — incognito, separate'+
+         ' profile, nothing written to your normal browser history.</div>';
+       $('#bwNote').textContent='PRIVATE WINDOW';openPrivate(raw);return;}
+     const f=document.createElement('iframe');
+     f.src=src;f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';
+     f.setAttribute('allowfullscreen','');
+     f.referrerPolicy='strict-origin-when-cross-origin';
+     stage.appendChild(f);
+     $('#bwNote').textContent=host.replace(/^www\./,'').toUpperCase();
+     if(push!==false){BW_HIST.push(raw);}
+     $('#bwUrl').value=raw;
+     post('/api/settings',{media_url:raw}).then(x=>SET=x).catch(()=>{});
+   };
+   $('#bwGo').onclick=()=>go($('#bwUrl').value);
+   $('#bwUrl').onkeydown=e=>{if(e.key==='Enter')go($('#bwUrl').value);};
+   $('#bwHome').onclick=()=>go('prometheus ps2 recompile');
+   $('#bwPop').onclick=()=>openPrivate($('#bwUrl').value);
+   $('#bwBack').onclick=()=>{BW_HIST.pop();const prev=BW_HIST[BW_HIST.length-1];
+     if(prev)go(prev,false);};
+   if(!$('#bwStage').dataset.loaded){
+     $('#bwStage').dataset.loaded='1';
+     const start=$('#mvUrl').value||SET.media_url||'';
+     go(start&&start.trim()?start:'prometheus ps2 recompile',true);
+   }
+ },
+ assets:async()=>{
+   const d=await api('/api/assets');
+   $('#asTot').textContent=(d.total||0).toLocaleString()+' files · '+
+     ((d.bytes||0)/1073741824).toFixed(1)+' GB';
+   const models=(d.groups||[]).filter(g=>g.kind==='model'||g.kind==='skeleton');
+   const nMod=models.reduce((a,g)=>a+g.n,0), nVer=models.reduce((a,g)=>a+(g.v||0),0);
+   $('#asTiles').innerHTML=[
+     ['files',(d.total||0).toLocaleString()],
+     ['GB',((d.bytes||0)/1073741824).toFixed(0)],
+     ['games',new Set((d.groups||[]).map(g=>g.serial)).size],
+     ['models verified',nVer+'/'+nMod]]
+     .map(x=>`<div class="tile"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');
+   $('#asGroups').innerHTML=(d.groups||[]).map(g=>{
+     const unver=(g.kind==='model'||g.kind==='skeleton')&&!g.v;
+     return `<div class="row">
+       <b style="font-family:var(--disp);font-size:14px;color:var(--acc)">${esc(g.serial||'-')}</b>
+       <span class="tag" style="color:var(--grn)">${esc(g.kind)}</span>
+       <span style="color:var(--ink)">${g.n.toLocaleString()} files</span>
+       <span style="color:var(--mut)">${(g.b/1048576).toFixed(0)} MB</span>
+       ${unver?'<span class="tag" style="color:var(--acc)">UNVERIFIED</span>':''}
+     </div>`;}).join('')||'<div class="kv">nothing indexed - run index_assets.py</div>';
+   $('#asCaps').innerHTML=(d.capabilities||[]).map(c=>`<div class="row">
+       <b style="font-family:var(--disp);font-size:13px;color:var(--grn)">${esc(c.name)}</b>
+       <span class="tag" style="color:var(--amb)">${esc(c.kind)}</span>
+       <span style="color:var(--mut)">${c.files} files</span>
+       <br><span style="color:var(--mut)">${esc(c.description||'')}</span>
+     </div>`).join('')||'<div class="kv">no capabilities registered</div>';
+ },
+ sessions:async()=>{const S=await api('/api/sessions');
+   $('#zk-sess').innerHTML=S.map((s,i)=>`<div class="row sess" data-i="${i}" style="cursor:pointer">
+     <b style="font-family:var(--disp);font-size:14px;color:var(--acc)">${esc(s.day)}</b>
+     <span style="color:var(--grn)">${s.n_commits} commits</span>
+     <span style="color:var(--amb)">${s.n_findings} findings</span>
+     <br><span style="color:var(--mut)">${esc(s.title)}</span></div>`).join('');
+   const show=i=>{const s=S[i];$('#zk-sessd').innerHTML=
+     `<div class="big" style="color:var(--acc)">${esc(s.day)}</div>
+      <div class="kv" style="margin-bottom:6px">${esc(s.title)}</div>
+      ${s.docs.length?`<div class="kv"><b>DOCS</b> ${s.docs.map(esc).join(', ')}</div>`:''}
+      <div class="kv"><b>FINDINGS</b> ${Object.entries(s.findings).filter(e=>e[0]!=='total')
+        .map(e=>esc(e[0])+'='+e[1]).join('  ')||'—'}</div>
+      ${s.points.length?`<h3 style="margin-top:8px">Highlights</h3>`+s.points.map(p=>
+        `<div class="row">${esc(p)}</div>`).join(''):''}
+      ${s.commits.length?`<h3 style="margin-top:8px">Commits</h3>`+s.commits.map(c=>
+        `<div class="row"><span style="color:var(--amb)">${esc(c.hash)}</span>
+         <span style="color:var(--mut)">${esc(c.repo)}</span> ${esc(c.subject)}</div>`).join(''):''}`;
+     document.querySelectorAll('.sess').forEach(e=>e.style.background=
+       e.dataset.i==i?'rgba(255,47,61,.14)':'');};
+   document.querySelectorAll('.sess').forEach(e=>e.onclick=()=>show(+e.dataset.i));
+   if(S.length)show(0);},
+ progress:async()=>{const T=await api('/api/timeline');CHART=T;
+   $('#zk-tot').innerHTML=[['findings',T.total_findings],['commits',T.total_commits],
+     ['active days',T.active_days],['roadmap',(ST.roadmap||{}).done+'/'+(ST.roadmap||{}).total]]
+     .map(x=>`<div class="tile"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');
+   $('#zk-days').innerHTML=T.points.slice().reverse().map(p=>`<div class="row">
+     <b style="color:var(--acc)">${esc(p.day)}</b>
+     <span style="color:var(--amb)">+${p.findings} findings</span>
+     <span style="color:var(--grn)">+${p.commits} commits</span>
+     <span style="color:var(--mut)">total ${p.cum_findings}</span></div>`).join('');},
+ needed:async()=>{const N=await api('/api/needed');
+   $('#zk-now').innerHTML=`<div class="kv" style="margin-bottom:6px">
+     <b>${N.done}/${N.total} complete</b> · ${N.actionable.length} ready to work · ${N.blocked.length} waiting</div>`+
+     N.actionable.map(i=>`<div class="row"><span style="color:var(--amb)">▶</span>
+       <b style="font-family:var(--disp);font-size:14px;color:var(--grn)">${esc(i.slug)}</b>
+       <span class="tag" style="color:var(--amb)">${esc(i.status)}</span>
+       <br><span style="color:var(--mut)">${esc(i.title||'')}</span>
+       ${i.fix_approach?`<br><span style="color:var(--ink)">FIX: ${esc(i.fix_approach)}</span>`:''}
+       ${i.verify_method?`<br><span style="color:var(--mut)">VERIFY: ${esc(i.verify_method)}</span>`:''}
+       </div>`).join('')||'<div class="kv">nothing actionable</div>';
+   $('#zk-blk').innerHTML=N.blocked.map(i=>`<div class="row">
+     <span style="color:var(--mut)">■</span> <b>${esc(i.slug)}</b>
+     <br><span style="color:var(--acc)">waiting on: ${i.blocked_by.map(esc).join(', ')}</span>
+     <br><span style="color:var(--mut)">${esc(i.title||'')}</span></div>`).join('')
+     ||'<div class="kv">nothing blocked</div>';},
+};
+
+/* ---------- inline operator console (lives in the welcome panel) ----------
+   Two streams feed it:
+     MIRROR  - a live tail of the active Claude Code session transcript, so work
+               done in a VS Code window behind Prometheus is projected here.
+     BRIDGE  - output of prompts sent from here (claude --continue), which
+               resume that same conversation.                                  */
+let MIR={out:[],session:null,enabled:true}, MIR_SEEN=0, HIST=[], HIST_I=-1;
+function openConsole(){$('#msWelcome').hidden=true;$('#msConsole').hidden=false;
+  $('#cliCwd').textContent=SET.claude_cwd||'';setTimeout(()=>$('#cliIn').focus(),60);}
+function closeConsole(){$('#msConsole').hidden=true;$('#msWelcome').hidden=false;}
+$('#startBtn').onclick=openConsole;
+$('#cliClose').onclick=closeConsole;
+function cliAppend(html){const o=$('#cliOut');const atBottom=
+  o.scrollHeight-o.scrollTop-o.clientHeight<60;
+  o.innerHTML+=html;if(atBottom)o.scrollTop=o.scrollHeight;}
+(()=>{const send=async()=>{const v=$('#cliIn').value.trim();if(!v)return;
+   cliAppend(`\n<span class="u">&gt; ${esc(v)}</span>\n`);
+   HIST.push(v);HIST_I=HIST.length;
+   $('#cliIn').value='';
+   seq('claude ← '+v.slice(0,60),'warn');
+   const r=await post('/api/claude/send',{prompt:v});
+   if(r.error)cliAppend(`<span class="e">!! ${esc(r.error)}</span>\n`);};
+ $('#cliGo').onclick=send;
+ $('#cliStop').onclick=async()=>{await post('/api/claude/stop',{});seq('claude stopped','warn');};
+ $('#mirrorInd').onclick=async()=>{MIR.enabled=!MIR.enabled;
+   await post('/api/mirror/set',{enabled:MIR.enabled});};
+ $('#cliIn').onkeydown=e=>{
+   if(e.key==='Enter'){send();return;}
+   if(e.key==='Escape'){e.stopPropagation();closeConsole();return;}
+   if(e.key==='ArrowUp'&&HIST.length){e.preventDefault();
+     HIST_I=Math.max(0,HIST_I-1);$('#cliIn').value=HIST[HIST_I]||'';}
+   if(e.key==='ArrowDown'&&HIST.length){e.preventDefault();
+     HIST_I=Math.min(HIST.length,HIST_I+1);$('#cliIn').value=HIST[HIST_I]||'';}};})();
+
+async function pumpMirror(){
+  try{
+    const m=await api('/api/mirror');
+    MIR.session=m.session;MIR.enabled=m.enabled;
+    const ind=$('#mirrorInd');
+    if(ind){ind.classList.toggle('off',!m.enabled);
+      $('#mirrorTxt').textContent=m.enabled
+        ? 'MIRROR '+(m.session?String(m.session).slice(0,8):'—') : 'MIRROR OFF';}
+    // only append lines we have not shown yet
+    if(m.out&&m.out.length){
+      if(MIR_SEEN===0){MIR_SEEN=m.out.length;}          // don't dump backlog
+      else if(m.out.length>MIR_SEEN){
+        const fresh=m.out.slice(MIR_SEEN);MIR_SEEN=m.out.length;
+        cliAppend(fresh.map(l=>`<span class="m">${esc(l)}</span>`).join('\n')+'\n');}
+      else if(m.out.length<MIR_SEEN){MIR_SEEN=m.out.length;}
+    }
+  }catch(e){}
+}
+function bindActs(){document.querySelectorAll('[data-act]').forEach(b=>b.onclick=async()=>{
+  const r=await post('/api/action/start',{name:b.dataset.act});
+  seq((r.error?'!! ':'▸ ')+(r.error||('started '+r.started)),r.error?'bad':'ok');});}
+
+/* ---------- VIEWPORT / second screen ----------
+   YouTube is embeddable via its /embed/ endpoint. Most streaming services
+   (Crunchyroll included) send X-Frame-Options / frame-ancestors, which the
+   browser enforces - no page can embed them, so those get POP OUT + FLOAT. */
+const YT=/(?:youtube\.com\/(?:watch\?[^ ]*v=|live\/|shorts\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/;
+const YTLIST=/[?&]list=([A-Za-z0-9_-]+)/;
+/* Verified by response headers: Bing and Wikipedia send no X-Frame-Options and
+   embed fine; DuckDuckGo and Google both send SAMEORIGIN and refuse. So plain
+   search terms go to Bing, which actually renders inside the viewport. */
+const SEARCH='https://www.bing.com/search?q=';
+/* Hosts known to refuse framing - sent straight to a real window instead of
+   showing the operator a silently blank panel. */
+const REFUSES=/(^|\.)(google\.|duckduckgo\.|crunchyroll\.|netflix\.|hulu\.|disneyplus\.|x\.com|twitter\.|instagram\.|facebook\.|reddit\.|tiktok\.|spotify\.|twitch\.tv)/i;
+/* Open a genuinely unrestricted window: real Chromium, incognito, on a
+   Prometheus-only profile. X-Frame-Options cannot be bypassed inside an
+   iframe, so anything that refuses embedding goes here instead. */
+async function openPrivate(raw){
+  const v=(raw||'').trim(); if(!v)return;
+  let url=v;
+  const m=v.match(YT)||(/^[A-Za-z0-9_-]{11}$/.test(v)?[null,v]:null);
+  if(m)url='https://www.youtube.com/watch?v='+m[1];          // watch page, not embed
+  const r=await post('/api/browser/open',{url:url,private:true});
+  if(r.error){seq('private browser failed: '+r.error,'bad');
+    window.open(mediaSrc(v),'prom_media','width=1200,height=800');}
+  else seq('private window ▸ '+String(r.opened).slice(0,54),'ok');
+}
+function hostOf(u){try{return new URL(u).hostname;}catch(e){return '';}}
+function mediaSrc(raw){
+  const u=(raw||'').trim(); if(!u)return null;
+  const m=u.match(YT);
+  if(m){const l=u.match(YTLIST);
+    return 'https://www.youtube-nocookie.com/embed/'+m[1]+'?autoplay=1&rel=0'+(l?'&list='+l[1]:'');}
+  if(/^[A-Za-z0-9_-]{11}$/.test(u))
+    return 'https://www.youtube-nocookie.com/embed/'+u+'?autoplay=1&rel=0';
+  if(/^https?:\/\//i.test(u))return u;
+  // a URL = one or more dotted labels then a TLD, optionally a path/query.
+  // Must allow subdomains (en.wikipedia.org) - the old single-label regex
+  // sent those to search instead of loading them.
+  if(/^([a-z0-9-]+\.)+[a-z]{2,}([\/?#]|$)/i.test(u)){
+    // typing a bare search-engine domain lands on its homepage, which refuses
+    // framing; only its /search path frames. Send those to a Bing search box.
+    if(/^(www\.)?(bing|google|duckduckgo)\.[a-z.]+\/?$/i.test(u))
+      return 'https://www.bing.com/search?q=web';
+    return 'https://'+u;
+  }
+  return SEARCH+encodeURIComponent(u);                          // search terms
+}
+function mediaLoad(raw,save){
+  const src=mediaSrc(raw);const st=$('#mvStage');
+  const old=st.querySelector('iframe');if(old)old.remove();
+  if(!src){$('#mvEmpty').style.display='';$('#mv-note').textContent='';return;}
+  const host=hostOf(src);
+  if(REFUSES.test(host)){        // would render blank - open it for real instead
+    $('#mvEmpty').style.display='';
+    $('#mv-note').textContent='REFUSES EMBED';
+    $('#mv-note').style.color='var(--amb)';
+    openPrivate(raw);
+    seq(host+' refuses embedding - opened a private window','warn');
+    if(save!==false)post('/api/settings',{media_url:raw}).then(x=>SET=x).catch(()=>{});
+    return;
+  }
+  $('#mvEmpty').style.display='none';
+  const f=document.createElement('iframe');
+  f.src=src;f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';
+  f.setAttribute('allowfullscreen','');
+  /* Do NOT send no-referrer here: the YouTube player refuses to start and
+     reports "Error 153" when the embedding origin is hidden from it. */
+  f.referrerPolicy='strict-origin-when-cross-origin';
+  st.appendChild(f);
+  const yt=/youtube-nocookie/.test(src);
+  $('#mv-note').textContent=yt?'YOUTUBE':host.replace(/^www\./,'').toUpperCase().slice(0,22);
+  $('#mv-note').style.color=yt?'var(--grn)':'var(--cyan,#00e5ff)';
+  if(save!==false)post('/api/settings',{media_url:raw}).then(x=>SET=x).catch(()=>{});
+}
+$('#mvGo').onclick=()=>mediaLoad($('#mvUrl').value);
+
+/* ---- local library: play your own files, with seeking ---- */
+function mvClearStage(){const st=$('#mvStage');
+  ['iframe','video','.mv-lib'].forEach(sel=>{const n=st.querySelector(sel);if(n)n.remove();});}
+async function mvBrowse(dir){
+  const st=$('#mvStage');mvClearStage();$('#mvEmpty').style.display='none';
+  const d=await api('/api/media/list'+(dir?('?dir='+encodeURIComponent(dir)):''));
+  const box=document.createElement('div');box.className='mv-lib';
+  if(d.error){box.innerHTML='<div class="kv" style="color:var(--acc)">'+esc(d.error)+'</div>';}
+  else{
+    let h='<h4>'+esc(d.cwd||'LIBRARY')+'</h4>';
+    if(d.parent)h+='<div class="it d" data-dir="'+esc(d.parent)+'">.. up</div>';
+    (d.dirs||[]).forEach(x=>h+='<div class="it d" data-dir="'+esc(x.path)+'">▸ '+esc(x.name)+'</div>');
+    (d.files||[]).forEach(x=>h+='<div class="it f" data-file="'+esc(x.path)+'">▶ '+esc(x.name)+
+      ' <span style="color:var(--mut)">'+(x.size/1048576).toFixed(0)+' MB</span></div>');
+    if(!(d.dirs||[]).length&&!(d.files||[]).length)h+='<div class="kv">nothing playable here</div>';
+    box.innerHTML=h;
+  }
+  st.appendChild(box);
+  box.querySelectorAll('[data-dir]').forEach(e=>e.onclick=()=>mvBrowse(e.dataset.dir));
+  box.querySelectorAll('[data-file]').forEach(e=>e.onclick=()=>mvPlayLocal(e.dataset.file));
+  $('#mv-note').textContent='LIBRARY';$('#mv-note').style.color='var(--amb)';
+}
+function mvPlayLocal(path){
+  const st=$('#mvStage');mvClearStage();$('#mvEmpty').style.display='none';
+  const v=document.createElement('video');
+  v.src='/media/file?path='+encodeURIComponent(path);
+  v.controls=true;v.autoplay=true;
+  v.onerror=()=>{$('#mv-note').textContent='CODEC UNSUPPORTED';
+    $('#mv-note').style.color='var(--acc)';};
+  st.appendChild(v);
+  const nm=path.split(/[\/]/).pop();
+  $('#mv-note').textContent=nm.slice(0,24);$('#mv-note').style.color='var(--grn)';
+  seq('viewport playing '+nm.slice(0,40),'ok');
+}
+$('#mvLocal').onclick=()=>mvBrowse(null);
+$('#mvBig').onclick=()=>openZ('browser');
+$('#mvUrl').onkeydown=e=>{if(e.key==='Enter')mediaLoad($('#mvUrl').value);};
+$('#mvClear').onclick=()=>{$('#mvUrl').value='';mvClearStage();mediaLoad('');};
+$('#mvPop').onclick=()=>openPrivate($('#mvUrl').value);
+/* Document Picture-in-Picture: a real always-on-top window that keeps the
+   player above every other application, so the HQ never has to be left. */
+$('#mvPip').onclick=async()=>{
+  const st=$('#mvStage'),f=st.querySelector('iframe')||st.querySelector('video');
+  if(!f){$('#mv-note').textContent='LOAD SOMETHING FIRST';return;}
+  if(!window.documentPictureInPicture){
+    $('#mv-note').textContent='FLOAT UNSUPPORTED — USE POP OUT';
+    $('#mv-note').style.color='var(--amb)';return;}
+  try{
+    const w=await documentPictureInPicture.requestWindow({width:640,height:380});
+    w.document.body.style.cssText='margin:0;background:#000;overflow:hidden';
+    w.document.body.appendChild(f);
+    f.style.cssText='position:fixed;inset:0;width:100%;height:100%;border:0';
+    w.addEventListener('pagehide',()=>{f.style.cssText='';st.appendChild(f);});
+    seq('viewport floating','ok');
+  }catch(e){$('#mv-note').textContent='FLOAT REFUSED';}
+};
+
+/* Sector list and globe share one selection. */
+function paintSectors(){
+  const s=PLANET.sectors||[];
+  const t=$('#zk-pt');
+  if(t)t.innerHTML=[['restored',PLANET.restored],['total',PLANET.total],
+    ['active',s.filter(x=>x.state==='active').length],['pct',(PLANET.pct||0)+'%']]
+    .map(x=>`<div class="tile"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');
+  const l=$('#zk-sec');
+  if(l){l.innerHTML=s.map(x=>`<div class="row sec" data-slug="${esc(x.slug)}"
+      style="cursor:pointer;${x.slug===PLANET_SEL?'background:rgba(255,255,255,.10)':''}">
+      <span style="color:${SECCOL[x.state]||'#ff2f3d'}">
+      ${x.state==='restored'?'█':x.state==='active'?'▓':'░'}</span>
+      <b>${esc(x.phase)}</b> ${esc(x.title||x.slug)}
+      <span class="tag" style="color:${SECCOL[x.state]}">${esc(x.state)}</span></div>`).join('');
+    l.querySelectorAll('.sec').forEach(e=>e.onclick=()=>{
+      PLANET_SEL=(PLANET_SEL===e.dataset.slug)?null:e.dataset.slug;paintSectors();});}
+}
+
+/* ---------- state ---------- */
+let CL={running:false,out:[]}, CL_SEEN=0;
+function seq(t,cls){SEQ.push({t:'> '+t,cls:cls||''});if(SEQ.length>300)SEQ.shift();}
+function health(){const p=ST.proc||{},g=ST.git||{},s=ST.sys||{};return[
+ {name:'HUB SERVER',ok:true,note:location.host},
+ {name:'KNOWLEDGE BASE',ok:!!(ST.knowledge&&ST.knowledge.findings),note:(ST.knowledge||{}).findings+' findings'},
+ {name:'ROADMAP ENGINE',ok:!!((ST.roadmap||{}).total),note:((ST.roadmap||{}).done)+'/'+((ST.roadmap||{}).total)},
+ {name:'GAME EXECUTABLE',ok:!!p.exe_present,note:p.exe_present?'built':'missing — run BUILD'},
+ {name:'SOURCE ISO',ok:!!p.iso_present,note:p.iso_present?'present':'missing'},
+ {name:'RUNNER PROCESS',ok:!!p.runner_alive,note:p.runner_alive?'alive':'not running'},
+ {name:'GIT WORKING TREE',ok:!g.dirty,note:g.dirty?'uncommitted changes':'clean'},
+ {name:'HOST TELEMETRY',ok:s.cpu!=null,note:s.cpu!=null?'sampling':'no data'},
+ {name:'CLAUDE BRIDGE',ok:true,note:CL.running?'busy':'ready'}];}
+
+function applySettings(){try{applyLabels();}catch(e){}
+  document.documentElement.style.setProperty('--acc',SET.accent||'#ff2f3d');
+  document.body.classList.toggle('noscan',SET.scanlines===false);
+  $('#t-name').textContent=SET.terminal||'TERMINAL-01';
+  $('#t-path').textContent=SET.project_path||'';
+  $('#u-name').textContent=SET.user_name||'OPERATOR';
+  $('#u-kanji').textContent=SET.user_kanji||'';
+  $('#u-kanji-big').textContent=SET.user_kanji||'';
+  $('#u-nm-en').textContent=SET.user_name||'';
+  $('#u-id').textContent=SET.user_id||'';
+  $('#u-clr').textContent=SET.clearance||'';
+  $('#tick-txt').textContent=(SET.motto||'')+'    '+(SET.motto_jp||'')+'    ';}
+function applySil(){const u='url(/user/silhouette?'+Date.now()+')';
+  document.documentElement.style.setProperty('--silm',u);}
+
+function renderVitals(){const s=ST.sys||{};
+  const f=(v,u)=>v==null?'--':v.toFixed?v.toFixed(0)+u:v+u;
+  $('#v-cpu').textContent=f(s.cpu,'');$('#v-ram').textContent=f(s.ram_pct,'');
+  $('#v-gpu').textContent=f(s.gpu,'');$('#v-tmp').textContent=f(s.gpu_temp,'');
+  const g=$('#zk-vit');if(g)g.innerHTML=[['CPU',f(s.cpu,'%')],['RAM',f(s.ram_pct,'%')],
+    ['GPU',f(s.gpu,'%')],['GPU °C',f(s.gpu_temp,'')]]
+    .map(x=>`<div class="tile"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');
+  const g2=$('#zk-vit2');if(g2)g2.innerHTML=`<b>GPU</b> <u>${esc(s.gpu_name||'—')}</u><br>
+    <b>VRAM USED</b> <u>${f(s.gpu_mem_pct,'%')}</u><br>
+    <b>RAM</b> <u>${s.ram_used_gb||'—'} / ${s.ram_total_gb||'—'} GB</u><br>
+    <b>DISK C:</b> <u>${f(s.disk_pct,'%')}</u>`;}
+
+async function refresh(){
+ try{
+  const [ov,sys,pl,tl,fl,cl,rc]=await Promise.all([api('/api/overview'),api('/api/sys'),api('/api/planet'),
+    TOOLS.length?Promise.resolve(TOOLS):api('/api/tools'),api('/api/codeflow?limit=12'),api('/api/claude'),
+    RECOMP.units&&RECOMP.units.length?Promise.resolve(RECOMP):api('/api/recomp?limit=26')]);
+  ST=ov;ST.sys=sys;PLANET=pl;TOOLS=tl;FLOW=fl;RECOMP=rc;
+  const wasRun=CL.running;CL=cl;
+  pumpActivity();                    // light up the MAGI tools doing real work
+  if(wasRun&&!cl.running)seq('claude finished rc='+cl.rc,cl.rc?'bad':'ok');
+  const o=$('#cliOut'),cs=$('#cliState');
+  if(cs){cs.textContent=cl.running?'WORKING… '+(cl.elapsed||0)+'s':'READY';
+    cs.classList.toggle('busy',!!cl.running);}
+  const sb=$('#cliStop');if(sb)sb.hidden=!cl.running;
+  if(o&&cl.out&&cl.out.length){o.innerHTML=cl.out.map(l=>esc(l)).join('\n')+
+    (cl.running?'\n<span class="s">…working</span>':'');o.scrollTop=o.scrollHeight;}
+
+  const R=ST.roadmap||{},p=ST.proc||{};
+  $('#m-status').textContent='SYSTEM STATUS: '+(p.runner_alive?'ALL GREEN':p.exe_present?'STANDBY':'BUILD REQUIRED');
+  $('#m-gate').textContent=p.exe_present?'GATE UNLOCKED / ゲート開放':'GATE LOCKED / 閉鎖中';
+  $('#u-state').textContent=jobState().toUpperCase();
+  $('#p-pct').textContent=(PLANET.pct||0)+'%';
+  $('#a-front').textContent=R.frontier||'—';
+  const act=(R.items||[]).filter(i=>i.actionable).length;
+  $('#a-state').textContent=act?'ACTIONABLE':'CLEAR';
+  $('#a-count').textContent=act+' ready · '+((R.total||0)-(R.done||0))+' left';
+  const bad=health().filter(h=>!h.ok);
+  $('#e-code').textContent=String(bad.length).padStart(3,'0');
+  $('#e-jp').textContent=bad.length>2?'緊急':bad.length?'警告':'正常';
+  $('#e-en').textContent=bad.length>2?'EMERGENCY':bad.length?'CAUTION':'NOMINAL';
+  const chip=$('#healthChip');
+  chip.className='healthchip'+(bad.length>2?' bad':bad.length?' warn':'');
+  $('#magi-list').innerHTML=TOOLS.slice(0,7).map(t=>
+    `${esc(t.name)} <span style="color:${t.online?'var(--grn)':'var(--mut)'};float:right">
+     ${t.online?'ONLINE':'—'}</span><br>`).join('');
+  renderVitals();
+  $('#s-log').innerHTML=SEQ.slice(-14).map(s=>`<div class="logline ${s.cls}">${esc(s.t)}</div>`).join('');
+  // views the user interacts with are not auto-repainted - it would wipe the
+  // selected session / typed settings out from under them
+  if(ZOOM&&POST[ZOOM]&&!['user','sessions','needed','progress','browser'].includes(ZOOM))POST[ZOOM]();
+ }catch(e){seq('refresh failed: '+e.message,'bad');}
+}
+
+/* boot sequence log */
+['BOOT SEQUENCE INITIATED','PROMETHEUS OS v2.0.1','SECURITY PROTOCOL: ENGAGED',
+ 'EXTERNAL CONNECTIONS: 0','PLUG DEPTH: STANDARD','KNOWLEDGE LINK: STABLE','ALL SYSTEMS NOMINAL']
+ .forEach(t=>seq(t,'ok'));
+
+(async()=>{SET=await api('/api/settings');applySettings();applySil();await refresh();fitAll();
+  if(SET.media_url){$('#mvUrl').value=SET.media_url;mediaLoad(SET.media_url,false);}
+  const h=location.hash.slice(1);                        // deep links: /#planet, /#console …
+  if(h==='console')openConsole(); else if(VIEW[h])openZ(h);
+})();
+setInterval(refresh,4000);
+setInterval(pumpMirror,1500);pumpMirror();
+setInterval(()=>{const t=new Date().toTimeString().slice(0,8);
+  $('#m-clock').textContent=t;$('#tick-clock').textContent=t;},1000);
+</script>
+</body>
+</html>

@@ -1,10 +1,92 @@
+# ============================================================================
+# PROMETHEUS_MASTER .gitignore
+# Track SOURCE, KNOWLEDGE-AS-TEXT, DOCS, TOOLS-WE-WROTE.
+# Never track: rebuildable databases, extracted assets, tool installs, dumps,
+# user data, caches. Everything excluded here is huge, regenerable, or personal.
+# ============================================================================
+
+# --- live junctions / external mirrors ---
 *_LIVE/
 07_LIVE_DATA/
 06_REFERENCE/external_projects/
 06_REFERENCE/cheat_sources/
-__pycache__/
-06_REFERENCE/tools/
 
-# unified knowledge store - rebuildable via 09_ORCHESTRATOR/merge_knowledge.py
+# --- rebuildable databases (merge_knowledge.py regenerates prometheus.db) ---
 db/prometheus.db
 db/*.db-journal
+db/*.db-wal
+*.sqlite
+*.sqlite3
+
+# --- tool INSTALLS (hundreds of MB; install locally, don't version) ---
+06_REFERENCE/tools/
+**/ghidra_*_PUBLIC/
+**/jdk*_portable/
+**/ghidra_install/
+*.zip
+
+# --- extracted / binary assets (indexed in place, not stored in git) ---
+04_OUTPUTS/3d_models/
+04_OUTPUTS/3d_models_LIVE/
+04_OUTPUTS/audio/
+04_OUTPUTS/decompiled/
+04_OUTPUTS/decompiled_ghidra/
+04_OUTPUTS/decompiled_ghidra_pre_r5900_*/
+*.bin
+*.BIN
+*.iso
+*.ISO
+*.vag
+*.adx
+*.wav
+*.fsb
+*.flver
+*.dds
+*.tex
+*.pim
+*.arc
+*.kmd
+*.mdsp
+
+# --- large model/image blobs (small icons kept via !rules at the bottom) ---
+*.fbx
+*.obj
+*.gltf
+*.glb
+04_OUTPUTS/**/*.png
+
+# --- RAM snapshots ---
+**/snapshots/
+*.bin.gz
+
+# --- user data / runtime state (personal or per-session) ---
+09_ORCHESTRATOR/prometheus_settings.json
+09_ORCHESTRATOR/user_silhouette.png
+09_ORCHESTRATOR/hub_activity.log
+09_ORCHESTRATOR/compress.log
+**/browser/
+**/PrometheusHQ/
+
+# --- caches / build junk ---
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+node_modules/
+*.log
+*.tmp
+*.part
+
+# --- OS cruft ---
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# --- KEEP these small meaningful assets despite the broad rules above ---
+!09_ORCHESTRATOR/mech_sinanju.json
+!09_ORCHESTRATOR/prometheus_logo.png
+!09_ORCHESTRATOR/prometheus_icon.png
+!09_ORCHESTRATOR/prometheus.ico
+.git.disabled/
