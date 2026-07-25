@@ -443,6 +443,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(X.get_asset_library())
             if p == "/api/events":
                 return self._json(X.get_event_stream(int(q.get("limit", [80])[0])))
+            if p == "/api/runtime":
+                return self._json(X.get_runtime_telemetry())
+            if p == "/api/callgraph":
+                return self._json(X.get_call_graph(int(q.get("limit", [26])[0])))
             if p == "/api/dna":
                 return self._json(X.get_project_dna())
             if p == "/api/recomp":

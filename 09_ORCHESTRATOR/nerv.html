@@ -110,7 +110,9 @@ function applyLabels(){
 
 /* ---------- grid ---------- */
 #hq{height:100%;display:grid;gap:6px;padding:6px 6px 0;
-  grid-template-columns:250px 1fr 1fr 340px;
+  /* sidebars shrink before the content columns, so a half-width window stays
+     aligned instead of overflowing */
+  grid-template-columns:minmax(200px,250px) minmax(0,1fr) minmax(0,1fr) minmax(230px,340px);
   grid-template-rows:108px minmax(0,1fr) minmax(0,1fr) 150px 92px 26px;
   grid-template-areas:
     "term   logo   logo    media"
@@ -119,6 +121,33 @@ function applyLabels(){
     "user   planet codemap vitals"
     "alert  planet codemap vitals"
     "tick   tick   tick    tick";}
+/* ---- RESPONSIVE: the layout always adjusts to the window (splitscreen etc.) ---- */
+@media (max-width:1180px){
+  #hq{grid-template-columns:minmax(170px,215px) minmax(0,1fr) minmax(0,1fr) minmax(190px,270px);gap:5px}
+}
+/* half-screen / narrow: reflow to a 2-column SCROLLING stack (no more clipping) */
+@media (max-width:900px){
+  html,body{overflow-y:auto;overflow-x:hidden}
+  #hq{height:auto;min-height:100vh;grid-template-columns:1fr 1fr;
+    grid-template-rows:none;grid-auto-rows:minmax(118px,auto);
+    grid-template-areas:
+      "logo   logo"
+      "main   main"
+      "term   media"
+      "syslog unit"
+      "magi   vitals"
+      "planet codemap"
+      "user   alert"
+      "tick   tick";}
+  #b-main{min-height:320px}
+  #b-media{min-height:260px}
+  canvas.cv{min-height:130px}
+}
+@media (max-width:560px){
+  #hq{grid-template-columns:1fr;
+    grid-template-areas:"logo" "main" "term" "media" "syslog" "unit"
+      "magi" "vitals" "planet" "codemap" "user" "alert" "tick";}
+}
 .blk{position:relative;border:1px solid var(--acc-dim);background:linear-gradient(180deg,rgba(10,3,5,.80),rgba(5,1,2,.86));
   padding:5px 8px;min-height:0;overflow:hidden;cursor:pointer;transition:border-color .15s,box-shadow .15s}
 .blk:hover{border-color:var(--acc);box-shadow:0 0 22px rgba(255,47,61,.28),inset 0 0 22px rgba(255,47,61,.07)}
@@ -586,6 +615,7 @@ function on(sel,ev,fn){const e=typeof sel==='string'?$(sel):sel;if(e)e[ev]=fn;re
 const esc=s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const post=(p,b)=>api(p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
 const T0=Date.now(); let ST={}, SET={}, PLANET={sectors:[]}, TOOLS=[], FLOW=[], SEQ=[], RECOMP={units:[]};
+let CALLGRAPH=null, EVENTS=[];     // real call graph + event-bus stream (live)
 
 /* ---------- boot ---------- */
 const NOBOOT=/[?&]noboot/.test(location.search);   // skip the intro: /?noboot=1
@@ -1113,38 +1143,66 @@ function planetPick(c,ev){
 }
 
 let pk=[];                 // in-flight packets on the code map
+/* CODE MAP - the REAL static call graph. Nodes are recompiled functions keyed
+   by EE address; edges are actual `jal func_XXXX` calls extracted from the
+   generated disassembly (/api/callgraph). Pulses travel along real edges. */
 function codemap(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
   const d=c.getContext('2d'),W=c.width,H=c.height;d.clearRect(0,0,W,H);
-  d.strokeStyle='rgba(255,47,61,.13)';d.lineWidth=1;
+  d.strokeStyle='rgba(255,47,61,.10)';d.lineWidth=1;
   for(let x=0;x<W;x+=W/18){d.beginPath();d.moveTo(x,0);d.lineTo(x,H);d.stroke()}
   for(let y=0;y<H;y+=H/9){d.beginPath();d.moveTo(0,y);d.lineTo(W,y);d.stroke()}
-  const U=(RECOMP.units||[]).slice(0,14);if(!U.length)return;
-  const mx=Math.max(1,...U.map(u=>u.bytes));
-  const FS=Math.max(10,Math.min(15,Math.min(W,H)*.028));
+  const G=CALLGRAPH||{nodes:[],edges:[]};
+  const N=G.nodes||[];if(!N.length)return;
+  const mxB=Math.max(1,...N.map(u=>u.bytes||1));
+  const FS=Math.max(9,Math.min(14,Math.min(W,H)*.026));
   d.font='700 '+FS+"px 'Arial Narrow',Impact,sans-serif";
-  // golden-angle placement: even spread, no clustering from modular repeats
-  const pos=U.map((u,i)=>{const a=i*2.39996, r=Math.sqrt((i+0.6)/U.length);
-    return {x:W*(.5+.40*r*Math.cos(a)), y:H*(.5+.38*r*Math.sin(a)), u:u};});
-  pos.forEach(p=>{const mag=p.u.bytes/mx, hle=p.u.kind==='hle';
-    const col=hle?'#ff8a00':'#00ff9c';
-    d.beginPath();d.arc(p.x,p.y,3+mag*7,0,7);d.fillStyle=col;
-    d.shadowColor=col;d.shadowBlur=8;d.fill();d.shadowBlur=0;
+  // stable golden-angle layout keyed by node index; map addr -> position
+  const P={};
+  N.forEach((u,i)=>{const a=i*2.39996, r=Math.sqrt((i+0.6)/N.length);
+    P[u.addr]={x:W*(.5+.40*r*Math.cos(a)), y:H*(.5+.38*r*Math.sin(a)), u:u,
+               deg:0};});
+  (G.edges||[]).forEach(e=>{if(P[e[0]])P[e[0]].deg++;if(P[e[1]])P[e[1]].deg++;});
+
+  // REAL edges: a static call from a->b. Curved, faint, thicker if either end
+  // is a hub. The current runtime PC lights its function.
+  const live=(ST.runtime&&ST.runtime.func)||null;
+  (G.edges||[]).forEach(e=>{const a=P[e[0]],b=P[e[1]];if(!a||!b)return;
+    const mx=(a.x+b.x)/2,my=(a.y+b.y)/2-Math.hypot(b.x-a.x,b.y-a.y)*0.12;
+    d.strokeStyle='rgba(0,255,156,.16)';d.lineWidth=1;
+    d.beginPath();d.moveTo(a.x,a.y);d.quadraticCurveTo(mx,my,b.x,b.y);d.stroke();});
+
+  // pulses along real edges (call flow). One pool, phase-cycled.
+  const E=G.edges||[];
+  if(E.length){
+    for(let k=0;k<Math.min(E.length,10);k++){
+      const e=E[(k*3+Math.floor(tt*0.6))%E.length],a=P[e[0]],b=P[e[1]];
+      if(!a||!b)continue;
+      const ph=(tt*0.5+k*0.19)%1, mx=(a.x+b.x)/2,my=(a.y+b.y)/2-Math.hypot(b.x-a.x,b.y-a.y)*0.12;
+      const uu=1-ph,x=uu*uu*a.x+2*uu*ph*mx+ph*ph*b.x,y=uu*uu*a.y+2*uu*ph*my+ph*ph*b.y;
+      d.beginPath();d.arc(x,y,2.6,0,7);d.fillStyle='#7dffb8';
+      d.shadowColor='#00ff9c';d.shadowBlur=9;d.fill();d.shadowBlur=0;}
+  }
+
+  // nodes: size by bytes, ring by degree (how connected), glow if it's the
+  // function the port is executing RIGHT NOW.
+  d.textBaseline='alphabetic';
+  Object.values(P).forEach(p=>{
+    const mag=(p.u.bytes||1)/mxB, hle=/hle|game_overrides|gs_|gif|dma|audio/i.test(p.u.name||'');
+    const isLive=live && (p.u.name||'').toLowerCase().includes(String(live).toLowerCase().slice(0,10));
+    const col=isLive?'#ffe000':hle?'#ff8a00':'#00ff9c';
+    const rad=3+mag*7+Math.min(p.deg,6)*0.6;
+    if(isLive){const pl=(Math.sin(tt*4)+1)/2;
+      d.beginPath();d.arc(p.x,p.y,rad+4+pl*6,0,7);d.strokeStyle='#ffe000';
+      d.globalAlpha=.5;d.lineWidth=2;d.stroke();d.globalAlpha=1;}
+    d.beginPath();d.arc(p.x,p.y,rad,0,7);d.fillStyle=col;
+    d.shadowColor=col;d.shadowBlur=isLive?16:8;d.fill();d.shadowBlur=0;
     d.fillStyle=col;d.textAlign='center';
-    const nm=p.u.sym||p.u.file.replace(/\.cpp$/,'');
-    d.fillText(nm.slice(0,20).toUpperCase(),p.x,p.y-9);
-    if(p.u.addr){d.fillStyle='rgba(255,106,114,.75)';
-      d.fillText('0x'+p.u.addr.toString(16),p.x,p.y+FS+6);}});
-  if(pk.length<14&&pos.length>1&&Math.random()<.10){
-    const a=pos[(Math.random()*pos.length)|0],b=pos[(Math.random()*pos.length)|0];
-    if(a!==b)pk.push({a:a,b:b,t:0,sp:.006+Math.random()*.010});}
-  pk=pk.filter(p=>p.t<1);
-  pk.forEach(p=>{p.t+=p.sp;
-    const mx=(p.a.x+p.b.x)/2,my=Math.min(p.a.y,p.b.y)-H*.20,u=1-p.t;
-    const x=u*u*p.a.x+2*u*p.t*mx+p.t*p.t*p.b.x, y=u*u*p.a.y+2*u*p.t*my+p.t*p.t*p.b.y;
-    d.strokeStyle='rgba(255,138,0,.30)';d.lineWidth=1;d.beginPath();d.moveTo(p.a.x,p.a.y);
-    d.quadraticCurveTo(mx,my,p.b.x,p.b.y);d.stroke();
-    d.beginPath();d.arc(x,y,3.2,0,7);d.fillStyle='#ffe000';
-    d.shadowColor='#ffe000';d.shadowBlur=11;d.fill();d.shadowBlur=0;});}
+    d.fillText((p.u.name||'').slice(0,18).toUpperCase(),p.x,p.y-rad-3);
+    d.fillStyle='rgba(255,106,114,.7)';
+    d.fillText('0x'+p.u.addr.toString(16),p.x,p.y+rad+FS);});
+  // legend
+  d.fillStyle='rgba(0,255,156,.6)';d.textAlign='left';d.font="600 10px Consolas,monospace";
+  d.fillText((G.n_edges||0)+' real call edges', 6, H-8);}
 
 /* BURN-UP CHART — cumulative findings + commits */
 function chart(cid){const c=document.getElementById(cid);if(!c||!c.width||!CHART)return;
@@ -1739,12 +1797,15 @@ function renderVitals(){const s=ST.sys||{};
 
 async function refresh(){
  try{
-  const [ov,sys,pl,tl,fl,cl,rc]=await Promise.all([api('/api/overview'),api('/api/sys'),api('/api/planet'),
+  const [ov,sys,pl,tl,fl,cl,rc,rt, events]=await Promise.all([api('/api/overview'),api('/api/sys'),api('/api/planet'),
     TOOLS.length?Promise.resolve(TOOLS):api('/api/tools'),api('/api/codeflow?limit=12'),api('/api/claude'),
-    RECOMP.units&&RECOMP.units.length?Promise.resolve(RECOMP):api('/api/recomp?limit=26')]);
-  ST=ov;ST.sys=sys;PLANET=pl;TOOLS=tl;FLOW=fl;RECOMP=rc;
+    RECOMP.units&&RECOMP.units.length?Promise.resolve(RECOMP):api('/api/recomp?limit=26'),
+    api('/api/runtime'), api('/api/events?limit=18')]);
+  ST=ov;ST.sys=sys;PLANET=pl;TOOLS=tl;FLOW=fl;RECOMP=rc;ST.runtime=rt;EVENTS=events.events||[];
+  if(!CALLGRAPH){api('/api/callgraph?limit=26').then(g=>CALLGRAPH=g).catch(()=>{});}
   const wasRun=CL.running;CL=cl;
   pumpActivity();                    // light up the MAGI tools doing real work
+  if(rt&&rt.alive)markActive('PS2RECOMP'),markActive('PCSX2');   // port is live
   if(wasRun&&!cl.running)seq('claude finished rc='+cl.rc,cl.rc?'bad':'ok');
   const o=$('#cliOut'),cs=$('#cliState');
   if(cs){cs.textContent=cl.running?'WORKING… '+(cl.elapsed||0)+'s':'READY';
@@ -1772,7 +1833,17 @@ async function refresh(){
     `${esc(t.name)} <span style="color:${t.online?'var(--grn)':'var(--mut)'};float:right">
      ${t.online?'ONLINE':'—'}</span><br>`).join('');
   renderVitals();
-  $('#s-log').innerHTML=SEQ.slice(-14).map(s=>`<div class="logline ${s.cls}">${esc(s.t)}</div>`).join('');
+  // SYSTEM LOG is a LIVE event feed now: real findings/commits/milestones from
+  // the event bus, newest first, colour-coded by kind. Falls back to the local
+  // action log (SEQ) if the bus is empty.
+  {const KC={discovery:'var(--cyan,#00e5ff)',hypothesis:'var(--amb)',fix:'var(--grn)',
+     fail:'var(--acc)',commit:'var(--grn-dim)',milestone:'var(--yel,#ffe000)',runtime:'var(--grn)'};
+   const KG={discovery:'◆',hypothesis:'◈',fix:'✓',fail:'✕',commit:'⎇',milestone:'★',runtime:'●'};
+   const feed=(EVENTS&&EVENTS.length)
+     ? EVENTS.slice(0,14).map(e=>`<div class="logline" style="color:${KC[e.kind]||'var(--ink)'}">
+         ${KG[e.kind]||'·'} ${esc((e.title||'').slice(0,42))}</div>`).join('')
+     : SEQ.slice(-14).map(s=>`<div class="logline ${s.cls}">${esc(s.t)}</div>`).join('');
+   $('#s-log').innerHTML=feed;}
   // views the user interacts with are not auto-repainted - it would wipe the
   // selected session / typed settings out from under them
   if(ZOOM&&POST[ZOOM]&&!['user','sessions','needed','progress','browser'].includes(ZOOM))POST[ZOOM]();

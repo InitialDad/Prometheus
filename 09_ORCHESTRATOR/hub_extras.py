@@ -649,6 +649,158 @@ def browser_open(url, private=True, size="1200,820"):
             "browser": os.path.basename(exe)}
 
 
+_RUNTICK = None
+_sym_cache = {"ts": 0, "syms": None}
+
+
+def _load_syms():
+    """Cached (addr -> name) sorted list for PC resolution."""
+    now = time.time()
+    if _sym_cache["syms"] is not None and now - _sym_cache["ts"] < 120:
+        return _sym_cache["syms"]
+    syms = []
+    try:
+        c = sqlite3.connect(DB, timeout=5)
+        for addr, name in c.execute(
+                "SELECT address,name FROM km_ghidra_functions WHERE serial=?", (SERIAL,)):
+            try:
+                syms.append((int(addr), name))
+            except Exception:
+                pass
+        c.close()
+    except Exception:
+        pass
+    syms.sort()
+    _sym_cache.update(ts=now, syms=syms)
+    return syms
+
+
+def _resolve_pc(pc):
+    syms = _load_syms()
+    if not syms:
+        return None, 0
+    import bisect
+    i = bisect.bisect_right([s[0] for s in syms], pc) - 1
+    if i < 0:
+        return None, 0
+    return syms[i][1], pc - syms[i][0]
+
+
+def get_runtime_telemetry():
+    """LIVE EMULATOR OVERLAY - real, not mocked. The port writes
+    '[run:tick] tick=.. pc=0x.. ra=0x.. sp=0x.. gp=0x.. dispfb1=.. activeThreads=..
+    dma=.. gif=.. gsw=.. vif=..' to its stderr log every frame, plus [p4:*]
+    traps. We tail the newest boot log and parse the last tick. When the port is
+    not running this reports alive=False honestly rather than inventing numbers.
+    """
+    import glob as _g
+    import re as _re
+    logs = _g.glob(os.path.join(WOS, "boot_*.log.err")) + _g.glob(os.path.join(WOS, "boot_*.log"))
+    if not logs:
+        return {"alive": False, "note": "no boot log yet"}
+    newest = max(logs, key=os.path.getmtime)
+    age = time.time() - os.path.getmtime(newest)
+    try:
+        with open(newest, "rb") as f:
+            f.seek(0, os.SEEK_END)
+            size = f.tell()
+            f.seek(max(0, size - 65536))
+            tail = f.read().decode("utf-8", "replace")
+    except OSError:
+        return {"alive": False, "note": "log unreadable"}
+
+    tick_re = _re.compile(
+        r"\[run:tick\] tick=(\d+) pc=0x([0-9a-fA-F]+) ra=0x([0-9a-fA-F]+) "
+        r"sp=0x([0-9a-fA-F]+) gp=0x([0-9a-fA-F]+).*?activeThreads=(\d+) "
+        r"dma=(\d+) gif=(\d+) gsw=(\d+) vif=(\d+)")
+    last = None
+    for m in tick_re.finditer(tail):
+        last = m
+    out = {"alive": age < 30, "log": os.path.basename(newest), "log_age": round(age, 1)}
+
+    # runtime trap tallies from the tail (real events)
+    traps = {}
+    for tag in ("p4:px", "p4:gs-sprite", "p4:clut", "p4:gs-trx", "p4:bad-alloc",
+                "p4:gzmfs-badctx", "p4:vbl", "p4:alloc-trap"):
+        n = tail.count("[" + tag + "]")
+        if n:
+            traps[tag] = n
+    out["traps"] = traps
+
+    # last drive verdict if present
+    vm = None
+    for vm in _re.finditer(r"VERDICT:\s*([A-Z_]+)", tail):
+        pass
+    if vm:
+        out["verdict"] = vm.group(1)
+
+    if last:
+        pc = int(last.group(2), 16)
+        sym, off = _resolve_pc(pc)
+        out.update({
+            "tick": int(last.group(1)), "pc": pc, "ra": int(last.group(3), 16),
+            "sp": int(last.group(4), 16), "active_threads": int(last.group(6)),
+            "dma": int(last.group(7)), "gif": int(last.group(8)),
+            "gsw": int(last.group(9)), "vif": int(last.group(10)),
+            "func": sym, "func_off": off,
+        })
+    return out
+
+
+def get_call_graph(limit=26):
+    """REAL code connections. Each generated TU is named by its EE address; its
+    disassembly comments contain 'jal func_XXXXXX' for every call it makes. We
+    take the busiest units (by byte size) and extract the actual call edges
+    among them. Not a decorative packet spray - these are real static calls.
+    """
+    import glob as _g
+    import re as _re
+    now = time.time()
+    if _RUNTICK is not None:
+        pass
+    global _callgraph_cache
+    try:
+        cache = _callgraph_cache
+    except NameError:
+        cache = None
+    if cache and now - cache["ts"] < 300:
+        return cache["data"]
+
+    rec = get_recomp_map(limit)
+    units = [u for u in rec.get("units", []) if u.get("addr")]
+    addr_set = {u["addr"] for u in units}
+    runner = os.path.join(WOS, "PS2Recomp", "ps2xRuntime", "src", "runner")
+    jal_re = _re.compile(r"jal\s+func_([0-9a-fA-F]+)")
+    edges = []
+    nodes = {}
+    for u in units:
+        nodes[u["addr"]] = {"addr": u["addr"], "name": u.get("sym") or u["file"],
+                            "bytes": u["bytes"]}
+        # find the file on disk for this unit and scan it
+        cand = _g.glob(os.path.join(runner, "*0x%x*.cpp" % u["addr"]))
+        if not cand:
+            continue
+        try:
+            with open(cand[0], "r", errors="replace") as f:
+                txt = f.read()
+        except OSError:
+            continue
+        targets = set()
+        for m in jal_re.finditer(txt):
+            t = int(m.group(1), 16)
+            if t in addr_set and t != u["addr"]:
+                targets.add(t)
+        for t in targets:
+            edges.append([u["addr"], t])
+    data = {"nodes": list(nodes.values()), "edges": edges,
+            "n_edges": len(edges)}
+    _callgraph_cache = {"ts": now, "data": data}
+    return data
+
+
+_callgraph_cache = None
+
+
 def get_event_stream(limit=80):
     """THE EVENT BUS. One typed, time-sorted stream that every live widget
     subscribes to. Assembled ONLY from real work already recorded - findings,
