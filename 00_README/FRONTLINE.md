@@ -5,30 +5,36 @@
 
 ---
 
-## CURRENT HYPOTHESIS  (one sentence)   [narrowed 2026-07-25]
+## ROOT CAUSE — PINNED  (2026-07-25)   *** the last bug before a title screen ***
 
-The title art is 8-bit CLUT-palettized (PSMT8, tpsm=0x13) and our texture
-sampler returns opaque BLACK for every texel — so the rasterizer draws the
-title correctly but with an all-black palette; the bug is in the PSMT8 index
-read or the CLUT lookup, nothing downstream.
+The game uploads the title texture as PSMCT32 (32-bit) but reads it as PSMT8
+(8-bit CLUT). Our WriteCT32 and ReadP8 use inconsistent VRAM swizzles, so
+ReadP8 reads all-zero indices -> CLUT[0]=black -> flat screen.
 
-PROVEN: [p4:texel] shows texel=0x80000000 (opaque black) for all samples from
-tbp=0x1A40; 479/514 sprites are textured; coords/scissor/test/present all
-correct. The INPUT is black, not the pipeline.
+PROOF (cross-referenced, same boot):
+  READ:   [p4:clut] tex.psm=PSMT8(0x13) tbp0=0x1A40 tbw=8, rawIndex=0x00 for ALL
+          24 samples. CLUT is FINE (cbp=0x3B44; index 0 is legitimately black).
+  UPLOAD: [p4:gs-trx] #7 dst=0x69000 (== block 0x1A40 since dst=dbp*64) dpsm=0x0
+          (PSMCT32) 256x128.
+  PROOF IT IS INTENTIONAL: 256*128*4 = 131072 bytes = exactly 512x256 PSMT8
+          indices. Standard PS2 idiom: upload an 8-bit texture via a 32-bit
+          BITBLT for DMA speed; the GS unswizzles on sample.
 
-## NEXT EXPERIMENT  (the one build/test to run)   [CLUT probe building now]
+RULED OUT (all previously proven): rasterizer, coords, scissor, test, present
+buffer, CLUT lookup, vertex colour. It is ONLY the cross-format texel fetch.
 
-    grep "p4:clut" boot_trap_*.log.err   # raw 8-bit index + cbp/csa + result
+## THE FIX  (next session)
 
-DECISION TABLE:
-  - rawIndex is always 0x00        -> the TEXTURE READ is wrong. The PSMT8 index
-                                      isn't at tbp0 (upload dest vs tbp0 mismatch)
-                                      or ReadVram's PSMT8 swizzle is wrong.
-  - rawIndex varies, result black  -> the CLUT LOOKUP is wrong. cbp/csa point
-                                      away from the uploaded 256-entry CLUT
-                                      (seen at [p4:gs-trx] dst=0xED100, 16x16=256),
-                                      or the CLUT read address/swizzle is wrong.
-  Either way it is a small, specific fix in sampleTexture/lookupCLUT/ReadVram.
+Make ReadP8/ReadP4 address the same physical bytes WriteCT32 wrote for a block,
+i.e. implement the PS2 PSMT8<->PSMCT32 (and PSMT4<->PSMCT32) block/column
+swizzle equivalence, the way PCSX2 does with its psm swizzle tables. Files:
+ps2_gs_memory.cpp (ReadP8/WriteCT32 layout), verify with a VRAM dump or the
+differential harness against PCSX2. This is the LAST thing between the port and
+a visible title.
+
+  Sanity test after the fix: rawIndex in [p4:clut] should become nonzero and
+  varied; [p4:px] pixel-write count should jump from 2,559 into the tens of
+  thousands; the screen should show art instead of a flat clear.
 
 ## AFTER THAT  (the decisive rendering tool)
 
