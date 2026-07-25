@@ -556,9 +556,8 @@ Type a prompt and press ENTER.</span></div>
   <div class="blk col" id="b-vitals" data-lk="vitals" data-z="vitals">
     <div class="bt">VITALS</div><div class="bj">機体状態</div>
     <canvas class="cv" id="cv-ecg" style="max-height:36px;flex:none"></canvas>
-    <div class="tiny">CPU LOAD</div><div class="big g"><span id="v-cpu">--</span><span style="font-size:11px">%</span></div>
-    <div class="tiny">MEMORY</div><div class="big g" style="font-size:20px"><span id="v-ram">--</span><span style="font-size:10px">%</span></div>
-    <div class="tiny">GPU / TEMP</div><div class="big" style="font-size:19px"><span id="v-gpu">--</span><span style="font-size:10px">% / </span><span id="v-tmp">--</span><span style="font-size:10px">°C</span></div>
+    <div id="vitBars" style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:5px;font-family:var(--mono)"></div>
+    <span id="v-cpu" hidden></span><span id="v-ram" hidden></span><span id="v-gpu" hidden></span><span id="v-tmp" hidden></span>
     <div class="exp">▸ EXPAND</div>
   </div>
 
@@ -1936,8 +1935,27 @@ function applySil(){const u='url(/user/silhouette?'+Date.now()+')';
 
 function renderVitals(){const s=ST.sys||{};
   const f=(v,u)=>v==null?'--':v.toFixed?v.toFixed(0)+u:v+u;
-  $('#v-cpu').textContent=f(s.cpu,'');$('#v-ram').textContent=f(s.ram_pct,'');
-  $('#v-gpu').textContent=f(s.gpu,'');$('#v-tmp').textContent=f(s.gpu_temp,'');
+  // retro bracket bar-meters [||||......], colour by load level
+  const bars=$('#vitBars');
+  if(bars){
+    const meter=(label,pct,disp,seg)=>{
+      seg=seg||14; const v=(pct==null)?0:pct;
+      const fill=Math.max(0,Math.min(seg,Math.round(v/100*seg)));
+      const col=v>=85?'var(--acc)':v>=60?'var(--amb)':'var(--grn)';
+      return `<div>
+        <div style="display:flex;justify-content:space-between;font-size:9px;letter-spacing:.14em;color:var(--mut)">
+          <span>${label}</span><b style="color:${col};font-family:var(--disp);font-size:15px">${disp}</b></div>
+        <div style="color:${col};font-size:13px;line-height:1;letter-spacing:-1px;text-shadow:0 0 6px ${col}">
+          [<span>${'|'.repeat(fill)}</span><span style="color:var(--mut)">${'.'.repeat(seg-fill)}</span>]</div>
+      </div>`;};
+    const tempPct=s.gpu_temp==null?null:Math.min(100,(s.gpu_temp/95)*100);
+    bars.innerHTML=
+      meter('CPU LOAD',s.cpu,f(s.cpu,'%'))+
+      meter('MEMORY',s.ram_pct,f(s.ram_pct,'%'))+
+      meter('GPU',s.gpu,f(s.gpu,'%'))+
+      meter('GPU TEMP',tempPct,s.gpu_temp==null?'--':s.gpu_temp.toFixed(0)+'°C')+
+      meter('DISK C:',s.disk_pct,f(s.disk_pct,'%'));
+  }
   const g=$('#zk-vit');if(g)g.innerHTML=[['CPU',f(s.cpu,'%')],['RAM',f(s.ram_pct,'%')],
     ['GPU',f(s.gpu,'%')],['GPU °C',f(s.gpu_temp,'')]]
     .map(x=>`<div class="tile"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');
