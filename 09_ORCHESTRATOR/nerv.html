@@ -1076,60 +1076,81 @@ const SECCOL={restored:'#00ff9c',active:'#ff8a00',raw:'#ff2f3d'};
 const RGB={'#00ff9c':'0,255,156','#ff8a00':'255,138,0','#ff2f3d':'255,47,61'};
 const rgba=(hex,a)=>'rgba('+(RGB[hex]||'255,47,61')+','+a+')';
 
+/* RECOMPILE SPHERE - a real 3D rotating wireframe orb. Roadmap sectors are
+   actual data nodes distributed over the surface (Fibonacci), rotating with the
+   globe, depth-sorted so the far side dims, front nodes clickable. The globe
+   brightens as more of the game is rebuilt. */
 function planet(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
-  const d=c.getContext('2d'),W=c.width,H=c.height,cx=W/2,cy=H/2,R=Math.min(W,H)*.42;
+  const d=c.getContext('2d'),W=c.width,H=c.height,cx=W/2,cy=H*0.46,R=Math.min(W,H*1.3)*0.38;
   d.clearRect(0,0,W,H);
-  const sec=PLANET.sectors||[], nSec=Math.max(1,sec.length);
-  const rows=11, cols=nSec*2;                 // two columns per sector
-  const spin=tt*.16;
-  PLANET_HIT=[];
-  for(let r=0;r<rows;r++){
-    const la=(r+.5)/rows*Math.PI, y=cy-Math.cos(la)*R, rr=Math.sin(la)*R;
-    for(let k=0;k<cols;k++){
-      const lo=(k/cols)*Math.PI*2+spin, cl=Math.cos(lo);
-      if(cl<0)continue;                        // back face
-      const x=cx+Math.sin(lo)*rr;
-      const si=Math.floor(k/2)%nSec, S=sec[si];
-      if(!S)continue;
-      const w=Math.max(2,(R*2/cols)*cl*1.7), h=Math.max(2,R/rows*1.1);
-      const dep=.30+cl*.70, isSel=(PLANET_SEL===S.slug);
-      const col=SECCOL[S.state]||SECCOL.raw;
-      if(S.state==='restored'||S.state==='active'){
-        const p=(Math.sin(tt*2+si*.5)+1)/2;
-        const a=(S.state==='active'?(.18+p*.30):(.22+dep*.45));
-        d.fillStyle=rgba(col,a.toFixed(3));
-        d.fillRect(x-w/2,y-h/2,w,h);
-      }
-      d.strokeStyle=isSel?'#ffffff':col;
-      d.globalAlpha=isSel?.95:(S.state==='raw'?dep*.30:dep*.65);
-      d.lineWidth=isSel?1.8:1;
-      d.strokeRect(x-w/2,y-h/2,w,h);
-      d.globalAlpha=1;
-      if(r===5)PLANET_HIT.push({slug:S.slug,x:x,y:y,r:Math.max(w,h)});
-    }}
-  d.strokeStyle='rgba(255,47,61,.55)';d.lineWidth=1.6;
+  const sec=PLANET.sectors||[];
+  const spin=tt*0.22, tilt=0.34, restored=(PLANET.pct||0)/100;
+  const ca=Math.cos(spin),sa=Math.sin(spin),ct=Math.cos(tilt),stt=Math.sin(tilt);
+  const proj=(x,y,z)=>{                       // unit-sphere pt -> screen + depth
+    const rx=x*ca+z*sa, rz=-x*sa+z*ca;
+    const ry2=y*ct-rz*stt, rz2=y*stt+rz*ct, f=1/(1-rz2*0.30);
+    return {sx:cx+rx*R*f, sy:cy-ry2*R*f, dep:rz2};   // dep>0 = toward camera
+  };
+  const gcol=SECCOL.restored;
+  // latitude rings
+  for(let li=1;li<9;li++){const lat=-Math.PI/2+li/9*Math.PI, ry=Math.sin(lat), rr=Math.cos(lat);
+    let pv=null;
+    for(let a=0;a<=44;a++){const an=a/44*Math.PI*2,p=proj(Math.cos(an)*rr,ry,Math.sin(an)*rr);
+      if(pv){const dp=(pv.dep+p.dep)/2;d.strokeStyle=rgba(gcol,(0.04+Math.max(0,dp)*(0.14+restored*0.2)).toFixed(3));
+        d.lineWidth=1;d.beginPath();d.moveTo(pv.sx,pv.sy);d.lineTo(p.sx,p.sy);d.stroke();}pv=p;}}
+  // longitude meridians
+  for(let mi=0;mi<12;mi++){const lon=mi/12*Math.PI*2;let pv=null;
+    for(let a=0;a<=30;a++){const lat=-Math.PI/2+a/30*Math.PI,rr=Math.cos(lat);
+      const p=proj(Math.cos(lon)*rr,Math.sin(lat),Math.sin(lon)*rr);
+      if(pv){const dp=(pv.dep+p.dep)/2;d.strokeStyle=rgba(gcol,(0.03+Math.max(0,dp)*(0.11+restored*0.16)).toFixed(3));
+        d.lineWidth=1;d.beginPath();d.moveTo(pv.sx,pv.sy);d.lineTo(p.sx,p.sy);d.stroke();}pv=p;}}
+  // rim + core glow scale with progress
+  d.strokeStyle=rgba(gcol,(0.25+restored*0.45).toFixed(3));d.lineWidth=1.5;
   d.beginPath();d.arc(cx,cy,R,0,7);d.stroke();
+  if(restored>0){d.beginPath();d.arc(cx,cy,R*0.5,0,7);
+    d.fillStyle=rgba(gcol,(restored*0.06).toFixed(3));d.fill();}
 
-  // callouts: the selection first, then whatever is in flight
-  const fs=Math.max(10,Math.min(14,R*.055));
+  // data nodes = roadmap sectors, Fibonacci-distributed on the surface
+  PLANET_HIT=[];
+  const N=Math.max(1,sec.length), GA=Math.PI*(3-Math.sqrt(5));
+  const nodes=sec.map((S,i)=>{const y=1-(i/Math.max(1,N-1))*2, rr=Math.sqrt(Math.max(0,1-y*y)), th=i*GA;
+    return {S, p:proj(Math.cos(th)*rr, y, Math.sin(th)*rr)};});
+  nodes.sort((a,b)=>a.p.dep-b.p.dep);          // back to front
+  nodes.forEach(({S,p})=>{
+    const col=SECCOL[S.state]||SECCOL.raw, sel=(PLANET_SEL===S.slug);
+    const dep=Math.max(0.12,(p.dep+1)/2), front=p.dep>-0.1;
+    const rad=(S.state==='raw'?2:3)+dep*2.6+(sel?3:0);
+    if(S.state==='restored'||S.state==='active'){
+      const pl=(Math.sin(tt*2.5+S.slug.length)+1)/2;
+      d.beginPath();d.arc(p.sx,p.sy,rad,0,7);
+      d.fillStyle=rgba(col,(0.4+dep*0.5).toFixed(3));
+      d.shadowColor=col;d.shadowBlur=(front?9:2)+(S.state==='active'?pl*8:0);d.fill();d.shadowBlur=0;
+    }else{d.beginPath();d.arc(p.sx,p.sy,rad,0,7);
+      d.strokeStyle=rgba(col,(0.22+dep*0.4).toFixed(3));d.lineWidth=1;d.stroke();}
+    if(sel){d.strokeStyle='#fff';d.lineWidth=1.5;d.beginPath();d.arc(p.sx,p.sy,rad+3,0,7);d.stroke();}
+    if(front)PLANET_HIT.push({slug:S.slug,x:p.sx,y:p.sy,r:rad+4});
+  });
+
+  // callouts: selected + active, only when on the front face
+  const fs=Math.max(9,Math.min(13,R*.05));
   d.font="700 "+fs+"px 'Arial Narrow',Impact,sans-serif";
   const show=[];
-  if(PLANET_SEL){const S=sec.find(x=>x.slug===PLANET_SEL);if(S)show.push(S);}
-  sec.filter(x=>x.state==='active'&&x.slug!==PLANET_SEL).slice(0,2).forEach(x=>show.push(x));
-  show.slice(0,3).forEach((S,i)=>{
-    const a=-.7+i*.62,x=cx+Math.cos(a)*R*1.02,y=cy+Math.sin(a)*R*1.02;
-    const txt=S.slug.slice(0,22).toUpperCase(), tw=d.measureText(txt).width;
-    const col=(S.slug===PLANET_SEL)?'#ffffff':(SECCOL[S.state]||'#ff8a00');
-    const endX=Math.min(cx+R*1.16,W-tw-10), lx=Math.max(endX+5,x+6);
-    d.strokeStyle=col;d.lineWidth=1.4;d.beginPath();d.moveTo(x,y);d.lineTo(endX,y);d.stroke();
-    d.beginPath();d.arc(x,y,4,0,7);d.fillStyle=col;d.fill();
-    d.fillStyle=col;d.textAlign='left';d.textBaseline='alphabetic';
-    d.fillText(txt,Math.min(lx,W-tw-4),y+fs*.34);});
+  if(PLANET_SEL){const n=nodes.find(x=>x.S.slug===PLANET_SEL);if(n&&n.p.dep>-0.2)show.push(n);}
+  nodes.filter(x=>x.S.state==='active'&&x.S.slug!==PLANET_SEL&&x.p.dep>0.1).slice(0,2).forEach(x=>show.push(x));
+  show.slice(0,3).forEach(({S,p})=>{
+    const txt=S.slug.slice(0,20).toUpperCase(), tw=d.measureText(txt).width;
+    const col=(S.slug===PLANET_SEL)?'#fff':(SECCOL[S.state]||'#ff8a00');
+    const rightSide=p.sx>cx, lx=rightSide?Math.min(p.sx+14,W-tw-4):Math.max(p.sx-14-tw,4);
+    d.strokeStyle=col;d.lineWidth=1;d.beginPath();d.moveTo(p.sx,p.sy);
+    d.lineTo(rightSide?lx-3:lx+tw+3,p.sy);d.stroke();
+    d.fillStyle=col;d.textAlign='left';d.textBaseline='alphabetic';d.fillText(txt,lx,p.sy+fs*.34);});
 
-  d.fillStyle='#00ff9c';d.font="700 "+Math.max(13,R*.16)+"px 'Arial Narrow',Impact,sans-serif";
-  d.textAlign='center';d.fillText((PLANET.pct||0).toFixed(0)+'%',cx,cy+R*1.34);
-  d.fillStyle='rgba(255,106,114,.8)';d.font="700 "+Math.max(9,R*.07)+"px 'Arial Narrow',Impact,sans-serif";
-  d.fillText(PLANET.restored+' / '+PLANET.total+' SECTORS RESTORED',cx,cy+R*1.34+Math.max(12,R*.11));
+  // progress readout
+  d.fillStyle=gcol;d.font="700 "+Math.max(13,R*.15)+"px 'Arial Narrow',Impact,sans-serif";
+  d.textAlign='center';d.textBaseline='alphabetic';
+  d.fillText((PLANET.pct||0).toFixed(0)+'%',cx,cy+R*1.28);
+  d.fillStyle=rgba('#ff2f3d',0.75);d.font="700 "+Math.max(8,R*.062)+"px 'Arial Narrow',Impact,sans-serif";
+  d.fillText(PLANET.restored+' / '+PLANET.total+' SECTORS RESTORED',cx,cy+R*1.28+Math.max(11,R*.10));
 }
 
 /* click the globe to select the sector under the pointer */
