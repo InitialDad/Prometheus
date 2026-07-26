@@ -2142,7 +2142,7 @@ async function refresh(){
    if(LAST_INV_TOTAL && itot>LAST_INV_TOTAL){FLASH.push({born:performance.now(),kind:'discovery',title:'+'+(itot-LAST_INV_TOTAL)+' artifacts'});}
    LAST_INV_TOTAL=itot;
    if(FLASH.length>12)FLASH=FLASH.slice(-12);}
-  if(!CALLGRAPH){api('/api/callgraph?limit=60').then(g=>CALLGRAPH=g).catch(()=>{});}
+  if(!CALLGRAPH){api('/api/callgraph?limit=200').then(g=>CALLGRAPH=g).catch(()=>{});}
   if(!INVENTORY){api('/api/inventory').then(v=>{INVENTORY=v;buildInvPoints();}).catch(()=>{});}
   const wasRun=CL.running;CL=cl;
   pumpActivity();                    // light up the MAGI tools doing real work

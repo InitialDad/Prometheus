@@ -98,9 +98,22 @@ def _sample_vitals():
         time.sleep(4)
 
 
+def _warm_caches():
+    # build the heavy graphs once at startup so the first UI request is instant
+    try:
+        get_call_graph(200)
+    except Exception:
+        pass
+    try:
+        get_recompile_inventory()
+    except Exception:
+        pass
+
+
 def start_samplers():
     threading.Thread(target=_sample_vitals, daemon=True).start()
     threading.Thread(target=_sample_mirror, daemon=True).start()
+    threading.Thread(target=_warm_caches, daemon=True).start()
 
 
 def get_vitals():
@@ -769,7 +782,8 @@ def get_call_graph(limit=26):
         cache = _callgraph_cache
     except NameError:
         cache = None
-    if cache and now - cache["ts"] < 300:
+    # cache keyed by limit so different densities don't collide
+    if cache and cache.get("limit") == limit and now - cache["ts"] < 600:
         return cache["data"]
 
     rec = get_recomp_map(limit)
@@ -779,16 +793,16 @@ def get_call_graph(limit=26):
     jal_re = _re.compile(r"jal\s+func_([0-9a-fA-F]+)")
     edges = []
     nodes = {}
+    CHUNK = 1500000            # read at most ~1.5 MB per TU - jal refs are dense
     for u in units:
         nodes[u["addr"]] = {"addr": u["addr"], "name": u.get("sym") or u["file"],
-                            "bytes": u["bytes"]}
-        # find the file on disk for this unit and scan it
+                            "bytes": u["bytes"], "kind": u.get("kind", "generated")}
         cand = _g.glob(os.path.join(runner, "*0x%x*.cpp" % u["addr"]))
         if not cand:
             continue
         try:
             with open(cand[0], "r", errors="replace") as f:
-                txt = f.read()
+                txt = f.read(CHUNK)
         except OSError:
             continue
         targets = set()
@@ -799,8 +813,8 @@ def get_call_graph(limit=26):
         for t in targets:
             edges.append([u["addr"], t])
     data = {"nodes": list(nodes.values()), "edges": edges,
-            "n_edges": len(edges)}
-    _callgraph_cache = {"ts": now, "data": data}
+            "n_edges": len(edges), "n_nodes": len(nodes)}
+    _callgraph_cache = {"ts": now, "limit": limit, "data": data}
     return data
 
 
