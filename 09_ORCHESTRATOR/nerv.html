@@ -91,6 +91,49 @@ function applyLabels(){
 #boot div{opacity:0;animation:fi .05s forwards}
 @keyframes fi{to{opacity:1}}
 
+/* ============ SPY-SPOOF LOGIN ============ */
+#login{position:fixed;inset:0;z-index:10002;background:radial-gradient(120% 100% at 50% 40%,#0a0203,#000);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--mono);transition:opacity .6s,transform .6s}
+#login.done{opacity:0;transform:scale(1.04);pointer-events:none}
+#login .lg-scan{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;
+  background:repeating-linear-gradient(0deg,rgba(255,47,61,.06) 0 1px,transparent 1px 3px)}
+.lg-card{position:relative;width:min(440px,88vw);border:2px solid var(--acc);
+  background:linear-gradient(180deg,rgba(12,3,5,.96),rgba(4,1,2,.98));padding:26px 26px 20px;
+  box-shadow:0 0 60px rgba(255,47,61,.25),inset 0 0 40px rgba(255,47,61,.05)}
+.lg-card::before,.lg-card::after{content:'';position:absolute;width:16px;height:16px;border:2px solid var(--acc)}
+.lg-card::before{left:-2px;top:-2px;border-right:0;border-bottom:0}
+.lg-card::after{right:-2px;bottom:-2px;border-left:0;border-top:0}
+.lg-sig{width:46px;height:46px;position:relative;margin:0 auto 10px}
+.lg-sig i{position:absolute;inset:0;border:2px solid var(--acc);transform:rotate(45deg);
+  box-shadow:0 0 16px rgba(255,47,61,.6)}
+.lg-sig i:nth-child(2){inset:9px;border-color:var(--grn);animation:spin 7s linear infinite}
+.lg-title{font-family:var(--disp);font-weight:700;font-size:34px;letter-spacing:.22em;text-align:center;
+  color:var(--acc);text-shadow:0 0 20px rgba(255,47,61,.8);line-height:1}
+.lg-sub{text-align:center;font-size:9px;letter-spacing:.28em;color:var(--mut);margin-top:4px}
+.lg-hz{height:8px;margin:12px 0;background:repeating-linear-gradient(45deg,var(--yel) 0 11px,#000 11px 22px);opacity:.8}
+.lg-warn{font-size:9px;letter-spacing:.14em;color:var(--acc);text-align:center;margin-bottom:14px;min-height:12px}
+.lg-warn.err{animation:lgshake .4s}
+@keyframes lgshake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.lg-f{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lg-f span{min-width:96px;font-size:9px;letter-spacing:.16em;color:var(--grn)}
+.lg-f input{flex:1;font-family:var(--mono);font-size:13px;background:#000;color:var(--grn);
+  border:1px solid var(--acc-dim);padding:7px 9px;letter-spacing:.1em}
+.lg-f input:focus{outline:none;border-color:var(--grn);box-shadow:0 0 12px rgba(0,255,156,.25)}
+.lg-row{display:flex;align-items:center;gap:10px;margin-top:6px}
+.lg-bio{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.14em;color:var(--mut);cursor:pointer}
+.lg-bio i{width:10px;height:10px;border-radius:50%;background:#3a0c12;border:1px solid var(--acc-dim)}
+.lg-bio.ok i{background:var(--grn);box-shadow:0 0 10px var(--grn)}
+.lg-btn{margin-left:auto;font-family:var(--disp);font-weight:700;font-size:15px;letter-spacing:.14em;
+  color:#000;background:var(--acc);border:0;padding:8px 18px;cursor:pointer;
+  box-shadow:0 0 22px rgba(255,47,61,.5)}
+.lg-btn:hover{background:var(--grn);box-shadow:0 0 22px rgba(0,255,156,.5)}
+.lg-btn:disabled{opacity:.5;cursor:wait}
+.lg-seq{margin-top:12px;font-size:10px;line-height:1.5;color:var(--grn);min-height:0;max-height:120px;
+  overflow:hidden;white-space:pre-wrap}
+.lg-seq .g{color:var(--grn)}.lg-seq .a{color:var(--amb)}.lg-seq .r{color:var(--acc)}.lg-seq .m{color:var(--mut)}
+.lg-foot{position:absolute;bottom:14px;font-size:8px;letter-spacing:.2em;color:var(--mut);text-align:center}
+
 /* ---------- transition wipe ---------- */
 #wipe{position:fixed;inset:0;z-index:9500;pointer-events:none;opacity:0}
 #wipe.go{animation:wf .5s cubic-bezier(.22,.61,.36,1) forwards}
@@ -443,6 +486,26 @@ label.f input,label.f select{flex:1}
 <b style="top:80%"></b><b style="top:90%"></b></div>
 <div id="boot"></div>
 
+<!-- ============ SPY-SPOOF LOGIN ============ -->
+<div id="login">
+  <div class="lg-scan"></div>
+  <div class="lg-card">
+    <div class="lg-sig"><i></i><i></i></div>
+    <div class="lg-title">PROMETHEUS</div>
+    <div class="lg-sub">SECURE OPERATIONS TERMINAL // 機密</div>
+    <div class="lg-hz"></div>
+    <div class="lg-warn" id="lg-warn">AUTHORIZATION REQUIRED — UNAUTHORIZED ACCESS PROHIBITED</div>
+    <label class="lg-f"><span>OPERATOR ID</span><input id="lg-user" autocomplete="off" spellcheck="false" value="OPERATOR"></label>
+    <label class="lg-f"><span>PASSCODE</span><input id="lg-pass" type="password" autocomplete="off" placeholder="••••••••"></label>
+    <div class="lg-row">
+      <div class="lg-bio" id="lg-bio"><i></i><span>BIOMETRIC</span></div>
+      <button class="lg-btn" id="lg-go">AUTHENTICATE ▸</button>
+    </div>
+    <div class="lg-seq" id="lg-seq"></div>
+  </div>
+  <div class="lg-foot">PROMETHEUS OS v2.0.1 · TOKYO-3 NODE · 世界の救済は死の恐怖の中にこそある</div>
+</div>
+
 <div id="hq">
   <!-- TERMINAL -->
   <div class="blk" id="b-term" data-lk="term" data-z="term">
@@ -626,6 +689,42 @@ const NOBOOT=/[?&]noboot/.test(location.search);   // skip the intro: /?noboot=1
  '> ALL SYSTEMS NOMINAL'];
  L.forEach((t,i)=>{const d=document.createElement('div');d.style.animationDelay=(i*.13)+'s';d.textContent=t;b.appendChild(d)});
  setTimeout(()=>b.classList.add('done'),L.length*130+400);})();
+
+/* ---------- spy-spoof login ---------- */
+(()=>{const lg=$('#login');if(!lg)return;
+ // skip for headless screenshots (?noboot) or once authenticated this session
+ if(NOBOOT || sessionStorage.getItem('prom_auth')){lg.remove();return;}
+ const seq=$('#lg-seq'), warn=$('#lg-warn'), btn=$('#lg-go'), bio=$('#lg-bio');
+ const line=(t,c)=>{seq.innerHTML+=`<span class="${c||'g'}">${t}</span>\n`;seq.scrollTop=seq.scrollHeight;};
+ bio.onclick=()=>bio.classList.toggle('ok');
+ setTimeout(()=>$('#lg-pass').focus(),200);
+ $('#lg-pass').addEventListener('keydown',e=>{if(e.key==='Enter')authenticate();});
+ btn.onclick=authenticate;
+ let busy=false;
+ function authenticate(){
+   if(busy)return; busy=true; btn.disabled=true; warn.classList.remove('err');
+   const user=($('#lg-user').value||'OPERATOR').toUpperCase();
+   seq.innerHTML='';
+   const steps=[
+     ['> ESTABLISHING SECURE CHANNEL ......... ','[OK]','g',260],
+     ['> OPERATOR '+user+' ................... ','[FOUND]','g',300],
+     ['> DECRYPTING CREDENTIAL VAULT ......... ','[####] ','g',420],
+     ['> BIOMETRIC HANDSHAKE ................. ',bio.classList.contains('ok')?'[MATCH]':'[BYPASS]','a',360],
+     ['> MAGI CONSENSUS  MELCHIOR/BALTHASAR/CASPER ','[3/3]','g',380],
+     ['> CLEARANCE ELEVATED .................. ','[GRANTED]','g',300],
+   ];
+   let i=0;
+   (function next(){
+     if(i>=steps.length){
+       line('ACCESS GRANTED — WELCOME, OPERATOR '+user,'g');
+       setTimeout(()=>{sessionStorage.setItem('prom_auth','1');lg.classList.add('done');
+         setTimeout(()=>lg.remove(),650);},520);
+       return;}
+     const [a,b,c,ms]=steps[i++];
+     line(a+b,c); setTimeout(next,ms);
+   })();
+ }
+})();
 
 /* ---------- zoom tabs ---------- */
 const JP={stream:'思考',assets:'資産庫',browser:'閲覧',term:'端末接続',emerg:'システム健全性',syslog:'記録',unit:'壱号機制御',magi:'マギ・連携ツール',
