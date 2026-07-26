@@ -451,6 +451,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(X.get_project_dna())
             if p == "/api/inventory":
                 return self._json(X.get_recompile_inventory())
+            if p == "/api/pipeline":
+                return self._json(X.get_pipeline())
             if p == "/api/recomp":
                 return self._json(X.get_recomp_map(int(q.get("limit", [26])[0])))
             if p == "/api/codeflow":

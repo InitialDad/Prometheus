@@ -901,6 +901,76 @@ def get_event_stream(limit=80):
     return {"events": ev[:limit], "now": now}
 
 
+def _proc_state():
+    """Minimal process/file state for the pipeline view (hub_extras-local)."""
+    def running(name):
+        try:
+            out = subprocess.run(["tasklist", "/FI", "IMAGENAME eq " + name, "/NH"],
+                                 capture_output=True, text=True, timeout=8,
+                                 creationflags=CREATE_NO_WINDOW)
+            return name.lower() in out.stdout.lower()
+        except Exception:
+            return False
+    exe = os.path.join(WOS, r"PS2Recomp\out\build\ps2xRuntime\ps2EntryRunner.exe")
+    iso = r"C:\Users\owner\pcsx2_modder_wos\iso\WayOfTheSamurai.iso"
+    return {"runner_alive": running("ps2EntryRunner.exe"),
+            "build_active": running("ninja.exe") or running("link.exe"),
+            "exe_present": os.path.exists(exe), "iso_present": os.path.exists(iso)}
+
+
+def get_pipeline():
+    """The recompile PIPELINE as real stages with real status. ISO -> extract ->
+    Ghidra -> recompile -> HLE -> build -> run -> render. Each stage's status and
+    metric come from real state, so the code map can show the actual pipeline."""
+    import glob as _g
+    p = _proc_state()
+    inv = get_recompile_inventory()
+    counts = {c["name"]: c["count"] for c in inv.get("categories", [])}
+    n_fns = counts.get("FUNCTIONS", 0)
+    n_tu = counts.get("TU (RECOMPILED)", 0)
+    n_str = counts.get("STRINGS", 0)
+
+    iso_extracted = os.path.join(r"C:\Users\owner\pcsx2_modder_wos", "iso")
+    extracted = os.path.isdir(iso_extracted)
+    hle_dir = os.path.join(WOS, "PS2Recomp", "ps2xRuntime", "src", "lib")
+    n_hle = len(_g.glob(os.path.join(hle_dir, "*.cpp")))
+
+    # render status from the roadmap frontier
+    render_status = "blocked"
+    try:
+        c = sqlite3.connect(DB, timeout=5)
+        r = c.execute("SELECT status FROM km_roadmap WHERE serial=? AND slug='title-menu-render'",
+                      (SERIAL,)).fetchone()
+        c.close()
+        if r:
+            render_status = ("done" if r[0] in ("done", "verified")
+                             else "active" if r[0] == "in_progress" else "blocked")
+    except Exception:
+        pass
+
+    stages = [
+        {"name": "ISO", "status": "done" if p.get("iso_present") else "blocked",
+         "metric": "source image", "detail": "WayOfTheSamurai.iso"},
+        {"name": "EXTRACT", "status": "done" if extracted else "raw",
+         "metric": "ELF + assets", "detail": "SLUS_204.07 + archives"},
+        {"name": "GHIDRA", "status": "done" if n_fns else "raw",
+         "metric": "%d functions" % n_fns, "detail": "auto-analysis + naming"},
+        {"name": "RECOMPILE", "status": "done" if n_tu else "raw",
+         "metric": "%d TUs" % n_tu, "detail": "MIPS -> C++ translation units"},
+        {"name": "HLE RUNTIME", "status": "active",
+         "metric": "%d modules" % n_hle, "detail": "GS/DMA/GIF/VIF/IOP/GZMFS"},
+        {"name": "BUILD", "status": "active" if p.get("build_active")
+         else "done" if p.get("exe_present") else "raw",
+         "metric": "ps2EntryRunner.exe", "detail": "MSVC/ninja LTCG"},
+        {"name": "RUN", "status": "active" if p.get("runner_alive")
+         else "done" if p.get("exe_present") else "raw",
+         "metric": "boots + interactive", "detail": "reads the ISO"},
+        {"name": "RENDER", "status": render_status,
+         "metric": "PSMT8 CLUT sampler", "detail": "title art -> GS raster"},
+    ]
+    return {"stages": stages}
+
+
 def get_recompile_inventory():
     """The FULL scale of what has been recompiled/recovered, by category, with
     REAL counts. The sphere renders a dense point field proportional to these,
