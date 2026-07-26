@@ -449,6 +449,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(X.get_call_graph(int(q.get("limit", [26])[0])))
             if p == "/api/dna":
                 return self._json(X.get_project_dna())
+            if p == "/api/inventory":
+                return self._json(X.get_recompile_inventory())
             if p == "/api/recomp":
                 return self._json(X.get_recomp_map(int(q.get("limit", [26])[0])))
             if p == "/api/codeflow":

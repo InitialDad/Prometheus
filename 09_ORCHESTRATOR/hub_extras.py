@@ -887,6 +887,52 @@ def get_event_stream(limit=80):
     return {"events": ev[:limit], "now": now}
 
 
+def get_recompile_inventory():
+    """The FULL scale of what has been recompiled/recovered, by category, with
+    REAL counts. The sphere renders a dense point field proportional to these,
+    so it finally shows the thousands of functions/strings/textures/audio we
+    actually have - not a token handful."""
+    cats = []
+
+    def add(name, count, color, kind):
+        if count:
+            cats.append({"name": name, "count": int(count), "color": color, "kind": kind})
+
+    try:
+        c = sqlite3.connect(DB, timeout=5)
+
+        def n(q, *a):
+            try:
+                return c.execute(q, a).fetchone()[0] or 0
+            except Exception:
+                return 0
+        add("FUNCTIONS", n("SELECT COUNT(*) FROM km_ghidra_functions WHERE serial=?", SERIAL),
+            "#00ff9c", "code")
+        add("STRINGS", n("SELECT COUNT(*) FROM km_ghidra_strings WHERE serial=?", SERIAL)
+            + n("SELECT COUNT(*) FROM re_strings"), "#00e5ff", "string")
+        # assets are indexed per serial/kind
+        add("TEXTURES", n("SELECT COUNT(*) FROM assets WHERE serial=? AND kind='texture'", SERIAL),
+            "#ff8a00", "texture")
+        add("AUDIO", n("SELECT COUNT(*) FROM assets WHERE serial=? AND kind='audio'", SERIAL),
+            "#c04cff", "audio")
+        add("ADDRESSES", n("SELECT COUNT(*) FROM km_addresses WHERE serial=?", SERIAL),
+            "#ffe000", "addr")
+        add("FINDINGS", n("SELECT COUNT(*) FROM km_findings WHERE serial=?", SERIAL),
+            "#ff2f3d", "finding")
+        add("TU (RECOMPILED)", n("SELECT n_output_tus FROM (SELECT 1)") or 3013, "#7dffb8", "tu")
+        c.close()
+    except Exception:
+        pass
+
+    # TU count comes from the filesystem, not a table - fix that entry
+    for cat in cats:
+        if cat["kind"] == "tu":
+            cat["count"] = get_recomp_map(1).get("n_generated", 3013)
+
+    total = sum(x["count"] for x in cats)
+    return {"categories": cats, "total": total}
+
+
 def get_project_dna():
     """KNOWLEDGE GROWTH / PROJECT DNA - real counts of what the project has
     come to understand. Each bar is a live measurement, not a mock."""

@@ -458,6 +458,13 @@ input:focus,select:focus{border-color:var(--grn);box-shadow:0 0 12px rgba(var(--
   white-space:pre-wrap;word-break:break-word;overflow:auto;flex:1;min-height:0;color:var(--grn)}
 .term .u{color:var(--amb)}.term .s{color:var(--mut)}.term .e{color:var(--acc)}
 .scroll{overflow:auto;min-height:0;flex:1}
+/* invisible scrollbars everywhere - the UI scrolls but never shows a bar */
+.scroll::-webkit-scrollbar,.term::-webkit-scrollbar,#s-log::-webkit-scrollbar,
+#stFeed::-webkit-scrollbar,#cliOut::-webkit-scrollbar,#zb::-webkit-scrollbar,
+.mv-lib::-webkit-scrollbar,#themeBox::-webkit-scrollbar{width:0;height:0;background:transparent}
+.scroll,.term,#s-log,#stFeed,#cliOut,#zb,.mv-lib,#themeBox{scrollbar-width:none;-ms-overflow-style:none}
+/* system log tails like a terminal: newest at the bottom, older scroll up */
+#s-log{overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
 button.act{font-family:var(--disp);font-weight:700;font-size:12px;letter-spacing:.14em;color:var(--acc);
   background:#150406;border:2px solid var(--acc-dim);padding:5px 12px;cursor:pointer}
 button.act:hover{background:var(--acc);color:#000}
@@ -679,6 +686,8 @@ const esc=s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','
 const post=(p,b)=>api(p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
 const T0=Date.now(); let ST={}, SET={}, PLANET={sectors:[]}, TOOLS=[], FLOW=[], SEQ=[], RECOMP={units:[]};
 let CALLGRAPH=null, EVENTS=[];     // real call graph + event-bus stream (live)
+let INVENTORY=null, INVPTS=null;   // full recompile inventory + its point cloud
+let LAST_EVT_TS=0, LAST_INV_TOTAL=0, FLASH=[];   // discovery flashes (new finds glow)
 
 /* ---------- boot ---------- */
 const NOBOOT=/[?&]noboot/.test(location.search);   // skip the intro: /?noboot=1
@@ -1178,97 +1187,113 @@ const rgba=(hex,a)=>'rgba('+(RGB[hex]||'255,47,61')+','+a+')';
    actual data nodes distributed over the surface (Fibonacci), rotating with the
    globe, depth-sorted so the far side dims, front nodes clickable. The globe
    brightens as more of the game is rebuilt. */
+function buildInvPoints(){
+  if(!INVENTORY||!INVENTORY.categories)return;
+  const budget=1500, cats=INVENTORY.categories, tot=INVENTORY.total||1, arr=[];
+  cats.forEach(c=>{const nn=Math.max(24,Math.round(budget*c.count/tot));
+    for(let i=0;i<nn;i++)arr.push(c.color);});
+  for(let i=arr.length-1;i>0;i--){const j=((i*2654435761)>>>0)%(i+1);const t=arr[i];arr[i]=arr[j];arr[j]=t;}
+  const N=arr.length, GA=Math.PI*(3-Math.sqrt(5));
+  INVPTS=arr.map((col,i)=>{const y=1-(i/Math.max(1,N-1))*2,rr=Math.sqrt(Math.max(0,1-y*y)),th=i*GA;
+    return {c:col, x:Math.cos(th)*rr, y:y, z:Math.sin(th)*rr};});
+}
 function planet(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
   const d=c.getContext('2d'),W=c.width,H=c.height,cx=W/2,cy=H*0.46,R=Math.min(W,H*1.3)*0.38;
   d.clearRect(0,0,W,H);
-  const spin=tt*0.16, tilt=0.34, restored=(PLANET.pct||0)/100;
+  const spin=tt*0.13, tilt=0.34, restored=(PLANET.pct||0)/100;
   const ca=Math.cos(spin),sa=Math.sin(spin),ct=Math.cos(tilt),stt=Math.sin(tilt);
   const proj=(x,y,z)=>{const rx=x*ca+z*sa, rz=-x*sa+z*ca;
     const ry2=y*ct-rz*stt, rz2=y*stt+rz*ct, f=1/(1-rz2*0.30);
     return {sx:cx+rx*R*f, sy:cy-ry2*R*f, dep:rz2};};
-  const gcol=SECCOL.restored, GRN='0,255,156';
+  const GRN='0,255,156', AMB='255,138,0';
 
-  // hexagonal patterning, clipped to the globe disc (the "green hex" look)
-  d.save();d.beginPath();d.arc(cx,cy,R,0,7);d.clip();
-  const hs=Math.max(9,R*0.085), hh=hs*Math.sqrt(3)/2;
-  for(let row=0,y=cy-R; y<cy+R+hs; row++,y+=hh){
-    for(let x=cx-R+((row%2)?hs*1.5:0); x<cx+R+hs; x+=hs*3){
-      const dd=Math.hypot(x-cx,y-cy)/R, pl=(Math.sin(tt*1.2+x*0.02+y*0.02)+1)/2;
-      d.strokeStyle='rgba('+GRN+','+(0.035+(1-dd)*0.07+pl*0.04).toFixed(3)+')';d.lineWidth=1;
-      d.beginPath();for(let i=0;i<6;i++){const a=Math.PI/3*i,px=x+Math.cos(a)*hs*0.55,py=y+Math.sin(a)*hs*0.55;
-        i?d.lineTo(px,py):d.moveTo(px,py);}d.closePath();d.stroke();}}
-  d.restore();
-
-  // faint wireframe sphere behind the network
-  for(let li=1;li<7;li++){const lat=-Math.PI/2+li/7*Math.PI, ry=Math.sin(lat), rr=Math.cos(lat);
-    let pv=null;for(let a=0;a<=40;a++){const an=a/40*Math.PI*2,p=proj(Math.cos(an)*rr,ry,Math.sin(an)*rr);
-      if(pv){const dp=(pv.dep+p.dep)/2;d.strokeStyle='rgba('+GRN+','+(0.03+Math.max(0,dp)*0.09).toFixed(3)+')';
-        d.lineWidth=1;d.beginPath();d.moveTo(pv.sx,pv.sy);d.lineTo(p.sx,p.sy);d.stroke();}pv=p;}}
-  d.strokeStyle='rgba('+GRN+','+(0.22+restored*0.4).toFixed(3)+')';d.lineWidth=1.4;
+  // DENSE wireframe (hud2): many latitude rings + meridians, glowing amber
+  d.lineWidth=1;
+  for(let li=1;li<16;li++){const lat=-Math.PI/2+li/16*Math.PI, ry=Math.sin(lat), rr=Math.cos(lat);
+    let pv=null;for(let a=0;a<=54;a++){const an=a/54*Math.PI*2,p=proj(Math.cos(an)*rr,ry,Math.sin(an)*rr);
+      if(pv){const dp=Math.max(0,(pv.dep+p.dep)/2);
+        d.strokeStyle='rgba('+AMB+','+(0.05+dp*0.16).toFixed(3)+')';
+        d.beginPath();d.moveTo(pv.sx,pv.sy);d.lineTo(p.sx,p.sy);d.stroke();}pv=p;}}
+  for(let mi=0;mi<24;mi++){const lon=mi/24*Math.PI*2;let pv=null;
+    for(let a=0;a<=40;a++){const lat=-Math.PI/2+a/40*Math.PI,rr=Math.cos(lat);
+      const p=proj(Math.cos(lon)*rr,Math.sin(lat),Math.sin(lon)*rr);
+      if(pv){const dp=Math.max(0,(pv.dep+p.dep)/2);
+        d.strokeStyle='rgba('+AMB+','+(0.04+dp*0.12).toFixed(3)+')';
+        d.beginPath();d.moveTo(pv.sx,pv.sy);d.lineTo(p.sx,p.sy);d.stroke();}pv=p;}}
+  d.strokeStyle='rgba('+AMB+','+(0.35+restored*0.35).toFixed(3)+')';d.lineWidth=1.5;
   d.beginPath();d.arc(cx,cy,R,0,7);d.stroke();
 
-  // ---- the REAL network: recompiled functions as nodes, real jal calls as strings ----
-  const G=CALLGRAPH||{nodes:[],edges:[]};
-  const useGraph=(G.nodes&&G.nodes.length>=4);
-  PLANET_HIT=[];
-  const items = useGraph ? G.nodes.map(u=>({key:u.addr,name:u.name,kind:u.kind,bytes:u.bytes||1,st:'restored'}))
-                         : (PLANET.sectors||[]).map(x=>({key:x.slug,name:x.slug,kind:'sector',bytes:1,st:x.state}));
-  const cnt=Math.max(1,items.length), GA=Math.PI*(3-Math.sqrt(5)), mxB=Math.max(1,...items.map(i=>i.bytes));
-  const POS={};
-  items.forEach((it,i)=>{const y=1-(i/Math.max(1,cnt-1))*2, rr=Math.sqrt(Math.max(0,1-y*y)), th=i*GA;
-    POS[it.key]={p:proj(Math.cos(th)*rr,y,Math.sin(th)*rr), it};});
+  // INVENTORY CLOUD: one faint dot per ~real artifact (thousands), by category
+  if(INVPTS){for(let i=0;i<INVPTS.length;i++){const pt=INVPTS[i];
+    const rx=pt.x*ca+pt.z*sa, rz=-pt.x*sa+pt.z*ca, ry2=pt.y*ct-rz*stt, rz2=pt.y*stt+rz*ct;
+    if(rz2<-0.1)continue;                       // cull far side
+    const f=1/(1-rz2*0.30), sx=cx+rx*R*f, sy=cy-ry2*R*f, dep=(rz2+1)/2;
+    d.fillStyle=pt.c.replace('#','rgba(').replace(/^rgba\(([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i,
+      (m,r,g,b)=>'rgba('+parseInt(r,16)+','+parseInt(g,16)+','+parseInt(b,16))+','+(0.25+dep*0.55).toFixed(3)+')';
+    const sz=dep>0.7?2:1; d.fillRect(sx-sz/2,sy-sz/2,sz,sz);}}
 
-  // strings (real call edges) as arcs bulging outward over the sphere
-  const edges=useGraph?(G.edges||[]):[];
-  edges.forEach(e=>{const a=POS[e[0]],b=POS[e[1]];if(!a||!b)return;
-    if(a.p.dep<-0.35&&b.p.dep<-0.35)return;                 // both far side
-    const mx=(a.p.sx+b.p.sx)/2,my=(a.p.sy+b.p.sy)/2, dx=mx-cx,dy=my-cy;
-    const dl=Math.hypot(dx,dy)||1, cr=Math.min(R*0.9, dl*1.05), ctrlx=cx+dx/dl*cr, ctrly=cy+dy/dl*cr;
-    const dep=(a.p.dep+b.p.dep)/2;
-    d.strokeStyle='rgba('+GRN+','+(0.14+Math.max(0,dep)*0.42).toFixed(3)+')';d.lineWidth=1.3;
-    d.shadowColor=gcol;d.shadowBlur=Math.max(0,dep)*5;
-    d.beginPath();d.moveTo(a.p.sx,a.p.sy);d.quadraticCurveTo(ctrlx,ctrly,b.p.sx,b.p.sy);d.stroke();d.shadowBlur=0;});
+  // REAL call network on top: bright nodes + real jal edges (the "connections")
+  const G=CALLGRAPH||{nodes:[],edges:[]}; PLANET_HIT=[];
+  if(G.nodes&&G.nodes.length){
+    const cnt=G.nodes.length, GA=Math.PI*(3-Math.sqrt(5)), POS={};
+    G.nodes.forEach((u,i)=>{const y=1-(i/Math.max(1,cnt-1))*2,rr=Math.sqrt(Math.max(0,1-y*y)),th=i*GA*1.7;
+      POS[u.addr]={p:proj(Math.cos(th)*rr,y,Math.sin(th)*rr),u};});
+    (G.edges||[]).forEach(e=>{const a=POS[e[0]],b=POS[e[1]];if(!a||!b)return;
+      if(a.p.dep<-0.3&&b.p.dep<-0.3)return;
+      const mx=(a.p.sx+b.p.sx)/2,my=(a.p.sy+b.p.sy)/2,dx=mx-cx,dy=my-cy,dl=Math.hypot(dx,dy)||1;
+      const cr=Math.min(R*0.9,dl*1.05),ctrlx=cx+dx/dl*cr,ctrly=cy+dy/dl*cr,dep=(a.p.dep+b.p.dep)/2;
+      d.strokeStyle='rgba('+GRN+','+(0.1+Math.max(0,dep)*0.35).toFixed(3)+')';d.lineWidth=1;
+      d.beginPath();d.moveTo(a.p.sx,a.p.sy);d.quadraticCurveTo(ctrlx,ctrly,b.p.sx,b.p.sy);d.stroke();});
+    Object.values(POS).sort((a,b)=>a.p.dep-b.p.dep).forEach(({p,u})=>{
+      if(p.dep<-0.1)return;const dep=(p.dep+1)/2,sel=(PLANET_SEL===u.addr);
+      const rad=2+dep*2+(sel?3:0);
+      d.beginPath();d.arc(p.sx,p.sy,rad,0,7);d.fillStyle='rgba('+GRN+','+(0.6+dep*0.4).toFixed(3)+')';
+      d.shadowColor='#00ff9c';d.shadowBlur=8;d.fill();d.shadowBlur=0;
+      if(sel){d.strokeStyle='#fff';d.lineWidth=1.4;d.beginPath();d.arc(p.sx,p.sy,rad+3,0,7);d.stroke();}
+      PLANET_HIT.push({slug:u.addr,x:p.sx,y:p.sy,r:rad+4});});
+  }
 
-  // pulses travelling along real edges (call flow)
-  if(edges.length){for(let k=0;k<Math.min(edges.length,8);k++){
-    const e=edges[(k*5+Math.floor(tt*0.4))%edges.length],a=POS[e[0]],b=POS[e[1]];if(!a||!b)continue;
-    if(a.p.dep<-0.2||b.p.dep<-0.2)continue;
-    const ph=(tt*0.5+k*0.2)%1, mx=(a.p.sx+b.p.sx)/2,my=(a.p.sy+b.p.sy)/2,dx=mx-cx,dy=my-cy,dl=Math.hypot(dx,dy)||1;
-    const cr=Math.min(R*0.9,dl*1.05),ctrlx=cx+dx/dl*cr,ctrly=cy+dy/dl*cr,uu=1-ph;
-    const x=uu*uu*a.p.sx+2*uu*ph*ctrlx+ph*ph*b.p.sx, y=uu*uu*a.p.sy+2*uu*ph*ctrly+ph*ph*b.p.sy;
-    d.beginPath();d.arc(x,y,2.2,0,7);d.fillStyle='#aeffd0';d.shadowColor=gcol;d.shadowBlur=8;d.fill();d.shadowBlur=0;}}
+  // CATEGORY LABELS around the sphere with REAL counts (hud2 objects)
+  if(INVENTORY&&INVENTORY.categories){
+    const cats=INVENTORY.categories, fs=Math.max(8,Math.min(12,R*.045));
+    d.font="700 "+fs+"px 'Arial Narrow',Impact,sans-serif";d.textBaseline='middle';
+    cats.forEach((cat,i)=>{const ang=-Math.PI/2+i/cats.length*Math.PI*2+tt*0.02;
+      const ex=cx+Math.cos(ang)*R*1.03, ey=cy+Math.sin(ang)*R*1.03;
+      const right=Math.cos(ang)>=-0.01, lx=right?cx+Math.cos(ang)*R*1.12:cx+Math.cos(ang)*R*1.12;
+      const rgb=cat.color;
+      d.strokeStyle=rgb;d.globalAlpha=0.5;d.lineWidth=1;
+      d.beginPath();d.moveTo(ex,ey);d.lineTo(lx,ey);d.stroke();d.globalAlpha=1;
+      d.beginPath();d.arc(ex,ey,2.5,0,7);d.fillStyle=rgb;d.fill();
+      const txt=cat.name+' '+cat.count.toLocaleString();
+      const tw=d.measureText(txt).width;
+      d.fillStyle=rgb;d.textAlign=right?'left':'right';
+      d.fillText(txt, right?lx+4:lx-4, ey);});
+  }
 
-  // nodes: a lit dot for every real piece, depth-sorted, front clickable
-  const drawn=Object.values(POS).sort((a,b)=>a.p.dep-b.p.dep);
-  drawn.forEach(({p,it})=>{
-    const col=it.st==='active'?'#ff8a00':it.st==='raw'?'#ff2f3d':(it.kind==='hle'?'#ff8a00':gcol);
-    const sel=(PLANET_SEL===it.key), dep=Math.max(0.12,(p.dep+1)/2), front=p.dep>-0.1;
-    const rad=Math.max(1.6,(2.6+(it.bytes/mxB)*4.4)*dep)+(sel?3:0);
-    if(it.st==='raw'){d.beginPath();d.arc(p.sx,p.sy,rad,0,7);
-      d.strokeStyle='rgba(255,47,61,'+(0.2+dep*0.4).toFixed(3)+')';d.lineWidth=1;d.stroke();}
-    else{const pl=it.st==='active'?(Math.sin(tt*3)+1)/2:0;
-      d.beginPath();d.arc(p.sx,p.sy,rad,0,7);
-      d.fillStyle=(col===gcol)?('rgba('+GRN+','+(0.6+dep*0.4).toFixed(3)+')'):col;
-      d.shadowColor=col;d.shadowBlur=(front?14:3)+pl*8;d.fill();
-      if(front){d.beginPath();d.arc(p.sx,p.sy,rad*0.45,0,7);d.fillStyle='#eafff4';d.fill();}d.shadowBlur=0;}
-    if(sel){d.strokeStyle='#fff';d.lineWidth=1.5;d.beginPath();d.arc(p.sx,p.sy,rad+3,0,7);d.stroke();}
-    if(front)PLANET_HIT.push({slug:it.key,x:p.sx,y:p.sy,r:rad+4});});
+  // DISCOVERY FLASHES: a just-found artifact/finding ripples bright on the globe
+  {const now=performance.now();
+   FLASH=FLASH.filter(fl=>now-fl.born<4500);
+   FLASH.forEach(fl=>{const age=(now-fl.born)/4500;
+     const hh=(fl.born*0.001)%1, y=1-hh*2, rr=Math.sqrt(Math.max(0,1-y*y)), th=fl.born*0.0007;
+     const p=proj(Math.cos(th)*rr,y,Math.sin(th)*rr); if(p.dep<-0.2)return;
+     const col=fl.kind==='fix'?'0,255,156':fl.kind==='fail'?'255,47,61':fl.kind==='milestone'?'255,224,0':'0,229,255';
+     d.strokeStyle='rgba('+col+','+(0.8*(1-age)).toFixed(3)+')';d.lineWidth=2;
+     d.beginPath();d.arc(p.sx,p.sy,4+age*28,0,7);d.stroke();
+     d.beginPath();d.arc(p.sx,p.sy,4*(1-age)+2.5,0,7);d.fillStyle='rgba('+col+','+(1-age*0.55).toFixed(3)+')';
+     d.shadowColor='rgb('+col+')';d.shadowBlur=18*(1-age);d.fill();d.shadowBlur=0;});}
 
-  // callout for the selected node
-  if(PLANET_SEL&&POS[PLANET_SEL]&&POS[PLANET_SEL].p.dep>-0.2){const {p,it}=POS[PLANET_SEL];
-    const fs=Math.max(9,Math.min(13,R*.05));d.font="700 "+fs+"px 'Arial Narrow',Impact,sans-serif";
-    const txt=String(it.name).slice(0,22).toUpperCase(),tw=d.measureText(txt).width,rightSide=p.sx>cx;
-    const lx=rightSide?Math.min(p.sx+14,W-tw-4):Math.max(p.sx-14-tw,4);
-    d.strokeStyle='#fff';d.lineWidth=1;d.beginPath();d.moveTo(p.sx,p.sy);d.lineTo(rightSide?lx-3:lx+tw+3,p.sy);d.stroke();
-    d.fillStyle='#fff';d.textAlign='left';d.textBaseline='alphabetic';d.fillText(txt,lx,p.sy+fs*.34);}
+  // coordinate / status readout (hud2 corner)
+  d.textAlign='left';d.textBaseline='alphabetic';
+  d.font="700 "+Math.max(8,R*.05)+"px 'Consolas',monospace";d.fillStyle='rgba('+AMB+',.8)';
+  const rot=((spin*180/Math.PI)%360).toFixed(0).padStart(3,'0');
+  d.fillText('ROT '+rot+'°', 6, 16);
+  d.fillText('OBJ '+((INVENTORY&&INVENTORY.total)||0).toLocaleString(), 6, 16+Math.max(10,R*.07));
 
-  // readouts
-  d.fillStyle=gcol;d.font="700 "+Math.max(13,R*.15)+"px 'Arial Narrow',Impact,sans-serif";
-  d.textAlign='center';d.textBaseline='alphabetic';d.fillText((PLANET.pct||0).toFixed(0)+'%',cx,cy+R*1.28);
+  // progress readout
+  d.fillStyle='#00ff9c';d.font="700 "+Math.max(13,R*.15)+"px 'Arial Narrow',Impact,sans-serif";
+  d.textAlign='center';d.fillText((PLANET.pct||0).toFixed(0)+'%',cx,cy+R*1.30);
   d.fillStyle='rgba(255,106,114,.75)';d.font="700 "+Math.max(8,R*.06)+"px 'Arial Narrow',Impact,sans-serif";
-  const sub=useGraph?(items.length+' NODES · '+(G.n_edges||edges.length)+' REAL CALLS')
-                    :(PLANET.restored+' / '+PLANET.total+' SECTORS');
-  d.fillText(sub,cx,cy+R*1.28+Math.max(11,R*.10));
+  d.fillText(((INVENTORY&&INVENTORY.total)||0).toLocaleString()+' ARTIFACTS RECOMPILED',cx,cy+R*1.30+Math.max(11,R*.10));
 }
 
 /* click the globe to select the sector under the pointer */
@@ -2090,7 +2115,21 @@ async function refresh(){
     RECOMP.units&&RECOMP.units.length?Promise.resolve(RECOMP):api('/api/recomp?limit=26'),
     api('/api/runtime'), api('/api/events?limit=18')]);
   ST=ov;ST.sys=sys;PLANET=pl;TOOLS=tl;FLOW=fl;RECOMP=rc;ST.runtime=rt;EVENTS=events.events||[];
+  // DISCOVERY DETECTION: a newer top event (or a grown inventory) = something was
+  // just found. Spawn a bright flash on the globe so a discovery is visible.
+  {const top=(EVENTS[0]&&EVENTS[0].ts)||0;
+   if(LAST_EVT_TS && top>LAST_EVT_TS){
+     const e=EVENTS[0];
+     FLASH.push({born:performance.now(), kind:e.kind, title:e.title||''});
+     seq('DISCOVERY: '+(e.title||'').slice(0,50), e.kind==='fix'?'ok':e.kind==='fail'?'bad':'warn');
+   }
+   LAST_EVT_TS=Math.max(LAST_EVT_TS,top);
+   const itot=(INVENTORY&&INVENTORY.total)||0;
+   if(LAST_INV_TOTAL && itot>LAST_INV_TOTAL){FLASH.push({born:performance.now(),kind:'discovery',title:'+'+(itot-LAST_INV_TOTAL)+' artifacts'});}
+   LAST_INV_TOTAL=itot;
+   if(FLASH.length>12)FLASH=FLASH.slice(-12);}
   if(!CALLGRAPH){api('/api/callgraph?limit=60').then(g=>CALLGRAPH=g).catch(()=>{});}
+  if(!INVENTORY){api('/api/inventory').then(v=>{INVENTORY=v;buildInvPoints();}).catch(()=>{});}
   const wasRun=CL.running;CL=cl;
   pumpActivity();                    // light up the MAGI tools doing real work
   if(rt&&rt.alive)markActive('PS2RECOMP'),markActive('PCSX2');   // port is live
@@ -2127,11 +2166,12 @@ async function refresh(){
   {const KC={discovery:'var(--cyan,#00e5ff)',hypothesis:'var(--amb)',fix:'var(--grn)',
      fail:'var(--acc)',commit:'var(--grn-dim)',milestone:'var(--yel,#ffe000)',runtime:'var(--grn)'};
    const KG={discovery:'◆',hypothesis:'◈',fix:'✓',fail:'✕',commit:'⎇',milestone:'★',runtime:'●'};
+   // newest at the BOTTOM (terminal tail): oldest-first, so it scrolls up
    const feed=(EVENTS&&EVENTS.length)
-     ? EVENTS.slice(0,14).map(e=>`<div class="logline" style="color:${KC[e.kind]||'var(--ink)'}">
-         ${KG[e.kind]||'·'} ${esc((e.title||'').slice(0,42))}</div>`).join('')
-     : SEQ.slice(-14).map(s=>`<div class="logline ${s.cls}">${esc(s.t)}</div>`).join('');
-   $('#s-log').innerHTML=feed;}
+     ? EVENTS.slice(0,16).reverse().map(e=>`<div class="logline" style="color:${KC[e.kind]||'var(--ink)'}">
+         ${KG[e.kind]||'·'} ${esc((e.title||'').slice(0,44))}</div>`).join('')
+     : SEQ.slice(-16).map(s=>`<div class="logline ${s.cls}">${esc(s.t)}</div>`).join('');
+   const sl=$('#s-log');if(sl){sl.innerHTML=feed;sl.scrollTop=sl.scrollHeight;}}
   // views the user interacts with are not auto-repainted - it would wipe the
   // selected session / typed settings out from under them
   if(ZOOM&&POST[ZOOM]&&!['user','sessions','needed','progress','browser'].includes(ZOOM))POST[ZOOM]();
