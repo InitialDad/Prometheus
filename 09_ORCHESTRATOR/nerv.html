@@ -1253,21 +1253,35 @@ function planet(cid){const c=document.getElementById(cid);if(!c||!c.width)return
       PLANET_HIT.push({slug:u.addr,x:p.sx,y:p.sy,r:rad+4});});
   }
 
-  // CATEGORY LABELS around the sphere with REAL counts (hud2 objects)
+  // CATEGORY LABELS + REAL DATA-FLOW between them (how the engine uses each type)
   if(INVENTORY&&INVENTORY.categories){
     const cats=INVENTORY.categories, fs=Math.max(8,Math.min(12,R*.045));
-    d.font="700 "+fs+"px 'Arial Narrow',Impact,sans-serif";d.textBaseline='middle';
+    // anchor position per category on the rim
+    const anch={};
     cats.forEach((cat,i)=>{const ang=-Math.PI/2+i/cats.length*Math.PI*2+tt*0.02;
-      const ex=cx+Math.cos(ang)*R*1.03, ey=cy+Math.sin(ang)*R*1.03;
-      const right=Math.cos(ang)>=-0.01, lx=right?cx+Math.cos(ang)*R*1.12:cx+Math.cos(ang)*R*1.12;
-      const rgb=cat.color;
-      d.strokeStyle=rgb;d.globalAlpha=0.5;d.lineWidth=1;
-      d.beginPath();d.moveTo(ex,ey);d.lineTo(lx,ey);d.stroke();d.globalAlpha=1;
-      d.beginPath();d.arc(ex,ey,2.5,0,7);d.fillStyle=rgb;d.fill();
-      const txt=cat.name+' '+cat.count.toLocaleString();
-      const tw=d.measureText(txt).width;
-      d.fillStyle=rgb;d.textAlign=right?'left':'right';
-      d.fillText(txt, right?lx+4:lx-4, ey);});
+      anch[cat.name]={x:cx+Math.cos(ang)*R*1.03, y:cy+Math.sin(ang)*R*1.03, ang, col:cat.color};});
+    // REAL relationships: code consumes assets; TUs contain functions; findings
+    // annotate functions; functions live at addresses. Not per-instance, but the
+    // true way these data types work together in the engine.
+    const REL=[['TU (RECOMPILED)','FUNCTIONS'],['FUNCTIONS','STRINGS'],['FUNCTIONS','TEXTURES'],
+      ['FUNCTIONS','AUDIO'],['FUNCTIONS','ADDRESSES'],['FINDINGS','FUNCTIONS']];
+    REL.forEach((r,ri)=>{const a=anch[r[0]],b=anch[r[1]];if(!a||!b)return;
+      const mx=(a.x+b.x)/2,my=(a.y+b.y)/2, cxx=cx+(mx-cx)*0.35, cyy=cy+(my-cy)*0.35;
+      d.strokeStyle='rgba(0,255,156,0.12)';d.lineWidth=1;
+      d.beginPath();d.moveTo(a.x,a.y);d.quadraticCurveTo(cxx,cyy,b.x,b.y);d.stroke();
+      // flow pip travelling the relationship
+      const ph=((tt*0.4+ri*0.16)%1),uu=1-ph;
+      const px=uu*uu*a.x+2*uu*ph*cxx+ph*ph*b.x, py=uu*uu*a.y+2*uu*ph*cyy+ph*ph*b.y;
+      d.beginPath();d.arc(px,py,1.8,0,7);d.fillStyle='rgba(0,255,156,0.7)';d.fill();});
+    // labels on top
+    d.font="700 "+fs+"px 'Arial Narrow',Impact,sans-serif";d.textBaseline='middle';
+    cats.forEach(cat=>{const a=anch[cat.name], right=Math.cos(a.ang)>=-0.01;
+      const lx=cx+Math.cos(a.ang)*R*1.12;
+      d.strokeStyle=cat.color;d.globalAlpha=0.5;d.lineWidth=1;
+      d.beginPath();d.moveTo(a.x,a.y);d.lineTo(lx,a.y);d.stroke();d.globalAlpha=1;
+      d.beginPath();d.arc(a.x,a.y,2.5,0,7);d.fillStyle=cat.color;d.fill();
+      d.fillStyle=cat.color;d.textAlign=right?'left':'right';
+      d.fillText(cat.name+' '+cat.count.toLocaleString(), right?lx+4:lx-4, a.y);});
   }
 
   // DISCOVERY FLASHES: a just-found artifact/finding ripples bright on the globe
