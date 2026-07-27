@@ -5,36 +5,72 @@
 
 ---
 
-## ROOT CAUSE — PINNED  (2026-07-25)   *** the last bug before a title screen ***
+## ROOT CAUSE — WITHDRAWN  (2026-07-27)   *** the swizzle is NOT broken ***
 
-The game uploads the title texture as PSMCT32 (32-bit) but reads it as PSMT8
-(8-bit CLUT). Our WriteCT32 and ReadP8 use inconsistent VRAM swizzles, so
-ReadP8 reads all-zero indices -> CLUT[0]=black -> flat screen.
+**The 2026-07-25 "pinned" root cause below was wrong, and is retained so nobody
+re-derives it.** It claimed ReadP8 returns all-zero indices because WriteCT32 and
+ReadP8 use inconsistent VRAM swizzles. That is disproved by measurement.
 
-PROOF (cross-referenced, same boot):
-  READ:   [p4:clut] tex.psm=PSMT8(0x13) tbp0=0x1A40 tbw=8, rawIndex=0x00 for ALL
-          24 samples. CLUT is FINE (cbp=0x3B44; index 0 is legitimately black).
-  UPLOAD: [p4:gs-trx] #7 dst=0x69000 (== block 0x1A40 since dst=dbp*64) dpsm=0x0
-          (PSMCT32) 256x128.
-  PROOF IT IS INTENTIONAL: 256*128*4 = 131072 bytes = exactly 512x256 PSMT8
-          indices. Standard PS2 idiom: upload an 8-bit texture via a 32-bit
-          BITBLT for DMA speed; the GS unswizzles on sample.
+DISPROOF. The probe it rested on was `if (n <= 24)` — it printed the first 24
+texel samples and stopped, and all 24 landed at u<=2, v<=1, the extreme top-left
+corner, where index 0 is legitimate. It could not distinguish a broken swizzle
+from a blank image corner. Replaced with an aggregate over every sample
+(`boot_clutprobe.log.err`, run 2026-07-27):
 
-RULED OUT (all previously proven): rasterizer, coords, scissor, test, present
-buffer, CLUT lookup, vertex colour. It is ONLY the cross-format texel fetch.
+    samples=1,000      u=[0..250] v=[0..1]    nonzero 0.00%   distinctIdx 1
+    samples=50,000     u=[0..480] v=[0..53]   nonzero 6.06%   distinctIdx 146
+    samples=500,000    u=[0..480] v=[0..255]  nonzero 35.21%  distinctIdx 256
+    samples=187,500,000                       nonzero 36.24%  distinctIdx 256
 
-## THE FIX  (next session)
+PSMT8 index reads are healthy: a third of texels non-zero, ALL 256 index values
+present, full 512x256 UV coverage. Note row 1 — at 1,000 samples the probe had
+still only reached v=[0..1] at 0.00%. The old 24-sample probe was a subset of
+that. It was never measuring the swizzle; it was measuring where the rasterizer
+starts. Do NOT rewrite the swizzle tables.
 
-Make ReadP8/ReadP4 address the same physical bytes WriteCT32 wrote for a block,
-i.e. implement the PS2 PSMT8<->PSMCT32 (and PSMT4<->PSMCT32) block/column
-swizzle equivalence, the way PCSX2 does with its psm swizzle tables. Files:
-ps2_gs_memory.cpp (ReadP8/WriteCT32 layout), verify with a VRAM dump or the
-differential harness against PCSX2. This is the LAST thing between the port and
-a visible title.
+  Caveat on that data: the aggregate uses one static struct, so the numbers are
+  cumulative across ALL CLUT-format textures and the psm/tbp0 printed is just
+  whatever was bound at report time. The global claim holds; per-texture
+  attribution is not yet measured.
 
-  Sanity test after the fix: rawIndex in [p4:clut] should become nonzero and
-  varied; [p4:px] pixel-write count should jump from 2,559 into the tens of
-  thousands; the screen should show art instead of a flat clear.
+## WHERE IT ACTUALLY IS  (2026-07-27, measured)
+
+Pixels ARE being written — 6.1 billion of them (`[p4:px]` counter reached
+#6111600000; logging is 1-in-100k sampled), to fbp_block=0x0 at valid coords,
+inside SCISSOR 0,0..639,223. The old success criterion ("px count into the tens
+of thousands") is met many times over.
+
+Colour IS reaching the framebuffer: sampled writes include 0x805D7280,
+0x80ADC3CC, 0x80282A2D and others. ~9% of sampled writes are non-black.
+
+But it is PHASED, not uniform. Black ratio of pixel writes by decile of the run:
+
+    d0 62.6%   d1 66.5%   d2 66.4%   d3 94.0%   d4-d9 100.0%
+
+Real image content is drawn early (the memory-card / early screens), then from
+~40% into the run every single pixel written is 0x80000000 — opaque black —
+forever. This is a phase transition, not a per-frame overwrite.
+
+Sprite state at the title is otherwise sane: tme=1, TEX0 tbp=0x71000 (word addr
+= block 0x1C40) psm=0x13 tw=128 th=512, uv0(16,16) uv1(2032,2032) in 12.4 fixed
+point = texels 1.0..127.0, screen rect (475,150)..(603,214) — well inside
+scissor. TEST=0x5001B: ATE=1 ATST=GEQUAL AREF=1 AFAIL=KEEP, ZTE=1 ZTST=GEQUAL.
+
+## NEXT (probe built 2026-07-27, not yet run)
+
+Indices are proven good; what the CLUT turns them into is NOT measured. If
+varied indices all resolve to one black entry, the defect is the CLUT (upload,
+cbp/csa selection, or lookup), not the texel fetch. The probe now also reports
+`CLUT black=/zero=/coloured=/distinct~` alongside the index stats.
+
+  Decisive outcome: coloured>0 with distinct>1 exonerates the CLUT and moves the
+  search to the blend/test path or the display buffer. black==samples with
+  distinct==1 pins the CLUT.
+
+ALSO STILL UNINSTRUMENTED: DISPFB. FRONTLINE named "drawn into a buffer that is
+never displayed (FRAME.fbp != DISPFB)" as a candidate and there is still no
+diagnostic for it. FRAME.fbp is 0x0 on 2,361 sprite kicks and 0x8 on 6, which is
+not the alternation a double-buffered title screen should show.
 
 ## AFTER THAT  (the decisive rendering tool)
 
