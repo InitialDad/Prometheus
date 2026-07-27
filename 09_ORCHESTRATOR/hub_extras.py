@@ -659,7 +659,13 @@ def _ensure_scope_indexes():
     is exactly how a selector turns into a stall. Create the indexes once."""
     try:
         with sqlite3.connect(DB, timeout=10) as c:
-            for tbl in ("assets", "km_findings", "km_ghidra_functions",
+            # after compact_master.py intern, `assets` is a VIEW over
+            # assets_store and cannot carry an index - index the real table
+            kinds = dict(c.execute("SELECT name,type FROM sqlite_master"
+                                   " WHERE name IN ('assets','assets_store')"))
+            assets_tbl = ("assets_store" if kinds.get("assets") == "view"
+                          else "assets")
+            for tbl in (assets_tbl, "km_findings", "km_ghidra_functions",
                         "km_addresses", "km_roadmap"):
                 try:
                     c.execute(f"CREATE INDEX IF NOT EXISTS idx_{tbl}_serial"
@@ -677,7 +683,13 @@ def _game_counts(serial, fresh=False):
     hit = _counts_cache.get(serial)
     if hit and not fresh and time.time() - hit[0] < _COUNTS_TTL:
         return hit[1]
-    out = {}
+    # A failed count is NOT a count of zero. compact_master.py holds a write
+    # lock for the length of its run, and the first version of this swallowed
+    # "database is locked", returned zeros, cached them for 90s, and then
+    # save_game_state() wrote those zeros into games/<serial>/state.json as if
+    # the game had no data. Failures now leave the last good value in place and
+    # are never cached.
+    out, failed = {}, False
     try:
         with sqlite3.connect(f"file:{DB}?mode=ro", uri=True, timeout=4) as c:
             for key, sql in (
@@ -690,9 +702,15 @@ def _game_counts(serial, fresh=False):
                 try:
                     out[key] = c.execute(sql, (serial,)).fetchone()[0]
                 except Exception:
-                    out[key] = 0
+                    failed = True
     except Exception:
-        pass
+        failed = True
+    if failed:
+        # prefer a stale-but-true answer over a fresh lie
+        if hit:
+            return hit[1]
+        return {k: None for k in
+                ("functions", "findings", "addresses", "assets", "roadmap")}
     _counts_cache[serial] = (time.time(), out)
     return out
 
@@ -790,7 +808,14 @@ def save_game_state(serial=None, extra=None):
         state["roadmap_total"] = rm.get("total")
     except Exception:
         pass
-    state["counts"] = _game_counts(serial)
+    fresh_counts = _game_counts(serial)
+    # never let an unreadable DB downgrade a snapshot that already has real
+    # numbers in it - a snapshot is only worth taking if it is true
+    if any(v is None for v in fresh_counts.values()) and state.get("counts"):
+        state["counts_stale"] = True
+    else:
+        state["counts"] = fresh_counts
+        state.pop("counts_stale", None)
     if isinstance(extra, dict):
         state.update({k: v for k, v in extra.items()
                       if k in ("view", "note", "ui")})

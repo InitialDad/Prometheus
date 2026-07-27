@@ -35,6 +35,24 @@
 
 ---
 
+## PHASE 0 STATUS (2026-07-27)
+
+- [x] **0.1 per-game context** — `SERIAL` in `hub_extras` is now the *active
+      project* and is rebound by `set_active_game()`. Every provider reads it at
+      call time, so one assignment re-scopes the whole UI. Per-game trees under
+      `Prometheus_Master/games/<serial>/{logs,exports,models,sessions,ghidra,db}`,
+      a `state.json` snapshot taken automatically before every switch, and a
+      PROJECT hexagon on the masthead opening a full selector (switch / save
+      state / start a new decompile). `/api/games`, `/api/games/select`,
+      `/api/games/save`, `/api/games/create`.
+      Caveat found: `_game_counts` scans `assets` (616k rows) — cached 90s and
+      backed by `idx_assets_serial`, otherwise the selector stalls the UI.
+- [x] **0.2 compressed activity log** — structured JSONL per game at
+      `games/<serial>/logs/activity.log`, self-rotating to
+      `activity-<ts>.log.gz` past 2 MB, with `search_activity()` grepping the
+      live segment *and* every compressed segment (`/api/activity/search`).
+- [ ] 0.3 interaction layer (orbit controller) — not started.
+
 ## PHASE 0 — FOUNDATIONS (do first; everything else depends on these)
 
 ### 0.1  PER-GAME CONTEXT  ★ highest-leverage, touches every block

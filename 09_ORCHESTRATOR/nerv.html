@@ -2089,7 +2089,8 @@ const POST={
            text-align:right">${live?'now':since!=null?since+'s ago':'—'}</span>
        </div>`;}).join('');},
  project:()=>{
-   const num=n=>(n||0).toLocaleString();
+   // null means "could not be read", which is not the same as zero
+   const num=n=>(n==null?'—':n.toLocaleString());
    const ago=ts=>{if(!ts)return 'never saved';
      const s=Math.max(0,Date.now()/1000-ts);
      return s<90?Math.round(s)+'s ago':s<5400?Math.round(s/60)+'m ago':
