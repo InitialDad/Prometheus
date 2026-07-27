@@ -24,66 +24,6 @@ body{font-family:var(--mono);font-size:12px;color:var(--ink);letter-spacing:.03e
 body.noscan #scan{display:none}
 
 
-/* ---------- labels / language ----------
-   Titles are authored in English and rendered with an accurate, deliberately
-   SIMPLE Japanese counterpart. Both sides are user-editable in Settings, and
-   the language mode decides which is shown. */
-const L0={
-  term:      {en:'PROMETHEUS ONLY',      jp:'立入禁止'},
-  terminal:  {en:'TERMINAL LINK',        jp:'端末接続'},
-  syslog:    {en:'SYSTEM LOG',           jp:'記録'},
-  magi:      {en:'MAGI',                 jp:'マギ'},
-  main:      {en:'MAIN SYSTEM',          jp:'主系統'},
-  welcome:   {en:'WELCOME TO PROMETHEUS HEADQUARTERS', jp:'プロメテウス本部へようこそ'},
-  gate_lock: {en:'GATE LOCKED',          jp:'閉鎖中'},
-  gate_open: {en:'GATE UNLOCKED',        jp:'開放'},
-  start:     {en:'START',                jp:'起動'},
-  media:     {en:'VIEWPORT',             jp:'副画面'},
-  unit:      {en:'UNIT-01 CONTROL',      jp:'壱号機制御'},
-  plug:      {en:'ENTRY PLUG',           jp:'搭乗部'},
-  vitals:    {en:'VITALS',               jp:'機体状態'},
-  user:      {en:'OPERATOR',             jp:'操縦者'},
-  planet:    {en:'RECOMPILE SPHERE',     jp:'再構築'},
-  codemap:   {en:'CODE MAP',             jp:'コード地図'},
-  alert:     {en:'BLOCKER ALERT',        jp:'障害警報'},
-  emerg:     {en:'SYSTEM HEALTH',        jp:'状態監視'},
-  sessions:  {en:'SESSION LOGBOOK',      jp:'作業記録'},
-  progress:  {en:'PROGRESS',             jp:'進捗'},
-  needed:    {en:'WHAT IS STILL NEEDED', jp:'残作業'},
-  browser:   {en:'BROWSER',              jp:'閲覧'},
-  console:   {en:'OPERATOR CONSOLE',     jp:'操作卓'},
-};
-function lbl(k){const o=(SET.labels&&SET.labels[k])||{};const d=L0[k]||{};
-  return {en:(o.en!==undefined&&o.en!=='')?o.en:(d.en||k),
-          jp:(o.jp!==undefined&&o.jp!=='')?o.jp:(d.jp||'')};}
-function applyLabels(){
-  const mode=SET.lang||'both';
-  document.querySelectorAll('[data-lk]').forEach(el=>{
-    const L=lbl(el.dataset.lk);
-    const t=el.querySelector('.bt'), j=el.querySelector('.bj');
-    if(t)t.textContent=(mode==='jp'&&L.jp)?L.jp:L.en;
-    if(j){j.textContent=(mode==='en')?'':(mode==='jp'?'':L.jp);
-          j.style.display=(mode==='en'||(mode==='jp'))?'none':'';}
-  });
-  // things outside the block-title pattern
-  const w=$('#welTxt'); if(w)w.textContent=(mode==='jp')?lbl('welcome').jp:lbl('welcome').en;
-  const wj=$('#welJp'); if(wj){wj.textContent=lbl('welcome').jp;
-    wj.style.display=(mode==='both')?'':'none';}
-  const sb=$('#startBtn');
-  if(sb)sb.innerHTML=((mode==='jp')?lbl('start').jp:lbl('start').en)+
-    ((mode==='both')?'<small>'+lbl('start').jp+'</small>':'');
-  TITLE.needed=lbl('needed').en; TITLE.progress=lbl('progress').en;
-  TITLE.sessions=lbl('sessions').en; TITLE.planet=lbl('planet').en;
-  TITLE.codemap=lbl('codemap').en; TITLE.vitals=lbl('vitals').en;
-  TITLE.unit=lbl('unit').en; TITLE.emerg=lbl('emerg').en;
-  TITLE.term=lbl('terminal').en; TITLE.browser=lbl('browser').en;
-  JP.needed=lbl('needed').jp; JP.progress=lbl('progress').jp;
-  JP.sessions=lbl('sessions').jp; JP.planet=lbl('planet').jp;
-  JP.codemap=lbl('codemap').jp; JP.vitals=lbl('vitals').jp;
-  JP.unit=lbl('unit').jp; JP.emerg=lbl('emerg').jp;
-  JP.term=lbl('terminal').jp; JP.browser=lbl('browser').jp;
-}
-
 /* ---------- boot ---------- */
 #boot{position:fixed;inset:0;z-index:10000;background:#000;display:flex;flex-direction:column;
   justify-content:center;align-items:center;gap:4px;color:var(--grn);font-size:12px;transition:opacity .5s}
@@ -483,6 +423,154 @@ label.f input,label.f select{flex:1}
 .tile span{font-size:9px;letter-spacing:.12em;color:var(--mut)}
 #cli{display:flex;gap:6px;flex:none;margin-top:6px}
 #cliIn{flex:1;font-size:12px}
+
+/* ============================================================
+   NERV CHROME  —  the armour plating pass
+   ------------------------------------------------------------
+   Panels stop being 1px rectangles and become cut-corner armour
+   plates with a real border thickness, a header name-plate, corner
+   lugs and edge rails.
+
+   How the frame is built (no masks, no raster, scales exactly):
+     .blk        is clipped to the chamfered silhouette and carries
+                 NO background of its own.
+     .chrome     sits at z-index:-1 filling that silhouette. Its own
+                 background IS the border colour.
+     .chrome::before  is inset by the border width and clipped to a
+                 slightly smaller chamfer, and carries the panel fill.
+   The visible border is therefore the sliver of .chrome that
+   ::before does not cover — a uniform, perfectly mitred 45° edge at
+   any panel size, recoloured live by Theme Studio.
+   ============================================================ */
+:root{ --cut:15px; --bw:2px; }
+
+.blk,#b-main{
+  --c-edge:var(--acc-dim);
+  border:0!important;background:none!important;
+  clip-path:polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)),
+                    calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+}
+.blk>.chrome,#b-main>.chrome{
+  position:absolute;inset:0;z-index:-1;display:block;background:var(--c-edge);
+  clip-path:polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)),
+                    calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+  transition:background .18s;opacity:1}
+.blk>.chrome::before,#b-main>.chrome::before{
+  content:'';position:absolute;inset:var(--bw);
+  clip-path:polygon(calc(var(--cut) - var(--bw)) 0, 100% 0,
+                    100% calc(100% - var(--cut) + var(--bw)),
+                    calc(100% - var(--cut) + var(--bw)) 100%, 0 100%,
+                    0 calc(var(--cut) - var(--bw)));
+  /* Opaque on purpose. .chrome underneath is painted in the EDGE colour, so any
+     translucency here lets that colour bleed across the whole plate and the
+     panel reads as a wash instead of a black plate with a bright rim.
+     The sheen is a fixed 46px band, not a percentage, for the same reason:
+     a percentage tints the big panels edge to edge. */
+  background:
+    linear-gradient(180deg,rgba(var(--acc-rgb),.10),transparent 46px),
+    linear-gradient(180deg,#0a0305,#040102);
+  transition:box-shadow .22s}
+.blk:hover>.chrome{background:var(--acc)}
+.blk:hover>.chrome::before{box-shadow:inset 0 0 38px rgba(var(--acc-rgb),.10)}
+/* the chamfer itself gets a bright hairline so the cut reads as machined */
+.cutline{position:absolute;z-index:3;pointer-events:none;height:2px;width:calc(var(--cut)*1.42);
+  background:var(--acc);opacity:.55;transition:opacity .18s}
+.cutline.tl{left:calc(var(--cut)*-.21);top:calc(var(--cut)*.5);transform:rotate(-45deg)}
+.cutline.br{right:calc(var(--cut)*-.21);bottom:calc(var(--cut)*.5);transform:rotate(-45deg)}
+.blk:hover .cutline{opacity:1}
+#b-logo,#b-logo>.chrome{clip-path:none}
+#b-logo>.chrome{display:none}
+
+/* ---- header name-plate ----
+   The block title sits on a stamped plate with a thick accent spine, the way a
+   labelled bulkhead panel would be. */
+.blk .bt:first-child,#b-main .ms-h{
+  position:relative;margin:-5px -8px 4px;padding:4px 9px 3px 11px;
+  background:linear-gradient(90deg,rgba(var(--acc-rgb),.20),rgba(var(--acc-rgb),.03) 68%,transparent);
+  border-bottom:1px solid rgba(var(--acc-rgb),.42)}
+.blk .bt:first-child::before,#b-main .ms-h::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--acc);
+  box-shadow:0 0 10px rgba(var(--acc-rgb),.7)}
+.blk .bj{padding-left:11px}
+/* MAIN is the green console: its plate follows the green channel, not the accent */
+#b-main .ms-h{margin:-5px -8px 0;border-bottom:1px solid var(--grn-dim);
+  background:linear-gradient(90deg,rgba(var(--grn-rgb),.14),rgba(var(--grn-rgb),.02) 62%,transparent)}
+#b-main .ms-h::before{background:var(--grn);box-shadow:0 0 10px rgba(var(--grn-rgb),.6)}
+#b-main{padding:5px 8px}
+#b-main>.chrome{--c-edge:var(--grn-dim)}
+#b-main>.chrome::before{background:
+  linear-gradient(180deg,rgba(var(--grn-rgb),.10),transparent 46px),
+  linear-gradient(180deg,#040c09,#010302)}
+
+/* ---- corner lugs ---- */
+.lug{position:absolute;width:15px;height:15px;color:var(--acc);opacity:.55;z-index:3;
+  pointer-events:none;transition:opacity .18s}
+.lug.a{right:2px;top:2px;transform:rotate(90deg)}
+.lug.b{left:2px;bottom:2px;transform:rotate(-90deg)}
+.blk:hover .lug{opacity:1}
+.ruler{top:auto;bottom:0;height:6px;left:18px;right:18px;
+  background:none;color:var(--acc);opacity:.35}
+.ruler svg{width:100%;height:100%;display:block}
+.blk:hover .ruler{opacity:.7}
+.slot{top:8px;bottom:auto;right:32px;font-size:9px}
+
+/* ---- hazard hexagon badge (real state, not decoration) ---- */
+.hexbadge{position:relative;width:var(--hw,86px);aspect-ratio:120/138;color:var(--acc);
+  display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer}
+.hexbadge>svg{position:absolute;inset:0;width:100%;height:100%}
+.hexbadge .hb-in{position:relative;z-index:2;text-align:center;line-height:1.05;
+  font-family:var(--disp);font-weight:700;letter-spacing:.09em;
+  font-size:calc(var(--hw,86px)*.115);color:var(--acc);text-shadow:0 0 10px rgba(var(--acc-rgb),.7)}
+.hexbadge .hb-w{width:34%;aspect-ratio:40/36;margin:0 auto 3px;display:block;color:var(--acc)}
+.hexbadge.ok{color:var(--grn)}
+.hexbadge.ok .hb-in,.hexbadge.ok .hb-w{color:var(--grn);text-shadow:0 0 10px rgba(var(--grn-rgb),.6)}
+.hexbadge.warn{color:var(--amb)}
+.hexbadge.warn .hb-in,.hexbadge.warn .hb-w{color:var(--amb);text-shadow:0 0 10px rgba(255,138,0,.6)}
+.hexbadge.live{animation:hexpulse 1.6s ease-in-out infinite}
+@keyframes hexpulse{50%{filter:drop-shadow(0 0 12px currentColor)}}
+/* the badge is parked in the panel corner rather than in the text flow: the
+   TERMINAL and ALERT plates are only ~100px tall and `overflow:hidden` ate an
+   in-flow badge whole. */
+.hexrow{position:absolute;right:6px;bottom:8px;z-index:3;display:flex;gap:5px;
+  align-items:center;pointer-events:none}
+.hexrow .hexbadge{pointer-events:auto}
+.hexbadge{--hw:56px}
+/* keep the two host panels' text clear of the parked badge */
+#b-term .kv,#b-alert .kv{padding-right:62px}
+.hexbadge .hb-in{font-size:calc(var(--hw)*.145);letter-spacing:.04em}
+
+/* ---- targeting reticle overlay ---- */
+.retwrap{position:absolute;inset:0;pointer-events:none;z-index:2}
+.reticle{position:absolute;width:74px;height:74px;color:var(--acc);opacity:.45;
+  transition:opacity .3s,color .3s}
+/* the ring is spun on the host <svg>: a <use> renders into a shadow tree that
+   page CSS cannot select into, so the inner group is not addressable here */
+.reticle>svg{width:100%;height:100%;display:block;transform-origin:50% 50%;
+  animation:spin 22s linear infinite}
+.reticle.live{opacity:.85;color:var(--grn)}
+.lockbr{position:absolute;color:var(--amb);opacity:0;transition:opacity .3s}
+.lockbr>svg{width:100%;height:100%;display:block}
+.lockbr.on{opacity:.9;animation:lockin .5s cubic-bezier(.16,1,.3,1)}
+@keyframes lockin{from{transform:scale(1.25);opacity:0}to{transform:none;opacity:.9}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---- vertical kana rails ---- */
+.rail{position:absolute;top:8px;bottom:8px;width:15px;writing-mode:vertical-rl;
+  text-orientation:upright;font-size:9.5px;letter-spacing:.30em;color:var(--acc-dim);
+  overflow:hidden;white-space:nowrap;pointer-events:none;z-index:2;opacity:.75;
+  border-left:1px solid rgba(var(--acc-rgb),.22);border-right:1px solid rgba(var(--acc-rgb),.22);
+  text-align:center}
+.rail.l{left:6px} .rail.r{right:6px}
+.rail b{color:var(--grn);font-weight:400}
+
+/* ---- chevron run + seal ---- */
+.chev{width:46px;height:12px;color:var(--acc);opacity:.45;flex:none}
+.seal{position:absolute;right:8px;top:6px;width:20px;height:20px;color:var(--acc-dim);
+  z-index:3;pointer-events:none;transition:color .18s}
+.blk:hover .seal{color:var(--acc)}
+
+@media (prefers-reduced-motion:reduce){
+  .reticle .r-out{animation:none}.hexbadge.live{animation:none}}
 </style>
 </head>
 <body>
@@ -678,6 +766,77 @@ Type a prompt and press ENTER.</span></div>
 
 <script>
 const $=s=>document.querySelector(s), api=async(p,o)=>(await fetch(p,o)).json();
+
+/* ---------- labels / language ----------
+   Titles are authored in English and rendered with an accurate, deliberately
+   SIMPLE Japanese counterpart. Both sides are user-editable in Settings, and
+   the language mode decides which is shown. */
+const L0={
+  term:      {en:'PROMETHEUS ONLY',      jp:'立入禁止'},
+  terminal:  {en:'TERMINAL LINK',        jp:'端末接続'},
+  syslog:    {en:'SYSTEM LOG',           jp:'記録'},
+  magi:      {en:'MAGI',                 jp:'マギ'},
+  main:      {en:'MAIN SYSTEM',          jp:'主系統'},
+  welcome:   {en:'WELCOME TO PROMETHEUS HEADQUARTERS', jp:'プロメテウス本部へようこそ'},
+  gate_lock: {en:'GATE LOCKED',          jp:'閉鎖中'},
+  gate_open: {en:'GATE UNLOCKED',        jp:'開放'},
+  start:     {en:'START',                jp:'起動'},
+  media:     {en:'VIEWPORT',             jp:'副画面'},
+  unit:      {en:'UNIT-01 CONTROL',      jp:'壱号機制御'},
+  plug:      {en:'ENTRY PLUG',           jp:'搭乗部'},
+  vitals:    {en:'VITALS',               jp:'機体状態'},
+  user:      {en:'OPERATOR',             jp:'操縦者'},
+  planet:    {en:'RECOMPILE SPHERE',     jp:'再構築'},
+  codemap:   {en:'CODE MAP',             jp:'コード地図'},
+  alert:     {en:'BLOCKER ALERT',        jp:'障害警報'},
+  emerg:     {en:'SYSTEM HEALTH',        jp:'状態監視'},
+  sessions:  {en:'SESSION LOGBOOK',      jp:'作業記録'},
+  progress:  {en:'PROGRESS',             jp:'進捗'},
+  needed:    {en:'WHAT IS STILL NEEDED', jp:'残作業'},
+  browser:   {en:'BROWSER',              jp:'閲覧'},
+  console:   {en:'OPERATOR CONSOLE',     jp:'操作卓'},
+};
+function lbl(k){const o=(SET.labels&&SET.labels[k])||{};const d=L0[k]||{};
+  return {en:(o.en!==undefined&&o.en!=='')?o.en:(d.en||k),
+          jp:(o.jp!==undefined&&o.jp!=='')?o.jp:(d.jp||'')};}
+function applyLabels(){
+  const mode=SET.lang||'both';
+  document.querySelectorAll('[data-lk]').forEach(el=>{
+    const L=lbl(el.dataset.lk);
+    const t=el.querySelector('.bt'), j=el.querySelector('.bj');
+    if(t)t.textContent=(mode==='jp'&&L.jp)?L.jp:L.en;
+    if(j){
+      // Some subtitles carry a live readout inside them (#p-pct, for one).
+      // Rewriting textContent would delete those nodes and every later
+      // $('#p-pct').textContent would throw, taking the whole render pass with
+      // it — so the element children are lifted out and put back.
+      const keep=Array.prototype.slice.call(j.children);
+      j.textContent=(mode==='en'||mode==='jp')?'':L.jp;
+      if(keep.length){
+        if(j.textContent)j.appendChild(document.createTextNode(' · '));
+        keep.forEach(k=>j.appendChild(k));
+      }
+      // a subtitle that hosts a live readout stays visible in every mode
+      j.style.display=((mode==='en'||mode==='jp')&&!keep.length)?'none':'';}
+  });
+  // things outside the block-title pattern
+  const w=$('#welTxt'); if(w)w.textContent=(mode==='jp')?lbl('welcome').jp:lbl('welcome').en;
+  const wj=$('#welJp'); if(wj){wj.textContent=lbl('welcome').jp;
+    wj.style.display=(mode==='both')?'':'none';}
+  const sb=$('#startBtn');
+  if(sb)sb.innerHTML=((mode==='jp')?lbl('start').jp:lbl('start').en)+
+    ((mode==='both')?'<small>'+lbl('start').jp+'</small>':'');
+  TITLE.needed=lbl('needed').en; TITLE.progress=lbl('progress').en;
+  TITLE.sessions=lbl('sessions').en; TITLE.planet=lbl('planet').en;
+  TITLE.codemap=lbl('codemap').en; TITLE.vitals=lbl('vitals').en;
+  TITLE.unit=lbl('unit').en; TITLE.emerg=lbl('emerg').en;
+  TITLE.term=lbl('terminal').en; TITLE.browser=lbl('browser').en;
+  JP.needed=lbl('needed').jp; JP.progress=lbl('progress').jp;
+  JP.sessions=lbl('sessions').jp; JP.planet=lbl('planet').jp;
+  JP.codemap=lbl('codemap').jp; JP.vitals=lbl('vitals').jp;
+  JP.unit=lbl('unit').jp; JP.emerg=lbl('emerg').jp;
+  JP.term=lbl('terminal').jp; JP.browser=lbl('browser').jp;
+}
 /* Bind a handler only if the element exists. A single missing id used to throw
    a TypeError at top level and kill every statement after it - clock, refresh
    intervals and deep links all died silently. */
@@ -775,13 +934,35 @@ document.querySelectorAll('.blk[data-z]').forEach(b=>b.onclick=()=>openZ(b.datas
 $('#healthChip').onclick=e=>{e.stopPropagation();openZ('emerg');};
 
 
+/* ---------- NERV sprite sheet ----------
+   The sheet is one same-origin SVG of <symbol> defs. It is injected into the
+   document rather than referenced across files so that `currentColor` and the
+   theme variables reach into every sprite, which is what lets Theme Studio
+   recolour the chrome. Everything that draws a sprite waits on SPRITES. */
+const SPRITES=fetch('/assets/sprites.svg').then(r=>r.text()).then(t=>{
+  const d=document.createElement('div');
+  d.style.cssText='position:absolute;width:0;height:0;overflow:hidden';
+  d.innerHTML=t; document.body.insertBefore(d,document.body.firstChild);
+}).catch(e=>{console.warn('sprite sheet unavailable',e);});
+const svgUse=(id,cls)=>`<svg class="${cls||''}" aria-hidden="true"><use href="#${id}"></use></svg>`;
+
 /* ---------- 2.5D parallax + panel chrome ---------- */
 (function(){
   // chrome/ruler/slot are injected rather than hand-written into every block
-  const blocks=document.querySelectorAll('#hq .blk');
+  const blocks=document.querySelectorAll('#hq .blk, #hq #b-main');
   blocks.forEach((b,i)=>{
     const c=document.createElement('i');c.className='chrome';b.appendChild(c);
-    const r=document.createElement('i');r.className='ruler';b.appendChild(r);
+    if(b.id==='b-logo')return;                          // the logo strip is frameless
+    // the two machined chamfer hairlines
+    ['tl','br'].forEach(k=>{const l=document.createElement('i');
+      l.className='cutline '+k;b.appendChild(l);});
+    // corner lugs + edge ruler + slot index, all sprite-drawn
+    SPRITES.then(()=>{
+      b.insertAdjacentHTML('beforeend',
+        svgUse('sp-lug','lug a')+svgUse('sp-lug','lug b'));
+      const r=document.createElement('i');r.className='ruler';
+      r.innerHTML=svgUse('sp-ruler');b.appendChild(r);
+    });
     const n=document.createElement('i');n.className='slot';
     n.textContent=String(i+1).padStart(2,'0');b.appendChild(n);
     if(b.dataset.z)b.tabIndex=0;                       // keyboard reachable
@@ -797,6 +978,70 @@ $('#healthChip').onclick=e=>{e.stopPropagation();openZ('emerg');};
     tx=(e.clientX/innerWidth-0.5)*2; ty=(e.clientY/innerHeight-0.5)*2;
     if(!queued){queued=true;requestAnimationFrame(apply);}
   },{passive:true});
+})();
+
+/* ---------- NERV ornaments ----------
+   Every piece added here is bound to a real signal, per the masterplan rule
+   that nothing in this UI is decorative. The hexagon badges report terminal
+   link state and blocker state, the reticle tracks whether the port process is
+   actually running, and the kana rails print the live active-game serial and
+   stage. NERVCHROME.sync() is called from the main render pass. */
+const NERVCHROME=(function(){
+  function hex(id,legend,jp){
+    return `<div class="hexbadge" id="${id}" title="${legend}">
+      ${svgUse('sp-hex')}
+      <span class="hb-in">${svgUse('sp-warn','hb-w')}${legend}<br>
+        <span style="font-size:.82em;opacity:.75">${jp}</span></span></div>`;
+  }
+  function build(){
+    // TERMINAL: restricted-access plate, lit green only while the link is up
+    const t=$('#b-term');
+    if(t&&!$('#hexTerm')) t.insertAdjacentHTML('beforeend',
+      `<div class="hexrow">${hex('hexTerm','ONLY','立入禁止')}</div>`);
+    // BLOCKER ALERT: the plate pulses only when something is genuinely actionable
+    const a=$('#b-alert');
+    if(a&&!$('#hexAlert')) a.insertAdjacentHTML('beforeend',
+      `<div class="hexrow">${hex('hexAlert','ALERT','障害警報')}</div>`);
+    // UNIT-01: reticle over the mech canvas + lock brackets when it is live
+    const u=$('#b-unit');
+    if(u&&!$('#unitRet')) u.insertAdjacentHTML('beforeend',
+      `<div class="retwrap"><div class="reticle" id="unitRet"
+          style="left:50%;top:44%;width:118px;height:118px;margin:-59px 0 0 -59px">${svgUse('sp-reticle')}</div>
+        <div class="lockbr" id="unitLock"
+          style="left:8%;top:22%;right:8%;bottom:24%">${svgUse('sp-lock')}</div></div>`);
+    // LOGO strip: vertical kana rails carrying the live scope
+    const g=$('#b-logo');
+    if(g&&!$('#railL')) g.insertAdjacentHTML('beforeend',
+      `<i class="rail l" id="railL"></i><i class="rail r" id="railR"></i>`);
+    // block seals
+    document.querySelectorAll('#hq .blk').forEach(b=>{
+      if(b.id==='b-logo'||b.querySelector('.seal'))return;
+      b.insertAdjacentHTML('beforeend',svgUse('sp-sigil','seal'));
+    });
+  }
+  function set(el,cls,live){
+    if(!el)return;
+    el.className='hexbadge'+(cls?' '+cls:'')+(live?' live':'');
+  }
+  function sync(){
+    const conn=($('#t-conn')||{}).textContent==='CONNECTED';
+    set($('#hexTerm'),conn?'ok':'',false);
+    const st=(($('#a-state')||{}).textContent||'');
+    set($('#hexAlert'),st==='ACTIONABLE'?'warn':st==='CLEAR'?'ok':'',st==='ACTIONABLE');
+    const jb=(($('#u-state')||{}).textContent||'').trim();
+    const running=jb&&jb!=='STANDBY'&&jb!=='IDLE';
+    const r=$('#unitRet'); if(r)r.classList.toggle('live',!!running);
+    const lk=$('#unitLock'); if(lk)lk.classList.toggle('on',!!running);
+    // rails: real scope, not filler
+    const rl=$('#railL'), rr=$('#railR');
+    if(rl){const g=(window.ST&&ST.game)||{};
+      rl.innerHTML='<b>'+esc(g.serial||'SLUS-20407')+'</b> · 再構築 '+
+        ((window.PLANET&&PLANET.pct)||0)+'%';}
+    if(rr){const p=(window.ST&&ST.proc)||{};
+      rr.innerHTML='主系統 '+(p.runner_alive?'<b>稼働</b>':'待機')+' · 本部';}
+  }
+  SPRITES.then(build).then(sync);
+  return {sync,build};
 })();
 
 /* ---------- canvas fit ---------- */
@@ -2224,6 +2469,7 @@ async function refresh(){
   $('#e-en').textContent=bad.length>2?'EMERGENCY':bad.length?'CAUTION':'NOMINAL';
   const chip=$('#healthChip');
   chip.className='healthchip'+(bad.length>2?' bad':bad.length?' warn':'');
+  try{NERVCHROME.sync();}catch(e){}
   $('#magi-list').innerHTML=TOOLS.slice(0,7).map(t=>
     `${esc(t.name)} <span style="color:${t.online?'var(--grn)':'var(--mut)'};float:right">
      ${t.online?'ONLINE':'—'}</span><br>`).join('');

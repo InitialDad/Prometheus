@@ -477,6 +477,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self._file(os.path.join(HERE, "prometheus_logo.png"), "image/png")
             if p == "/assets/icon.png":
                 return self._file(os.path.join(HERE, "prometheus_icon.png"), "image/png")
+            if p == "/assets/sprites.svg":
+                return self._file(os.path.join(HERE, "nerv_sprites.svg"),
+                                  "image/svg+xml")
             if p == "/favicon.ico":
                 return self._file(os.path.join(HERE, "prometheus.ico"), "image/x-icon")
             if p == "/mech/sinanju.json":

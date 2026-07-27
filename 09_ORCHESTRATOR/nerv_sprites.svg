@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+<!--
+  PROMETHEUS / NERV chrome sprite sheet.
+
+  Every symbol draws with `currentColor` (and `fill/stroke` left unset where the
+  consumer should decide), so a sprite inherits whatever colour the block it sits
+  in is themed to. Nothing here is a raster: the sheet is injected into the DOM at
+  boot and referenced with <use href="#id">, which keeps the shapes crisp at any
+  block size and keeps Theme Studio in control of the palette.
+
+  Sizing convention: each symbol declares its own viewBox and the consumer sets
+  width/height in CSS. Stroke widths are authored for the stated viewBox.
+-->
+
+<!-- ===== hazard hexagon badge =====
+     The big warning plate from the reference sheet. Text is supplied by the
+     consumer (an HTML overlay), so the same sprite serves ALERT / RESTRICTED /
+     any other legend without a second asset. -->
+<symbol id="sp-hex" viewBox="0 0 120 138">
+  <polygon points="60,3 116,34.5 116,103.5 60,135 4,103.5 4,34.5"
+           fill="none" stroke="currentColor" stroke-width="5"/>
+  <polygon points="60,12 108,39 108,99 60,126 12,99 12,39"
+           fill="currentColor" opacity=".07"/>
+  <polygon points="60,12 108,39 108,99 60,126 12,99 12,39"
+           fill="none" stroke="currentColor" stroke-width="1.4" opacity=".55"/>
+  <!-- corner ticks, one per vertex -->
+  <g stroke="currentColor" stroke-width="2.4" opacity=".8">
+    <path d="M60 3v9"/><path d="M116 34.5l-8 4.5"/><path d="M116 103.5l-8-4.5"/>
+    <path d="M60 135v-9"/><path d="M4 103.5l8-4.5"/><path d="M4 34.5l8 4.5"/>
+  </g>
+</symbol>
+
+<!-- warning triangle, drawn to sit inside sp-hex -->
+<symbol id="sp-warn" viewBox="0 0 40 36">
+  <path d="M20 3 38 33H2Z" fill="none" stroke="currentColor" stroke-width="3"
+        stroke-linejoin="round"/>
+  <path d="M20 13v9" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>
+  <circle cx="20" cy="27.5" r="1.9" fill="currentColor"/>
+</symbol>
+
+<!-- ===== targeting reticle =====
+     Two counter-rotating rings + a fixed crosshair. The rings are animated by
+     CSS (.sp-spin / .sp-spin-r) rather than by SMIL so reduced-motion can stop
+     them. -->
+<symbol id="sp-reticle" viewBox="0 0 100 100">
+  <g class="r-out" stroke="currentColor" fill="none">
+    <circle cx="50" cy="50" r="46" stroke-width="1.2" opacity=".45"/>
+    <path d="M50 2v10M50 88v10M2 50h10M88 50h10" stroke-width="2.4"/>
+    <path d="M14.5 14.5l7 7M85.5 14.5l-7 7M14.5 85.5l7-7M85.5 85.5l-7-7"
+          stroke-width="1.6" opacity=".7"/>
+  </g>
+  <circle cx="50" cy="50" r="33" fill="none" stroke="currentColor"
+          stroke-width="1.6" stroke-dasharray="10 6 3 6" opacity=".8"/>
+  <circle cx="50" cy="50" r="20" fill="none" stroke="currentColor"
+          stroke-width="1" opacity=".4"/>
+  <path d="M50 40v20M40 50h20" stroke="currentColor" stroke-width="1" opacity=".55"/>
+  <circle cx="50" cy="50" r="3" fill="currentColor"/>
+</symbol>
+
+<!-- lock brackets: the four corner claws that close around a tracked object -->
+<symbol id="sp-lock" viewBox="0 0 100 100">
+  <g fill="none" stroke="currentColor" stroke-width="3.4">
+    <path d="M4 26V4h22"/><path d="M74 4h22v22"/>
+    <path d="M96 74v22H74"/><path d="M26 96H4V74"/>
+  </g>
+</symbol>
+
+<!-- ===== corner lug =====
+     Heavy bracket + bolt, dropped into panel corners. Rotated per corner by CSS. -->
+<symbol id="sp-lug" viewBox="0 0 34 34">
+  <path d="M2 15V2h13" fill="none" stroke="currentColor" stroke-width="3"/>
+  <path d="M2 22V19M8 2h3" stroke="currentColor" stroke-width="3" opacity=".6"/>
+  <circle cx="9.5" cy="9.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"
+          opacity=".75"/>
+</symbol>
+
+<!-- ===== chevron run =====
+     The stacked arrows that fill dead space along a rail in the reference. -->
+<symbol id="sp-chev" viewBox="0 0 60 16">
+  <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square">
+    <path d="M4 3l6 5-6 5" opacity=".35"/>
+    <path d="M16 3l6 5-6 5" opacity=".5"/>
+    <path d="M28 3l6 5-6 5" opacity=".7"/>
+    <path d="M40 3l6 5-6 5" opacity=".85"/>
+    <path d="M52 3l6 5-6 5"/>
+  </g>
+</symbol>
+
+<!-- ===== sigil =====
+     The house emblem: a leaf-cut diamond over a ring. Used at small size as a
+     block seal and at large size on the login card. -->
+<symbol id="sp-sigil" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="29" fill="none" stroke="currentColor"
+          stroke-width="2" opacity=".55"/>
+  <path d="M32 6 52 32 32 58 12 32Z" fill="currentColor" opacity=".12"/>
+  <path d="M32 6 52 32 32 58 12 32Z" fill="none" stroke="currentColor" stroke-width="2.4"/>
+  <path d="M32 6v52M12 32h40" stroke="currentColor" stroke-width="1" opacity=".45"/>
+  <circle cx="32" cy="32" r="6" fill="none" stroke="currentColor" stroke-width="2"/>
+</symbol>
+
+<!-- ===== data plug =====
+     Connector glyph for the terminal / link blocks. -->
+<symbol id="sp-plug" viewBox="0 0 40 24">
+  <rect x="2" y="5" width="24" height="14" rx="1" fill="none"
+        stroke="currentColor" stroke-width="2.4"/>
+  <path d="M26 12h12" stroke="currentColor" stroke-width="2.4"/>
+  <path d="M8 10v4M13 10v4M18 10v4" stroke="currentColor" stroke-width="2" opacity=".7"/>
+  <circle cx="38" cy="12" r="2.4" fill="currentColor"/>
+</symbol>
+
+<!-- ===== bar gauge frame =====
+     The bracketed [|||||....] meter housing. The fill itself is HTML so it can
+     be driven by real numbers. -->
+<symbol id="sp-gauge" viewBox="0 0 120 14" preserveAspectRatio="none">
+  <path d="M6 1H1v12h5M114 1h5v12h-5" fill="none" stroke="currentColor" stroke-width="2"/>
+</symbol>
+
+<!-- ===== waveform tick strip =====
+     A ruler with major/minor divisions, stretched along a panel edge. -->
+<symbol id="sp-ruler" viewBox="0 0 200 10" preserveAspectRatio="none">
+  <g stroke="currentColor" stroke-width="1">
+    <path d="M0 10h200" opacity=".35"/>
+    <path d="M0 10V2M50 10V2M100 10V2M150 10V2M200 10V2" opacity=".85"/>
+    <path d="M10 10V6M20 10V6M30 10V6M40 10V6M60 10V6M70 10V6M80 10V6M90 10V6
+             M110 10V6M120 10V6M130 10V6M140 10V6M160 10V6M170 10V6M180 10V6M190 10V6"
+          opacity=".45"/>
+  </g>
+</symbol>
+</svg>
