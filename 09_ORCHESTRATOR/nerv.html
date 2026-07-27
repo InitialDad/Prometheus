@@ -537,6 +537,20 @@ label.f input,label.f select{flex:1}
 .hexbadge{--hw:56px}
 /* keep the two host panels' text clear of the parked badge */
 #b-term .kv,#b-alert .kv{padding-right:62px}
+/* the PROJECT plate sits on the masthead, left of the wordmark, and is the one
+   badge that is a control rather than a readout */
+.hexrow.projrow{left:26px;right:auto;top:50%;bottom:auto;transform:translateY(-50%)}
+.hexbadge.proj{--hw:74px;color:var(--grn);cursor:pointer;
+  transition:filter .18s,transform .18s}
+.hexbadge.proj .hb-in,.hexbadge.proj .hb-w{color:var(--grn);
+  text-shadow:0 0 10px rgba(var(--grn-rgb),.55)}
+.hexbadge.proj{--hw:84px}
+.hexbadge.proj .hb-in{font-size:calc(var(--hw)*.20);letter-spacing:.02em;line-height:1.15}
+.hexbadge.proj .hb-w{width:24%;margin-bottom:1px}
+#hexProjSerial{font-size:1.15em;color:#fff;text-shadow:0 0 12px rgba(var(--grn-rgb),.9)}
+.hexbadge.proj:hover{filter:drop-shadow(0 0 12px rgba(var(--grn-rgb),.75));
+  transform:scale(1.04)}
+@media (max-width:900px){.hexrow.projrow{left:8px}.hexbadge.proj{--hw:58px}}
 .hexbadge .hb-in{font-size:calc(var(--hw)*.145);letter-spacing:.04em}
 
 /* ---- targeting reticle overlay ---- */
@@ -713,7 +727,7 @@ Type a prompt and press ENTER.</span></div>
   <!-- VITALS -->
   <div class="blk col" id="b-vitals" data-lk="vitals" data-z="vitals">
     <div class="bt">VITALS</div><div class="bj">機体状態</div>
-    <canvas class="cv" id="cv-ecg" style="max-height:36px;flex:none"></canvas>
+    <canvas class="cv" id="cv-ecg" style="max-height:44px;flex:none"></canvas>
     <div id="vitBars" style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:5px;font-family:var(--mono)"></div>
     <span id="v-cpu" hidden></span><span id="v-ram" hidden></span><span id="v-gpu" hidden></span><span id="v-tmp" hidden></span>
     <div class="exp">▸ EXPAND</div>
@@ -844,6 +858,14 @@ function on(sel,ev,fn){const e=typeof sel==='string'?$(sel):sel;if(e)e[ev]=fn;re
 const esc=s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const post=(p,b)=>api(p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
 const T0=Date.now(); let ST={}, SET={}, PLANET={sectors:[]}, TOOLS=[], FLOW=[], SEQ=[], RECOMP={units:[]};
+/* the active project and the roster, filled by refresh() */
+let GAMES={active:null,games:[]};
+/* Everything here was computed for ONE serial. A project switch must drop it or
+   the new game inherits the old game's call graph and inventory. */
+function resetGameScope(){
+  RECOMP={units:[]}; CALLGRAPH=null; INVENTORY=null; PLANET={sectors:[]};
+  LAST_EVT_TS=0; LAST_INV_TOTAL=0; EVENTS=[]; FLASH=[]; INVPTS=null;
+}
 let CALLGRAPH=null, EVENTS=[];     // real call graph + event-bus stream (live)
 let INVENTORY=null, INVPTS=null;   // full recompile inventory + its point cloud
 let LAST_EVT_TS=0, LAST_INV_TOTAL=0, FLASH=[];   // discovery flashes (new finds glow)
@@ -897,13 +919,13 @@ const NOBOOT=/[?&]noboot/.test(location.search);   // skip the intro: /?noboot=1
 /* ---------- zoom tabs ---------- */
 const JP={stream:'思考',assets:'資産庫',browser:'閲覧',term:'端末接続',emerg:'システム健全性',syslog:'記録',unit:'壱号機制御',magi:'マギ・連携ツール',
  vitals:'ホスト生体情報',user:'操縦者設定',planet:'再構築球体',codemap:'コード転送',alert:'障害警報',
- sessions:'セッション記録',progress:'進捗',needed:'残作業'};
+ sessions:'セッション記録',progress:'進捗',needed:'残作業',project:'案件選択'};
 const TITLE={stream:'AI THOUGHT STREAM',assets:'ASSET LIBRARY',browser:'BROWSER',term:'TERMINAL LINK',emerg:'SYSTEM HEALTH',syslog:'SYSTEM LOG',unit:'UNIT-01 CONTROL',
  magi:'MAGI — LINKED TOOLING',vitals:'HOST VITALS',user:'OPERATOR SETTINGS',planet:'RECOMPILE SPHERE',
  codemap:'CODE MAP',alert:'BLOCKER ALERT',sessions:'SESSION LOGBOOK',
- progress:'PROGRESS',needed:'WHAT IS STILL NEEDED'};
+ progress:'PROGRESS',needed:'WHAT IS STILL NEEDED',project:'PROJECT SELECTOR'};
 /* order of the strip along the top of every fullscreen view */
-const TABS=['stream','needed','progress','sessions','assets','planet','browser','magi','codemap','vitals','unit',
+const TABS=['project','stream','needed','progress','sessions','assets','planet','browser','magi','codemap','vitals','unit',
  'syslog','emerg','term','user'];
 let ZOOM=null,CHART=null,BW_HIST=[];
 function wipe(fn){const w=$('#wipe');w.classList.remove('go');void w.offsetWidth;w.classList.add('go');setTimeout(fn,190);}
@@ -1009,10 +1031,22 @@ const NERVCHROME=(function(){
           style="left:50%;top:44%;width:118px;height:118px;margin:-59px 0 0 -59px">${svgUse('sp-reticle')}</div>
         <div class="lockbr" id="unitLock"
           style="left:8%;top:22%;right:8%;bottom:24%">${svgUse('sp-lock')}</div></div>`);
-    // LOGO strip: vertical kana rails carrying the live scope
+    // LOGO strip: vertical kana rails carrying the live scope, plus the
+    // PROJECT plate — the switch between games lives on the masthead because it
+    // re-scopes every other block on the page.
     const g=$('#b-logo');
     if(g&&!$('#railL')) g.insertAdjacentHTML('beforeend',
       `<i class="rail l" id="railL"></i><i class="rail r" id="railR"></i>`);
+    if(g&&!$('#hexProj')) g.insertAdjacentHTML('beforeend',
+      `<div class="hexrow projrow">
+         <div class="hexbadge proj" id="hexProj" title="Switch project / start a new decompile">
+           ${svgUse('sp-hex')}
+           <span class="hb-in">${svgUse('sp-sigil','hb-w')}
+             <span id="hexProjSerial">—</span><br>
+             <span style="font-size:.8em;opacity:.75">案件</span></span></div></div>`);
+    const hp=$('#hexProj');
+    if(hp&&!hp.__wired){hp.__wired=1;
+      hp.onclick=e=>{e.stopPropagation();openZ('project');};}
     // block seals
     document.querySelectorAll('#hq .blk').forEach(b=>{
       if(b.id==='b-logo'||b.querySelector('.seal'))return;
@@ -1034,9 +1068,16 @@ const NERVCHROME=(function(){
     const lk=$('#unitLock'); if(lk)lk.classList.toggle('on',!!running);
     // rails: real scope, not filler
     const rl=$('#railL'), rr=$('#railR');
-    if(rl){const g=(window.ST&&ST.game)||{};
-      rl.innerHTML='<b>'+esc(g.serial||'SLUS-20407')+'</b> · 再構築 '+
+    const gm=(window.ST&&ST.game)||{};
+    if(rl){rl.innerHTML='<b>'+esc(gm.serial||'—')+'</b> · 再構築 '+
         ((window.PLANET&&PLANET.pct)||0)+'%';}
+    const ps=$('#hexProjSerial');
+    if(ps){const s=gm.serial||'—';
+      // the plate shows the numeric half; the full serial is in the tooltip
+      ps.textContent=s.indexOf('-')>0?s.split('-')[1]:s;
+      const hb=$('#hexProj');
+      if(hb)hb.title='Active project: '+s+(gm.name?' — '+gm.name:'')+
+        '  ·  click to switch or start a new decompile';}
     if(rr){const p=(window.ST&&ST.proc)||{};
       rr.innerHTML='主系統 '+(p.runner_alive?'<b>稼働</b>':'待機')+' · 本部';}
   }
@@ -1429,16 +1470,95 @@ function magi(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
   d.fillStyle='#ff2f3d';d.font='700 '+Math.max(14,cr*.52)+"px 'Arial Narrow',Impact,sans-serif";
   d.textAlign='center';d.textBaseline='middle';d.fillText('中枢',cx,cy);}
 
-/* ECG */
-let ecg=[];
-function ecgDraw(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
-  const d=c.getContext('2d'),W=c.width,H=c.height;d.clearRect(0,0,W,H);
-  if(!ecg.length)for(let i=0;i<220;i++)ecg.push(0);
-  d.beginPath();ecg.forEach((v,i)=>{const x=i/ecg.length*W,y=H/2-v*H*.42;i?d.lineTo(x,y):d.moveTo(x,y)});
-  d.strokeStyle='#00ff9c';d.lineWidth=2;d.shadowColor='#00ff9c';d.shadowBlur=8;d.stroke();d.shadowBlur=0;}
-function ecgTick(){const ph=(tt*2.2)%1,load=(ST.sys&&ST.sys.cpu!=null?ST.sys.cpu:20)/100;
-  let v=0;if(ph<.05)v=.18;else if(ph<.10)v=-.30;else if(ph<.15)v=1;else if(ph<.20)v=-.42;else if(ph<.30)v=.22;
-  ecg.push(v*(.45+load*.75));if(ecg.length>220)ecg.shift();}
+/* ================= SEISMOGRAPH =================
+   Replaces the old fake ECG, which drew the same synthetic heartbeat forever
+   and told you nothing. This is a drum trace of how hard the project is
+   actually working: a small job is a small bounce, a build is an earthquake.
+
+   MAGNITUDE is computed from real signals only, on a log scale so that the
+   difference between "sqlite wrote a row" and "the whole port is rebuilding"
+   is legible on one axis:
+
+     background   host CPU load                       (always present, small)
+     M+           each tool the activity tracker sees working
+     M+           a running guarded action, weighted by what it is
+     M++          an active build (the heaviest thing this machine does)
+     M++          the port process running and advancing frames
+     transient    a new event on the bus (finding / discovery / commit) fires
+                  a decaying aftershock, so discrete work shows as a jolt
+
+   Nothing here is invented: if the project is idle the needle sits flat. */
+let seis=[], seisShock=0, seisPeak=0, seisLastEvt=0;
+const SEIS_N=260;
+
+function seisMagnitude(){
+  const p=ST.proc||{}, a=ST.action||{}, s=ST.sys||{};
+  let energy=0;
+  // background tremor: the host is never perfectly still
+  energy += Math.max(0,(s.cpu==null?0:s.cpu))/100 * 0.9;
+  // every tool genuinely working adds energy
+  energy += TOOLS.filter(t=>toolActive(t.name)).length * 0.7;
+  // a guarded action, weighted by how heavy that action really is
+  if(a.running){
+    const n=(a.name||'').toLowerCase();
+    energy += /build|recompile/.test(n)?7:/drive|catch|run/.test(n)?4:2;
+  }
+  if(p.build_active) energy += 9;          // the heaviest job on this machine
+  if(p.runner_alive) energy += 3;
+  if(CL&&CL.running)  energy += 2.5;
+  energy += seisShock;                      // decaying event aftershock
+  // log scale, clamped to a 0-10 dial like a real magnitude scale
+  return Math.max(0,Math.min(10, Math.log10(1+energy)*4.6));
+}
+
+function seisTick(){
+  // a genuinely new event on the bus is a discrete jolt, not a level
+  const n=(typeof EVENTS!=='undefined'&&EVENTS)?EVENTS.length:0;
+  if(n>seisLastEvt){ seisShock += Math.min(6,(n-seisLastEvt)*2.2); }
+  seisLastEvt=n;
+  seisShock *= 0.94;                        // aftershocks decay
+  if(seisShock<0.01) seisShock=0;
+
+  const m=seisMagnitude();
+  seisPeak = Math.max(m, seisPeak*0.995);   // slow-falling peak marker
+  // amplitude grows with magnitude; the trace is band-limited noise so a big
+  // job reads as a quake rather than a taller sine wave
+  const amp=Math.pow(m/10,1.35);
+  const prev=seis.length?seis[seis.length-1]:0;
+  const shake=(Math.random()*2-1)+(Math.random()*2-1);   // ~triangular
+  let v=prev*0.55 + shake*amp*0.85;
+  if(amp>0.02 && Math.random()<amp*0.30) v += (Math.random()<0.5?-1:1)*amp*1.5;
+  seis.push(Math.max(-1.6,Math.min(1.6,v)));
+  if(seis.length>SEIS_N)seis.shift();
+}
+
+function seisDraw(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
+  const d=c.getContext('2d'),W=c.width,H=c.height,mid=H/2;
+  d.clearRect(0,0,W,H);
+  if(!seis.length)for(let i=0;i<SEIS_N;i++)seis.push(0);
+  const m=seisMagnitude();
+  const col=m>=7?'#ff2f3d':m>=4?'#ff8a00':'#00ff9c';
+
+  // drum baseline + the two threshold rules the colour changes on
+  d.strokeStyle='rgba(255,47,61,.16)';d.lineWidth=1;
+  d.beginPath();d.moveTo(0,mid);d.lineTo(W,mid);d.stroke();
+
+  // the trace
+  d.beginPath();
+  seis.forEach((v,i)=>{const x=i/SEIS_N*W, y=mid-v*mid*0.86;
+    i?d.lineTo(x,y):d.moveTo(x,y);});
+  d.strokeStyle=col;d.lineWidth=2;d.shadowColor=col;
+  d.shadowBlur=4+ (m/10)*14;d.stroke();d.shadowBlur=0;
+
+  // magnitude readout, drawn small in the corner of the drum
+  const fs=Math.max(11,Math.min(17,H*0.30));
+  d.font='700 '+fs+"px 'Arial Narrow','Roboto Condensed',Impact,sans-serif";
+  d.textAlign='right';d.textBaseline='top';
+  d.fillStyle=col;d.fillText('M '+m.toFixed(1),W-6,4);
+  d.font=(fs*0.62)+"px 'Consolas',monospace";
+  d.fillStyle='rgba(255,106,114,.55)';
+  d.fillText('PEAK '+seisPeak.toFixed(1),W-6,6+fs);
+}
 
 /* RECOMPILE SPHERE — tiles fill in as roadmap sectors are restored */
 /* RECOMPILE SPHERE
@@ -1730,10 +1850,10 @@ function _draw(fn,id){try{fn(id);}catch(e){
   if(!_drawErr[id]){_drawErr[id]=1;console.warn('[prom] draw error in',id,e);}}}
 function loop(){
   tt+=.012;
-  try{ecgTick();}catch(e){}
-  if(!ZOOM){_draw(unit,'cv-unit');_draw(magi,'cv-magi');_draw(ecgDraw,'cv-ecg');
+  try{seisTick();}catch(e){}
+  if(!ZOOM){_draw(unit,'cv-unit');_draw(magi,'cv-magi');_draw(seisDraw,'cv-ecg');
     _draw(planet,'cv-planet');_draw(codemap,'cv-map');}
-  else{_draw(unit,'z-unit');_draw(magi,'z-magi');_draw(ecgDraw,'z-ecg');
+  else{_draw(unit,'z-unit');_draw(magi,'z-magi');_draw(seisDraw,'z-ecg');
     _draw(planet,'z-planet');_draw(codemap,'z-map');_draw(chart,'z-chart');}
   requestAnimationFrame(loop);
 }
@@ -1766,8 +1886,35 @@ const VIEW={
  magi:()=>`<div class="zgrid" style="grid-template-columns:1.2fr 1fr">
    <div class="zp"><h3>MAGI — Linked Tooling</h3><canvas class="cv" id="z-magi"></canvas></div>
    <div class="zp"><h3>Inventory</h3><div class="scroll" id="zk-tools"></div></div></div>`,
+ /* PROJECT SELECTOR — point Prometheus at a different game.
+    Switching saves the outgoing game's state first, so nothing in flight is
+    lost, then re-scopes every provider to the new serial. */
+ project:()=>`<div class="zgrid" style="grid-template-columns:1.4fr 1fr">
+   <div class="zp"><h3>Projects <span class="kx" id="pjMsg" style="margin-left:auto;
+     font-size:10px;letter-spacing:.14em;color:var(--mut)"></span></h3>
+     <div class="scroll" id="pjList"></div></div>
+   <div class="zp" style="gap:6px">
+     <h3>Active Project</h3><div class="kv" id="pjState"></div>
+     <div style="display:flex;gap:6px;margin:4px 0 10px">
+       <button class="act" id="pjSave">SAVE STATE</button>
+       <button class="act" id="pjRefresh">RESCAN</button></div>
+     <h3>Start A New Decompile</h3>
+     <div class="kv" style="margin-bottom:6px">A new project gets its own tree
+       under <b>Prometheus_Master/games/&lt;serial&gt;/</b> — logs, exports,
+       models, sessions, ghidra, db — and a row in the shared knowledge store.
+       Findings stay scoped to the serial, so cross-game patterns can be mined
+       later without the folders ever mixing.</div>
+     <label class="f"><span>SERIAL</span><input id="pjSerial" placeholder="SLUS-20614"></label>
+     <label class="f"><span>NAME</span><input id="pjName" placeholder="Game title"></label>
+     <label class="f"><span>REGION</span><input id="pjRegion" placeholder="NTSC-U"></label>
+     <div style="display:flex;gap:6px;align-items:center">
+       <button class="act" id="pjCreate">CREATE</button>
+       <span class="kv" id="pjNewMsg"></span></div>
+     <div class="tiny" style="margin-top:10px;color:var(--mut)">After creating,
+       run the <b>iso-bootstrap</b> skill against the game's ISO to populate it.</div>
+   </div></div>`,
  vitals:()=>`<div class="zgrid" style="grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr">
-   <div class="zp" style="grid-column:span 2"><h3>Pulse</h3><canvas class="cv" id="z-ecg" style="height:120px"></canvas></div>
+   <div class="zp" style="grid-column:span 2"><h3>Seismograph &mdash; work magnitude</h3><canvas class="cv" id="z-ecg" style="height:120px"></canvas></div>
    <div class="zp"><h3>Host</h3><div class="grid4" id="zk-vit"></div></div>
    <div class="zp"><h3>Detail</h3><div class="kv" id="zk-vit2"></div></div></div>`,
  user:()=>`<div class="zgrid" style="grid-template-columns:1fr 1.15fr">
@@ -1892,10 +2039,105 @@ const POST={
      <b>JOB</b> <u>${esc(a.name||'—')}</u><br><b>ELAPSED</b> <u>${a.elapsed||0}s</u><br>
      <b>RC</b> <u>${a.rc==null?'—':a.rc}</u>`;
    $('#zk-jobtail').textContent=(a.tail||[]).join('');},
- magi:()=>{$('#zk-tools').innerHTML=TOOLS.map(t=>`<div class="row">
-   <span style="color:${t.online?'var(--grn)':'var(--mut)'}">${t.online?'● ONLINE ':'○ ABSENT '}</span>
-   <b style="font-family:var(--disp);font-size:13px;letter-spacing:.1em">${esc(t.name)}</b>
-   <span style="color:var(--mut)"> — ${esc(t.role)}</span></div>`).join('');},
+ // Three states, not two. "installed" and "doing work right now" are different
+ // facts and the inventory has to separate them: ACTIVE (fired inside the
+ // activity window), IDLE (present but not working), ABSENT (not on this box).
+ magi:()=>{
+   const dirw={in:'IN  ▶ core',out:'core ▶ OUT',both:'core ⇄ tool'};
+   const rows=TOOLS.slice().sort((a,b)=>
+     (toolActive(b.name)-toolActive(a.name))||(b.online-a.online)||
+     a.name.localeCompare(b.name));
+   $('#zk-tools').innerHTML=
+     `<div class="row" style="color:var(--mut);font-size:9.5px;letter-spacing:.14em">
+        ${TOOLS.filter(t=>t.online).length} INSTALLED ·
+        ${TOOLS.filter(t=>toolActive(t.name)).length} ACTIVE ·
+        ${TOOLS.filter(t=>!t.online).length} ABSENT</div>`+
+     rows.map(t=>{
+       const live=toolActive(t.name);
+       const since=ACT[t.name]?Math.round((performance.now()-ACT[t.name])/1000):null;
+       const state=live?'● ACTIVE':t.online?'◐ IDLE  ':'○ ABSENT';
+       const col=live?'var(--grn)':t.online?'var(--amb)':'var(--mut)';
+       return `<div class="row" style="display:flex;gap:8px;align-items:baseline">
+         <span style="color:${col};min-width:74px">${state}</span>
+         <b style="font-family:var(--disp);font-size:13px;letter-spacing:.1em;min-width:96px"
+            >${esc(t.name)}</b>
+         <span style="color:var(--mut);flex:1">${esc(t.role||'')}</span>
+         <span style="color:var(--mut);font-size:9.5px">${dirw[t.flow]||''}</span>
+         <span style="color:${live?'var(--grn)':'var(--mut)'};font-size:9.5px;min-width:64px;
+           text-align:right">${live?'now':since!=null?since+'s ago':'—'}</span>
+       </div>`;}).join('');},
+ project:()=>{
+   const num=n=>(n||0).toLocaleString();
+   const ago=ts=>{if(!ts)return 'never saved';
+     const s=Math.max(0,Date.now()/1000-ts);
+     return s<90?Math.round(s)+'s ago':s<5400?Math.round(s/60)+'m ago':
+       s<172800?Math.round(s/3600)+'h ago':Math.round(s/86400)+'d ago';};
+   const paint=()=>{
+     const L=$('#pjList'); if(!L)return;
+     L.innerHTML=(GAMES.games||[]).map(g=>`
+       <div class="row" data-pj="${esc(g.serial)}" style="display:flex;gap:10px;
+         align-items:center;padding:7px 4px;cursor:${g.active?'default':'pointer'};
+         border-left:3px solid ${g.active?'var(--grn)':'transparent'}">
+         <div style="min-width:150px">
+           <b style="font-family:var(--disp);font-size:15px;letter-spacing:.1em;
+             color:${g.active?'var(--grn)':'var(--acc)'}">${esc(g.serial)}</b><br>
+           <span style="color:var(--mut);font-size:10px">${esc(g.name||'')}</span></div>
+         <div class="tiny" style="flex:1;line-height:1.6">
+           ${num(g.counts.functions)} fn · ${num(g.counts.findings)} findings ·
+           ${num(g.counts.addresses)} addr · ${num(g.counts.assets)} assets ·
+           ${num(g.counts.roadmap)} roadmap<br>
+           <span style="color:var(--mut)">state ${ago(g.saved_at)}${
+             g.frontier?' · frontier '+esc(g.frontier):''}${
+             g.tree?'':' · no working tree yet'}</span></div>
+         <span class="tag" style="color:${g.active?'var(--grn)':'var(--mut)'}"
+           >${g.active?'ACTIVE':'SWITCH'}</span>
+       </div>`).join('')||'<div class="kv">No games registered.</div>';
+     L.querySelectorAll('[data-pj]').forEach(el=>{
+       el.onclick=async()=>{
+         const s=el.dataset.pj;
+         if((GAMES.games||[]).some(g=>g.serial===s&&g.active))return;
+         $('#pjMsg').textContent='SAVING '+GAMES.active+'  …';
+         const r=await post('/api/games/select',{serial:s,save:true});
+         if(!r.ok){$('#pjMsg').textContent=r.error||'switch failed';return;}
+         $('#pjMsg').textContent='SWITCHED TO '+r.serial;
+         seq('project → '+r.serial,'ok');
+         resetGameScope();                    // drop the old game's cached graphs
+         GAMES=await api('/api/games');
+         // every provider is scoped to SERIAL server-side, so a full refresh is
+         // what actually re-points the UI
+         await refresh(); paint(); state();
+       };});
+   };
+   const state=()=>{
+     const g=(GAMES.games||[]).find(x=>x.active)||{counts:{}};
+     $('#pjState').innerHTML=`<b>SERIAL</b> <u>${esc(g.serial||'—')}</u><br>
+       <b>TITLE</b> <u>${esc(g.name||'—')}</u><br>
+       <b>REGION</b> <u>${esc(g.region||'—')}</u><br>
+       <b>TREE</b> <u>games/${esc(g.serial||'')}/</u><br>
+       <b>STATE</b> <u>${ago(g.saved_at)}</u><br>
+       <b>SCALE</b> <u>${num(g.counts.functions)} fn · ${num(g.counts.findings)} findings
+         · ${num(g.counts.assets)} assets</u>`;
+   };
+   paint(); state();
+   $('#pjSave').onclick=async()=>{
+     $('#pjMsg').textContent='SAVING …';
+     await post('/api/games/save',{});
+     GAMES=await api('/api/games'); paint(); state();
+     $('#pjMsg').textContent='STATE SAVED';seq('project state saved','ok');};
+   $('#pjRefresh').onclick=async()=>{GAMES=await api('/api/games');paint();state();
+     $('#pjMsg').textContent='RESCANNED';};
+   $('#pjCreate').onclick=async()=>{
+     const m=$('#pjNewMsg');m.textContent='…';
+     const r=await post('/api/games/create',{
+       serial:$('#pjSerial').value.trim(),
+       name:$('#pjName').value.trim(),
+       region:$('#pjRegion').value.trim()});
+     if(!r.ok){m.style.color='var(--acc)';m.textContent=r.error;return;}
+     m.style.color='var(--grn)';m.textContent='created '+r.serial;
+     seq('project created '+r.serial,'ok');
+     $('#pjSerial').value=$('#pjName').value=$('#pjRegion').value='';
+     GAMES=await api('/api/games'); paint(); state();};
+ },
  vitals:()=>renderVitals(),
  user:()=>{const F=[['user_name','NAME'],['user_kanji','KANJI'],['user_id','ID'],['clearance','CLEARANCE'],
    ['terminal','TERMINAL'],['project_path','PROJECT PATH'],['motto','MOTTO'],['motto_jp','MOTTO (JP)'],['accent','ACCENT']];
@@ -2445,11 +2687,12 @@ function renderVitals(){const s=ST.sys||{};
 
 async function refresh(){
  try{
-  const [ov,sys,pl,tl,fl,cl,rc,rt, events]=await Promise.all([api('/api/overview'),api('/api/sys'),api('/api/planet'),
+  const [ov,sys,pl,tl,fl,cl,rc,rt, events, games]=await Promise.all([api('/api/overview'),api('/api/sys'),api('/api/planet'),
     TOOLS.length?Promise.resolve(TOOLS):api('/api/tools'),api('/api/codeflow?limit=12'),api('/api/claude'),
     RECOMP.units&&RECOMP.units.length?Promise.resolve(RECOMP):api('/api/recomp?limit=26'),
-    api('/api/runtime'), api('/api/events?limit=18')]);
+    api('/api/runtime'), api('/api/events?limit=18'), api('/api/games')]);
   ST=ov;ST.sys=sys;PLANET=pl;TOOLS=tl;FLOW=fl;RECOMP=rc;ST.runtime=rt;EVENTS=events.events||[];
+  GAMES=games||GAMES; ST.game=(GAMES.games||[]).find(g=>g.active)||{serial:GAMES.active};
   // DISCOVERY DETECTION: a newer top event (or a grown inventory) = something was
   // just found. Spawn a bright flash on the globe so a discovery is visible.
   {const top=(EVENTS[0]&&EVENTS[0].ts)||0;
@@ -2493,23 +2736,37 @@ async function refresh(){
   const chip=$('#healthChip');
   chip.className='healthchip'+(bad.length>2?' bad':bad.length?' warn':'');
   try{NERVCHROME.sync();}catch(e){}
-  // the whole toolchain, not the first seven: working tools first, then the
-  // rest of the installed set, then whatever is missing
-  {const act=TOOLS.filter(t=>toolActive(t.name)).map(t=>t.name);
-   const arrow=t=>t.flow==='out'?'&#9654;':t.flow==='both'?'&#8646;':'&#9664;';
+  // Three distinct states, not just installed/not:
+  //   ACTIVE   the activity tracker saw it work inside the last 4.5s
+  //   IDLE     installed and linked, but doing nothing right now
+  //   OFFLINE  not found on this machine
+  // ACTIVE tools also carry how long ago they last fired and which way their
+  // data is flowing, so the block answers "what is working right now" at a
+  // glance instead of only "what is installed".
+  {const arrow=t=>t.flow==='out'?'&#9654;':t.flow==='both'?'&#8646;':'&#9664;';
+   const rank=t=>toolActive(t.name)?0:t.online?1:2;
+   const nAct=TOOLS.filter(t=>toolActive(t.name)).length;
+   const nOn=TOOLS.filter(t=>t.online).length;
    $('#magi-list').innerHTML=
      `<div style="display:flex;justify-content:space-between;color:var(--mut);
-        font-size:9px;letter-spacing:.12em;margin-bottom:2px">
-        <span>TOOLCHAIN ${TOOLS.filter(t=>t.online).length}/${TOOLS.length}</span>
-        <span style="color:${act.length?'var(--grn)':'var(--mut)'}">${act.length} ACTIVE</span></div>
+        font-size:9px;letter-spacing:.12em;margin-bottom:3px;
+        border-bottom:1px solid rgba(var(--acc-rgb),.2);padding-bottom:2px">
+        <span>LINKED ${nOn}/${TOOLS.length}</span>
+        <span style="color:${nAct?'var(--grn)':'var(--mut)'}">
+          ${nAct?nAct+' WORKING':'IDLE'}</span></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 8px;font-size:9.5px">`+
-     TOOLS.slice().sort((a,b)=>(act.includes(b.name)-act.includes(a.name))||
-                               (b.online-a.online)).map(t=>{
-       const live=act.includes(t.name);
+     TOOLS.slice().sort((a,b)=>rank(a)-rank(b)||a.name.localeCompare(b.name)).map(t=>{
+       const live=toolActive(t.name);
+       const age=ACT[t.name]?Math.round((performance.now()-ACT[t.name])/1000):null;
        const col=live?'var(--grn)':t.online?'var(--mut)':'var(--acc-dim)';
-       return `<span style="color:${col};white-space:nowrap;overflow:hidden;
-         text-overflow:ellipsis" title="${esc(t.role||'')}${t.online?'':' — not found'}">
-         ${live?arrow(t):'&#183;'} ${esc(t.name)}</span>`;}).join('')+'</div>';}
+       const mark=live?arrow(t):t.online?'&#9675;':'&#215;';
+       const tip=`${t.name} — ${t.role||''}\n`+
+         (live?`ACTIVE (${age}s ago), data flow ${t.flow||'in'}`
+              :t.online?'IDLE — linked, not working':'OFFLINE — not found');
+       return `<span title="${esc(tip)}" style="color:${col};white-space:nowrap;
+         overflow:hidden;text-overflow:ellipsis;${live?'text-shadow:0 0 7px rgba(var(--grn-rgb),.55)':''}">
+         ${mark} ${esc(t.name)}${live&&age!=null?` <b style="color:var(--grn-dim);
+           font-weight:400">${age}s</b>`:''}</span>`;}).join('')+'</div>';}
   renderVitals();
   // SYSTEM LOG is a LIVE event feed now: real findings/commits/milestones from
   // the event bus, newest first, colour-coded by kind. Falls back to the local

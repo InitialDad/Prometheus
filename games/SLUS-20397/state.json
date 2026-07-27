@@ -1,0 +1,12 @@
+{
+  "serial": "SLUS-20397",
+  "saved_at": 1785129602.2668629,
+  "saved_at_iso": "2026-07-27 00:20:02",
+  "counts": {
+    "functions": 0,
+    "findings": 1,
+    "addresses": 0,
+    "assets": 17724,
+    "roadmap": 0
+  }
+}

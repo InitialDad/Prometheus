@@ -1,0 +1,12 @@
+{
+  "serial": "SLUS-20407",
+  "saved_at": 1785129494.737591,
+  "saved_at_iso": "2026-07-27 00:18:14",
+  "counts": {
+    "functions": 2820,
+    "findings": 209,
+    "addresses": 139,
+    "assets": 35013,
+    "roadmap": 19
+  }
+}

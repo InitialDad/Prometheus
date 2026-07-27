@@ -46,7 +46,12 @@ ELF = r"C:\Users\owner\pcsx2_modder_wos\elf\SLUS_204.07"
 ISO = r"C:\Users\owner\pcsx2_modder_wos\iso\WayOfTheSamurai.iso"
 BUILD_BAT = os.path.join(WOS, "build_p4n.bat")
 HUNTS = os.path.join(WOS, "hunts_parscan")
-SERIAL = "SLUS-20407"
+# The active project lives in hub_extras and is rebound by set_active_game().
+# This module must NOT keep its own copy: a private constant here is how the
+# roadmap and findings stayed pinned to WoS after a switch.
+def _serial():
+    return X.SERIAL
+
 ACTIVITY_LOG = os.path.join(HERE, "hub_activity.log")
 
 # background action state (single slot; the hub serializes long ops)
@@ -60,6 +65,12 @@ def log_activity(msg):
         with open(ACTIVITY_LOG, "a") as f:
             f.write(line)
     except OSError:
+        pass
+    # and into the per-game structured black box, which is the one that rotates
+    # and stays greppable across compressed history
+    try:
+        X.log_activity(msg, kind="action")
+    except Exception:
         pass
 
 
@@ -77,7 +88,7 @@ def get_roadmap():
     try:
         rows = c.execute("""SELECT phase,phase_order,slug,title,status,priority,
             depends_on,fix_approach,verify_method,evidence FROM km_roadmap
-            WHERE serial=? ORDER BY phase_order,priority""", (SERIAL,)).fetchall()
+            WHERE serial=? ORDER BY phase_order,priority""", (_serial(),)).fetchall()
     except sqlite3.OperationalError:
         return {"items": [], "note": "roadmap not seeded - run prometheus_fix.py status"}
     items = [dict(r) for r in rows]
@@ -98,7 +109,7 @@ def get_roadmap():
 def get_findings(limit=25, outcome=None):
     c = db()
     q = "SELECT id,ts,topic,outcome,details FROM km_findings WHERE serial=?"
-    args = [SERIAL]
+    args = [_serial()]
     if outcome:
         q += " AND outcome=?"; args.append(outcome)
     q += " ORDER BY id DESC LIMIT ?"; args.append(limit)
@@ -109,7 +120,7 @@ def get_badpaths():
     c = db()
     return [dict(r) for r in c.execute(
         "SELECT pattern,reason FROM km_bad_paths WHERE serial=? OR serial IS NULL ORDER BY id DESC",
-        (SERIAL,)).fetchall()]
+        (_serial(),)).fetchall()]
 
 
 def get_patterns():
@@ -129,12 +140,12 @@ def get_knowledge_counts():
         except sqlite3.OperationalError:
             return 0
     return {
-        "findings": n("SELECT COUNT(*) FROM km_findings WHERE serial=?", SERIAL),
-        "works": n("SELECT COUNT(*) FROM km_findings WHERE serial=? AND outcome='works'", SERIAL),
-        "fails": n("SELECT COUNT(*) FROM km_findings WHERE serial=? AND outcome='fails'", SERIAL),
-        "bad_paths": n("SELECT COUNT(*) FROM km_bad_paths WHERE serial=? OR serial IS NULL", SERIAL),
+        "findings": n("SELECT COUNT(*) FROM km_findings WHERE serial=?", _serial()),
+        "works": n("SELECT COUNT(*) FROM km_findings WHERE serial=? AND outcome='works'", _serial()),
+        "fails": n("SELECT COUNT(*) FROM km_findings WHERE serial=? AND outcome='fails'", _serial()),
+        "bad_paths": n("SELECT COUNT(*) FROM km_bad_paths WHERE serial=? OR serial IS NULL", _serial()),
         "addresses": n("SELECT COUNT(*) FROM km_addresses WHERE game_crc IS NOT NULL OR 1=1"),
-        "functions": n("SELECT COUNT(*) FROM km_ghidra_functions WHERE serial=?", SERIAL),
+        "functions": n("SELECT COUNT(*) FROM km_ghidra_functions WHERE serial=?", _serial()),
         "patterns": n("SELECT COUNT(*) FROM km_bug_patterns"),
     }
 
@@ -463,8 +474,21 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(X.get_timeline())
             if p == "/api/needed":
                 return self._json(X.get_needed())
+            if p == "/api/games":
+                return self._json({"games": X.list_games(),
+                                   "active": X.SERIAL})
+            if p == "/api/activity/search":
+                return self._json(X.search_activity(
+                    q.get("q", [""])[0],
+                    limit=int(q.get("limit", [200])[0])))
             if p == "/api/settings":
                 return self._json(X.get_settings())
+            if p == "/api/games":
+                return self._json({"active": X.SERIAL, "games": X.list_games()})
+            if p == "/api/activity/search":
+                return self._json(X.search_activity(
+                    q.get("q", [""])[0],
+                    limit=int(q.get("limit", [200])[0])))
             if p == "/api/claude":
                 return self._json(X.claude_status())
             if p == "/api/mirror":
@@ -513,6 +537,17 @@ class Handler(BaseHTTPRequestHandler):
                 log_activity("private browser: " + str(body.get("url"))[:120])
                 return self._json(X.browser_open(body.get("url", ""),
                                                  private=body.get("private", True)))
+            if u.path == "/api/games/select":
+                return self._json(X.set_active_game(
+                    body.get("serial", ""),
+                    save_current=body.get("save", True)))
+            if u.path == "/api/games/save":
+                return self._json(X.save_game_state(
+                    body.get("serial") or None, body))
+            if u.path == "/api/games/create":
+                return self._json(X.create_game(
+                    body.get("serial", ""), body.get("name"),
+                    body.get("region"), body.get("notes")))
             if u.path == "/api/settings":
                 return self._json(X.save_settings(body))
             if u.path == "/api/silhouette":

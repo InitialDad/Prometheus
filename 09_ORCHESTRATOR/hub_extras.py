@@ -17,8 +17,11 @@ Everything degrades gracefully: if a probe fails the field comes back None and
 the UI just shows a dash. Nothing here is allowed to raise into the router.
 """
 import base64
+import glob as _glob
+import gzip
 import json
 import os
+import re
 import shutil
 import subprocess
 import sqlite3
@@ -34,9 +37,20 @@ DB = os.path.join(os.path.dirname(HERE), "db", "prometheus.db")
 LIVE_DB = r"C:\Users\owner\pcsx2_modder_wos\db\mods.db"
 if not os.path.exists(DB):          # fall back until the merge has been run
     DB = LIVE_DB
+# SERIAL is the ACTIVE PROJECT and is rebound by set_active_game(). Every
+# provider below reads the module global at call time rather than capturing it,
+# so rebinding it re-scopes the entire UI in one assignment. Do not turn these
+# reads into a default argument or a closure capture or switching will silently
+# stop working for that provider.
 SERIAL = "SLUS-20407"
 SETTINGS_F = os.path.join(HERE, "prometheus_settings.json")
 SILHOUETTE_F = os.path.join(HERE, "user_silhouette.png")
+# Per-game working tree. Everything a game generates - logs, exports, model
+# wireframes, session notes, its state snapshot - lives under its own serial so
+# the filesystem stays clean as games accumulate. The unified prometheus.db
+# stays shared; only the queries are scoped.
+GAMES_ROOT = os.path.join(os.path.dirname(HERE), "games")
+GAME_SUBDIRS = ("logs", "exports", "models", "sessions", "ghidra", "db")
 
 CREATE_NO_WINDOW = 0x08000000 if os.name == "nt" else 0
 
@@ -274,8 +288,13 @@ def get_recomp_map(limit=26):
         return _recomp_cache["data"]
 
     runner = os.path.join(WOS, "PS2Recomp", "ps2xRuntime", "src", "runner")
-    gen = os.path.join(WOS, "output")
+    gen = recomp_root()                       # per-game; None until recompiled
     lib = os.path.join(WOS, "PS2Recomp", "ps2xRuntime", "src", "lib")
+    if not gen:
+        empty = {"units": [], "n_generated": 0, "serial": SERIAL,
+                 "note": "no recompiled output for this game yet"}
+        _recomp_cache.update(ts=now, data=empty)
+        return empty
 
     syms = {}
     try:
@@ -516,6 +535,7 @@ _DEFAULT_SETTINGS = {
     "motto": "THE WORLD'S SALVATION LIES WITHIN THE TERROR OF DEATH.",
     "motto_jp": "死の恐怖こそ、世界を救う鍵となる",
     "project_path": WOS,
+    "current_game": "SLUS-20407",   # the active project; see set_active_game()
     "scanlines": True,
     "boot_sound": False,
     "media_url": "",          # last thing loaded in the viewport block
@@ -539,6 +559,322 @@ _DEFAULT_SETTINGS = {
     # Empty by default -> the CSS :root values apply; any key set overrides it.
     "theme": {},              # {var:'#hex' | font | 'pattern':[...] | 'newcaps':bool}
 }
+
+
+# --------------------------------------------------------------------------- #
+# ACTIVITY LOG - the black box (masterplan 0.2)
+#
+# One JSONL line per tracked event, per game. When the live segment passes
+# ACTIVITY_MAX it is gzipped to activity-<ts>.log.gz and a fresh one starts, so
+# history stays complete and greppable while disk stays bounded.
+# --------------------------------------------------------------------------- #
+ACTIVITY_MAX = 2 * 1024 * 1024
+
+
+def activity_file(serial=None):
+    return game_dir(serial, "logs", "activity.log")
+
+
+def log_activity(msg, kind="ui", serial=None):
+    """Append one event. Never raises - logging must not break a request."""
+    try:
+        serial = serial or SERIAL
+        f = activity_file(serial)
+        os.makedirs(os.path.dirname(f), exist_ok=True)
+        try:
+            if os.path.getsize(f) > ACTIVITY_MAX:
+                rolled = os.path.join(os.path.dirname(f),
+                                      "activity-%d.log.gz" % int(time.time()))
+                with open(f, "rb") as src, gzip.open(rolled, "wb") as dst:
+                    shutil.copyfileobj(src, dst)
+                os.remove(f)
+        except OSError:
+            pass                       # no file yet, or it is already gone
+        rec = {"ts": time.time(), "kind": kind, "serial": serial,
+               "msg": str(msg)[:500]}
+        with open(f, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+
+
+def search_activity(pattern, serial=None, limit=200):
+    """Grep the live segment AND every compressed segment for this game."""
+    serial = serial or SERIAL
+    try:
+        rx = re.compile(pattern, re.I)
+    except re.error as e:
+        return {"error": str(e), "hits": []}
+    hits, logs = [], os.path.dirname(activity_file(serial))
+    files = sorted(_glob.glob(os.path.join(logs, "activity-*.log.gz")))
+    files.append(activity_file(serial))
+    for path in files:
+        try:
+            op = gzip.open if path.endswith(".gz") else open
+            with op(path, "rt", encoding="utf-8", errors="replace") as fh:
+                for line in fh:
+                    if rx.search(line):
+                        try:
+                            hits.append(json.loads(line))
+                        except Exception:
+                            hits.append({"msg": line.rstrip()})
+                        if len(hits) >= limit:
+                            return {"hits": hits, "truncated": True,
+                                    "segments": len(files)}
+        except Exception:
+            continue
+    return {"hits": hits, "truncated": False, "segments": len(files)}
+
+
+# --------------------------------------------------------------------------- #
+# PROJECT CONTEXT - which game Prometheus is pointed at
+#
+# Switching is three things, in this order:
+#   1. snapshot the outgoing game so nothing in-flight is lost,
+#   2. rebind SERIAL and drop every cache that was built for the old scope,
+#   3. let the providers re-answer; they all read SERIAL at call time.
+# --------------------------------------------------------------------------- #
+def game_dir(serial, *parts):
+    return os.path.join(GAMES_ROOT, serial or SERIAL, *parts)
+
+
+def ensure_game_tree(serial):
+    """Create (idempotently) the per-game working tree and return its root."""
+    root = game_dir(serial)
+    for sub in ("",) + GAME_SUBDIRS:
+        try:
+            os.makedirs(os.path.join(root, sub), exist_ok=True)
+        except Exception:
+            pass
+    return root
+
+
+_counts_cache = {}          # serial -> (ts, counts)
+_COUNTS_TTL = 90
+
+
+def _ensure_scope_indexes():
+    """`assets` is 616k rows. COUNT(*) WHERE serial=? without an index is a full
+    scan, and /api/games asks for it once per game on every UI refresh - which
+    is exactly how a selector turns into a stall. Create the indexes once."""
+    try:
+        with sqlite3.connect(DB, timeout=10) as c:
+            for tbl in ("assets", "km_findings", "km_ghidra_functions",
+                        "km_addresses", "km_roadmap"):
+                try:
+                    c.execute(f"CREATE INDEX IF NOT EXISTS idx_{tbl}_serial"
+                              f" ON {tbl}(serial)")
+                except Exception:
+                    pass
+            c.commit()
+    except Exception:
+        pass
+
+
+def _game_counts(serial, fresh=False):
+    """Cheap per-game scale numbers for the selector cards. Cached: these move
+    on the scale of an indexing run, not of a UI refresh."""
+    hit = _counts_cache.get(serial)
+    if hit and not fresh and time.time() - hit[0] < _COUNTS_TTL:
+        return hit[1]
+    out = {}
+    try:
+        with sqlite3.connect(f"file:{DB}?mode=ro", uri=True, timeout=4) as c:
+            for key, sql in (
+                ("functions", "SELECT COUNT(*) FROM km_ghidra_functions WHERE serial=?"),
+                ("findings",  "SELECT COUNT(*) FROM km_findings WHERE serial=?"),
+                ("addresses", "SELECT COUNT(*) FROM km_addresses WHERE serial=?"),
+                ("assets",    "SELECT COUNT(*) FROM assets WHERE serial=?"),
+                ("roadmap",   "SELECT COUNT(*) FROM km_roadmap WHERE serial=?"),
+            ):
+                try:
+                    out[key] = c.execute(sql, (serial,)).fetchone()[0]
+                except Exception:
+                    out[key] = 0
+    except Exception:
+        pass
+    _counts_cache[serial] = (time.time(), out)
+    return out
+
+
+def list_games():
+    """Every game Prometheus knows about, with its scale and saved state."""
+    rows, seen = [], set()
+    try:
+        with sqlite3.connect(f"file:{DB}?mode=ro", uri=True, timeout=4) as c:
+            for serial, name, region, notes in c.execute(
+                    "SELECT serial,name,region,notes FROM games"):
+                # a couple of rows carry the serial only in _serial
+                if not serial:
+                    try:
+                        serial = c.execute(
+                            "SELECT _serial FROM games WHERE name=?", (name,)
+                        ).fetchone()[0]
+                    except Exception:
+                        serial = None
+                if not serial or serial in seen:
+                    continue
+                seen.add(serial)
+                rows.append({"serial": serial, "name": name or serial,
+                             "region": region, "notes": notes})
+    except Exception:
+        pass
+    # anything with a working tree but no games row still belongs in the list
+    try:
+        for d in sorted(os.listdir(GAMES_ROOT)):
+            if d not in seen and os.path.isdir(os.path.join(GAMES_ROOT, d)):
+                seen.add(d)
+                rows.append({"serial": d, "name": d, "region": None, "notes": None})
+    except Exception:
+        pass
+    for r in rows:
+        r["counts"] = _game_counts(r["serial"])
+        r["active"] = (r["serial"] == SERIAL)
+        r["tree"] = os.path.isdir(game_dir(r["serial"]))
+        st = read_game_state(r["serial"])
+        r["saved_at"] = st.get("saved_at")
+        r["frontier"] = st.get("frontier")
+    rows.sort(key=lambda r: (not r["active"], -sum(r["counts"].values())))
+    return rows
+
+
+def recomp_root(serial=None):
+    """Where this game's recompiled translation units live, or None.
+
+    Only WoS has been through the recompiler so far; a new game gets its tree
+    under games/<serial>/exports/output once it does. Returning None is the
+    honest answer for a game that has not been recompiled, and the callers
+    drop the category rather than borrow another game's number.
+    """
+    serial = serial or SERIAL
+    own = game_dir(serial, "exports", "output")
+    if os.path.isdir(own) and os.listdir(own):
+        return own
+    if serial == "SLUS-20407":
+        legacy = os.path.join(WOS, "output")
+        if os.path.isdir(legacy):
+            return legacy
+    return None
+
+
+def has_recomp_tree(serial=None):
+    return recomp_root(serial) is not None
+
+
+def read_game_state(serial):
+    try:
+        with open(game_dir(serial, "state.json"), "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_game_state(serial=None, extra=None):
+    """Snapshot what the operator would lose on a switch.
+
+    Deliberately small and derived from live sources rather than from the
+    browser, so it is still correct if the UI was never opened.
+    """
+    serial = serial or SERIAL
+    ensure_game_tree(serial)
+    state = read_game_state(serial)
+    state.update({
+        "serial": serial,
+        "saved_at": time.time(),
+        "saved_at_iso": time.strftime("%Y-%m-%d %H:%M:%S"),
+    })
+    try:
+        rm = get_roadmap()
+        state["frontier"] = rm.get("frontier")
+        state["roadmap_done"] = rm.get("done")
+        state["roadmap_total"] = rm.get("total")
+    except Exception:
+        pass
+    state["counts"] = _game_counts(serial)
+    if isinstance(extra, dict):
+        state.update({k: v for k, v in extra.items()
+                      if k in ("view", "note", "ui")})
+    with open(game_dir(serial, "state.json"), "w", encoding="utf-8") as f:
+        json.dump(state, f, indent=2)
+    log_activity(f"project state saved: {serial}")
+    return state
+
+
+def _drop_caches():
+    """Every cache below is scoped to one game and must not survive a switch."""
+    global _recomp_cache, _sym_cache, _callgraph_cache, _tools_cache
+    _recomp_cache = {"ts": 0, "data": None}
+    _sym_cache = {"ts": 0, "syms": None}
+    _callgraph_cache = None
+    _tools_cache = None                 # role/flow is shared, but re-probe is cheap
+
+
+def set_active_game(serial, save_current=True):
+    global SERIAL
+    serial = (serial or "").strip().upper()
+    if not serial:
+        return {"ok": False, "error": "no serial given"}
+    known = {g["serial"] for g in list_games()}
+    if serial not in known:
+        return {"ok": False, "error": f"unknown game {serial}",
+                "known": sorted(known)}
+    if serial == SERIAL:
+        return {"ok": True, "serial": SERIAL, "unchanged": True}
+    if save_current:
+        try:
+            save_game_state(SERIAL)
+        except Exception:
+            pass
+    prev, SERIAL = SERIAL, serial
+    ensure_game_tree(serial)
+    _drop_caches()
+    _counts_cache.pop(prev, None)       # the outgoing game's numbers just moved
+    save_settings({"current_game": serial})
+    log_activity(f"project switched: {prev} -> {serial}")
+    return {"ok": True, "serial": SERIAL, "previous": prev,
+            "state": read_game_state(SERIAL)}
+
+
+def create_game(serial, name=None, region=None, notes=None):
+    """Register a brand-new decompile target and give it its own working tree."""
+    serial = (serial or "").strip().upper()
+    if not re.match(r"^[A-Z]{4}-?[A-Z0-9]{3,6}$", serial.replace("_", "-")):
+        return {"ok": False,
+                "error": "serial must look like SLUS-20407 / SLPS-25217"}
+    if serial in {g["serial"] for g in list_games()}:
+        return {"ok": False, "error": f"{serial} already exists"}
+    try:
+        with sqlite3.connect(DB, timeout=8) as c:
+            c.execute("INSERT INTO games(serial,name,region,notes,_src,_serial)"
+                      " VALUES(?,?,?,?,?,?)",
+                      (serial, name or serial, region, notes, "hub_ui", serial))
+            c.commit()
+    except Exception as e:
+        return {"ok": False, "error": f"could not register: {e}"}
+    ensure_game_tree(serial)
+    with open(game_dir(serial, "README.md"), "w", encoding="utf-8") as f:
+        f.write(f"# {name or serial} ({serial})\n\n"
+                "Created by the Prometheus project selector.\n\n"
+                "Everything this game generates lives here: `logs/`, `exports/`,\n"
+                "`models/`, `sessions/`, `ghidra/`, `db/`. The shared knowledge\n"
+                "store stays `db/prometheus.db`, scoped by this serial.\n\n"
+                "Next: run the `iso-bootstrap` skill against the game's ISO.\n")
+    log_activity(f"project created: {serial}")
+    return {"ok": True, "serial": serial, "root": game_dir(serial)}
+
+
+def _restore_active_game():
+    """Re-point at whatever game was active when the hub last ran."""
+    global SERIAL
+    try:
+        with open(SETTINGS_F, "r", encoding="utf-8") as f:
+            saved = (json.load(f) or {}).get("current_game")
+        if saved:
+            SERIAL = saved
+    except Exception:
+        pass
+    ensure_game_tree(SERIAL)
+    threading.Thread(target=_ensure_scope_indexes, daemon=True).start()
 
 
 def get_settings():
@@ -1013,8 +1349,11 @@ def get_recompile_inventory():
                 return 0
         add("FUNCTIONS", n("SELECT COUNT(*) FROM km_ghidra_functions WHERE serial=?", SERIAL),
             "#00ff9c", "code")
+        # re_strings has no `serial`, only the merge-provenance `_serial`. It was
+        # being added unscoped, so WoS was counting Tenchu's strings as its own.
         add("STRINGS", n("SELECT COUNT(*) FROM km_ghidra_strings WHERE serial=?", SERIAL)
-            + n("SELECT COUNT(*) FROM re_strings"), "#00e5ff", "string")
+            + n("SELECT COUNT(*) FROM re_strings WHERE _serial=?", SERIAL),
+            "#00e5ff", "string")
         # assets are indexed per serial/kind
         add("TEXTURES", n("SELECT COUNT(*) FROM assets WHERE serial=? AND kind='texture'", SERIAL),
             "#ff8a00", "texture")
@@ -1024,15 +1363,19 @@ def get_recompile_inventory():
             "#ffe000", "addr")
         add("FINDINGS", n("SELECT COUNT(*) FROM km_findings WHERE serial=?", SERIAL),
             "#ff2f3d", "finding")
-        add("TU (RECOMPILED)", n("SELECT n_output_tus FROM (SELECT 1)") or 3013, "#7dffb8", "tu")
+        # The recompiled surface lives on disk, not in a table, and only the
+        # game that has actually been recompiled has one. Reporting WoS's 3,013
+        # TUs while Tenchu is active would be inventing data for Tenchu.
+        if has_recomp_tree(SERIAL):
+            add("TU (RECOMPILED)", 1, "#7dffb8", "tu")   # real count filled below
         c.close()
     except Exception:
         pass
 
-    # TU count comes from the filesystem, not a table - fix that entry
     for cat in cats:
         if cat["kind"] == "tu":
-            cat["count"] = get_recomp_map(1).get("n_generated", 3013)
+            cat["count"] = get_recomp_map(1).get("n_generated", 0)
+    cats = [c for c in cats if c["count"]]
 
     total = sum(x["count"] for x in cats)
     return {"categories": cats, "total": total}
@@ -1436,3 +1779,8 @@ def mirror_set(enabled):
         if not enabled:
             _mirror["out"].append("── mirror paused ──")
     return {"enabled": _mirror["enabled"]}
+
+
+# Applied at import so the very first request is already scoped to the game the
+# operator left off on.
+_restore_active_game()
