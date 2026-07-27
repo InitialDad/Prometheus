@@ -139,26 +139,47 @@ def _find_exe(name, extra_globs=()):
 
 
 _TOOL_SPECS = [
-    # name, kind, target, role, [extra search globs for kind == "exe"]
-    ("GHIDRA",   "dir",  r"C:\Users\owner\.ghidra",        "decompiler"),
-    ("PYTHON",   "exe",  "python",                         "runtime"),
-    ("CAPSTONE", "mod",  "capstone",                       "disassembler"),
-    ("UNICORN",  "mod",  "unicorn",                        "cpu emulator"),
-    ("KEYSTONE", "mod",  "keystone",                       "assembler"),
-    ("PYMEM",    "mod",  "pymem",                          "live memory"),
-    ("SQLITE",   "mod",  "sqlite3",                        "knowledge"),
-    ("CLAUDE",   "exe",  "claude",                         "agent"),
-    ("GIT",      "exe",  "git",                            "vcs"),
-    ("CMAKE",    "exe",  "cmake",                          "build", (
+    # name, kind, target, role, flow, [extra search globs for kind == "exe"]
+    #
+    # `flow` is which way real data moves through the tool in THIS pipeline and
+    # drives the direction MAGI animates particles in:
+    #   "in"   the tool produces data that lands in the project  (node -> core)
+    #   "out"  the tool consumes what the project produced       (core -> node)
+    #   "both" it does both, so the flow alternates
+    ("GHIDRA",   "dir",  r"C:\Users\owner\.ghidra",        "decompiler",     "in"),
+    ("PYTHON",   "exe",  "python",                         "runtime",        "both"),
+    ("CAPSTONE", "mod",  "capstone",                       "disassembler",   "in"),
+    ("UNICORN",  "mod",  "unicorn",                        "cpu emulator",   "in"),
+    ("KEYSTONE", "mod",  "keystone",                       "assembler",      "out"),
+    ("PYMEM",    "mod",  "pymem",                          "live memory",    "in"),
+    # PINE is not a pip package here - it is the harvested client that talks to
+    # PCSX2's IPC socket, so probe the file we actually call.
+    ("PINE",     "dir",  os.path.join(HERE, "..", "03_TOOLS", "forge_backend",
+                                      "pine_client.py"),  "emu ipc",        "both"),
+    ("SQLITE",   "mod",  "sqlite3",                        "knowledge",      "out"),
+    ("CLAUDE",   "exe",  "claude",                         "agent",          "both"),
+    ("GIT",      "exe",  "git",                            "vcs",            "out"),
+    ("CMAKE",    "exe",  "cmake",                          "build",          "out", (
         r"C:\Program Files\CMake\bin\cmake.exe",
         r"C:\Program Files\Microsoft Visual Studio\*\*\Common7\IDE\CommonExtensions"
         r"\Microsoft\CMake\CMake\bin\cmake.exe")),
-    ("PCSX2",    "dir",  r"C:\Users\owner\pcsx2_modder_wos", "reference emu"),
-    ("PS2RECOMP", "dir", os.path.join(WOS, "PS2Recomp"),   "recompiler"),
-    ("NOESIS",   "dir",  r"C:\Users\owner\Tools\Noesis",   "assets"),
-    ("BLENDER",  "exe",  "blender",                        "3d", (
+    ("NINJA",    "exe",  "ninja",                          "build",          "out", (
+        r"C:\Program Files\Microsoft Visual Studio\*\*\Common7\IDE\CommonExtensions"
+        r"\Microsoft\CMake\Ninja\ninja.exe",
+        r"C:\ProgramData\chocolatey\bin\ninja.exe")),
+    ("MSVC",     "exe",  "cl",                             "compiler",       "out", (
+        r"C:\Program Files\Microsoft Visual Studio\*\*\VC\Tools\MSVC\*\bin\Host*\x64\cl.exe",
+        r"C:\Program Files (x86)\Microsoft Visual Studio\*\*\VC\Tools\MSVC\*\bin\Host*\x64\cl.exe")),
+    ("PCSX2",    "dir",  r"C:\Users\owner\pcsx2_modder_wos", "reference emu", "in"),
+    ("PS2RECOMP", "dir", os.path.join(WOS, "PS2Recomp"),   "recompiler",     "both"),
+    ("NOESIS",   "dir",  r"C:\Users\owner\Tools\Noesis",   "assets",         "in"),
+    ("BLENDER",  "exe",  "blender",                        "3d",             "both", (
         r"C:\Program Files\Blender Foundation\Blender *\blender.exe",
         r"C:\Program Files\Blender Foundation\Blender*\*\blender.exe")),
+    ("FFMPEG",   "exe",  "ffmpeg",                         "media",          "out", (
+        r"C:\Users\owner\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg*"
+        r"\*\bin\ffmpeg.exe",)),
+    ("COMFYUI",  "dir",  r"C:\Users\owner\ComfyUI-Installs", "generation",   "out"),
 ]
 _tools_cache = None
 
@@ -170,8 +191,8 @@ def get_tools(refresh=False):
         return _tools_cache
     out = []
     for spec in _TOOL_SPECS:
-        name, kind, target, role = spec[:4]
-        globs = spec[4] if len(spec) > 4 else ()
+        name, kind, target, role, flow = spec[:5]
+        globs = spec[5] if len(spec) > 5 else ()
         ok, where, ver = False, None, None
         try:
             if kind == "exe":
@@ -193,7 +214,7 @@ def get_tools(refresh=False):
                         pass
         except Exception:
             ok = False
-        out.append({"name": name, "role": role, "online": ok,
+        out.append({"name": name, "role": role, "online": ok, "flow": flow,
                     "where": where, "version": str(ver) if ver else None})
     _tools_cache = out
     return out

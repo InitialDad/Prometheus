@@ -1324,7 +1324,9 @@ function pumpActivity(){
   // the orchestrator itself is python reading sqlite; pulse them each refresh
   markActive('PYTHON'); markActive('SQLITE');
   const p=ST.proc||{}, a=ST.action||{};
-  if(p.build_active){markActive('CMAKE');markActive('PS2RECOMP');}
+  // a build really does drive cmake -> ninja -> cl, so all three light together
+  if(p.build_active){markActive('CMAKE');markActive('NINJA');markActive('MSVC');
+    markActive('PS2RECOMP');}
   if(p.runner_alive){markActive('PS2RECOMP');markActive('PCSX2');}
   if(CL&&CL.running){markActive('CLAUDE');}
   if(a.running){markActive('PS2RECOMP');                       // a drive/build/catch action
@@ -1358,19 +1360,40 @@ function magi(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
     d.beginPath();d.moveTo(cx,cy);d.lineTo(p.x,p.y);d.stroke();
   });
 
-  // ACTIVE nodes send a particle DOWN the spoke into the core (data feeding the
-  // pipeline). Multiple pips per spoke, phase-offset, so flow reads as motion.
+  // DIRECTIONAL FLOW. A tool's `flow` field says which way real data moves
+  // through it in this pipeline, and the pips follow it:
+  //   in    node -> core   (GHIDRA analysis, PCSX2 captures, PYMEM reads)
+  //   out   core -> node   (writes into SQLITE, a GIT commit, a CMAKE build)
+  //   both  alternates, because the tool genuinely does both
+  // Only tools the activity tracker says are working emit anything at all, so
+  // an idle toolchain is a still picture.
   d.save();
   pos.forEach((p,i)=>{
     if(!p.act)return;
+    const fl=p.t.flow||'in';
+    const outward=fl==='out'||(fl==='both'&&Math.floor(tt*0.5+i*0.2)%2===1);
     for(let k=0;k<3;k++){
-      const ph=((tt*0.9)+i*0.13+k/3)%1;         // 0 at node -> 1 at core
+      let ph=((tt*0.9)+i*0.13+k/3)%1;           // 0 at node -> 1 at core
+      if(outward)ph=1-ph;                       // core -> node
       const x=p.x+(cx-p.x)*ph, y=p.y+(cy-p.y)*ph;
       const fade=1-Math.abs(ph-0.5)*1.2;
       d.beginPath();d.arc(x,y,rr*0.55,0,7);
-      d.fillStyle='#7dffb8';d.shadowColor='#00ff9c';d.shadowBlur=10;
+      // outbound pips carry the accent, inbound the green, so direction is
+      // readable at a glance and not only from the motion
+      d.fillStyle=outward?'#ff9aa1':'#7dffb8';
+      d.shadowColor=outward?'#ff2f3d':'#00ff9c';d.shadowBlur=10;
       d.globalAlpha=Math.max(0,fade);d.fill();
     }
+    // arrowhead at the receiving end, so a paused frame still shows direction
+    const ax=outward?p.x:cx, ay=outward?p.y:cy;
+    const ang=Math.atan2(ay-(outward?cy:p.y),ax-(outward?cx:p.x));
+    const back=rr*(outward?1.9:2.6);
+    d.globalAlpha=.85;d.fillStyle=outward?'#ff9aa1':'#7dffb8';d.shadowBlur=0;
+    d.beginPath();
+    d.moveTo(ax-Math.cos(ang)*back,ay-Math.sin(ang)*back);
+    d.lineTo(ax-Math.cos(ang-0.42)*(back+rr*.9),ay-Math.sin(ang-0.42)*(back+rr*.9));
+    d.lineTo(ax-Math.cos(ang+0.42)*(back+rr*.9),ay-Math.sin(ang+0.42)*(back+rr*.9));
+    d.closePath();d.fill();
   });
   d.globalAlpha=1;d.shadowBlur=0;d.restore();
 
@@ -2470,9 +2493,23 @@ async function refresh(){
   const chip=$('#healthChip');
   chip.className='healthchip'+(bad.length>2?' bad':bad.length?' warn':'');
   try{NERVCHROME.sync();}catch(e){}
-  $('#magi-list').innerHTML=TOOLS.slice(0,7).map(t=>
-    `${esc(t.name)} <span style="color:${t.online?'var(--grn)':'var(--mut)'};float:right">
-     ${t.online?'ONLINE':'—'}</span><br>`).join('');
+  // the whole toolchain, not the first seven: working tools first, then the
+  // rest of the installed set, then whatever is missing
+  {const act=TOOLS.filter(t=>toolActive(t.name)).map(t=>t.name);
+   const arrow=t=>t.flow==='out'?'&#9654;':t.flow==='both'?'&#8646;':'&#9664;';
+   $('#magi-list').innerHTML=
+     `<div style="display:flex;justify-content:space-between;color:var(--mut);
+        font-size:9px;letter-spacing:.12em;margin-bottom:2px">
+        <span>TOOLCHAIN ${TOOLS.filter(t=>t.online).length}/${TOOLS.length}</span>
+        <span style="color:${act.length?'var(--grn)':'var(--mut)'}">${act.length} ACTIVE</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 8px;font-size:9.5px">`+
+     TOOLS.slice().sort((a,b)=>(act.includes(b.name)-act.includes(a.name))||
+                               (b.online-a.online)).map(t=>{
+       const live=act.includes(t.name);
+       const col=live?'var(--grn)':t.online?'var(--mut)':'var(--acc-dim)';
+       return `<span style="color:${col};white-space:nowrap;overflow:hidden;
+         text-overflow:ellipsis" title="${esc(t.role||'')}${t.online?'':' — not found'}">
+         ${live?arrow(t):'&#183;'} ${esc(t.name)}</span>`;}).join('')+'</div>';}
   renderVitals();
   // SYSTEM LOG is a LIVE event feed now: real findings/commits/milestones from
   // the event bus, newest first, colour-coded by kind. Falls back to the local

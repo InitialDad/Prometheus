@@ -23,6 +23,15 @@
 - [x] Retro bar-meter VITALS, live event feed SYSTEM LOG, hidden scrollbars
 - [x] Theme Studio (all colors/fonts, presets, word-pattern) — **canvases not yet themed**
 - [x] Responsive/splitscreen layout; asset library; live port telemetry channel
+- [x] **NERV chrome pass** (2026-07-26): SVG sprite sheet at `/assets/sprites.svg`,
+      cut-corner armour panels, header name-plates, corner lugs, edge rulers,
+      block seals, kana rails, state-bound hazard hexagons, UNIT-01 reticle.
+      Fixed: `applyLabels()` was dead inside `<style>`; `.bj` rewrites were
+      deleting `#p-pct` and aborting the render pass.
+- [x] **1.2 MAGI full toolchain + directional flow** (2026-07-26): 19 tools
+      probed (PINE, NOESIS, NINJA, MSVC, FFMPEG, COMFYUI added), each carrying a
+      `flow` field that drives which way the particles travel, with an arrowhead
+      at the receiving end and colour by direction.
 
 ---
 
