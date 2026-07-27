@@ -835,7 +835,7 @@ def set_active_game(serial, save_current=True):
             "state": read_game_state(SERIAL)}
 
 
-def create_game(serial, name=None, region=None, notes=None):
+def create_game(serial, name=None, region=None, notes=None, iso=None):
     """Register a brand-new decompile target and give it its own working tree."""
     serial = (serial or "").strip().upper()
     if not re.match(r"^[A-Z]{4}-?[A-Z0-9]{3,6}$", serial.replace("_", "-")):
@@ -858,9 +858,107 @@ def create_game(serial, name=None, region=None, notes=None):
                 "Everything this game generates lives here: `logs/`, `exports/`,\n"
                 "`models/`, `sessions/`, `ghidra/`, `db/`. The shared knowledge\n"
                 "store stays `db/prometheus.db`, scoped by this serial.\n\n"
-                "Next: run the `iso-bootstrap` skill against the game's ISO.\n")
-    log_activity(f"project created: {serial}")
-    return {"ok": True, "serial": serial, "root": game_dir(serial)}
+                + (f"Disc image: `{iso}`\n\n" if iso else "")
+                + "Next: run the `iso-bootstrap` skill against the game's ISO.\n")
+    if iso:
+        # remember where the disc lives so iso-bootstrap does not have to ask
+        save_game_state(serial, {"iso": iso})
+        st = read_game_state(serial)
+        st["iso"] = iso
+        with open(game_dir(serial, "state.json"), "w", encoding="utf-8") as f:
+            json.dump(st, f, indent=2)
+    log_activity(f"project created: {serial}" + (f" (iso {iso})" if iso else ""))
+    return {"ok": True, "serial": serial, "root": game_dir(serial), "iso": iso}
+
+
+# --------------------------------------------------------------------------- #
+# LOCAL DISC BROWSER + ISO PROBE
+#
+# Starting a new decompile begins with picking the disc image off this machine,
+# so the selector browses the real filesystem and then reads the serial out of
+# the image rather than asking the operator to type it and get it wrong.
+# --------------------------------------------------------------------------- #
+DISC_EXT = (".iso", ".bin", ".cue", ".chd", ".img", ".mdf", ".nrg")
+
+
+def browse_fs(path=None):
+    """List drives, or the directories and disc images inside one folder."""
+    if not path:
+        drives = []
+        for letter in "CDEFGHIJKLMNOPQRSTUVWXYZ":
+            root = f"{letter}:\\"
+            if os.path.exists(root):
+                drives.append({"name": root, "path": root, "kind": "dir"})
+        # the places a PS2 project actually keeps images, offered up front
+        for guess in (r"C:\Users\owner\pcsx2_modder_wos\iso",
+                      r"C:\Users\owner\Downloads",
+                      os.path.join(os.path.dirname(HERE), "01_GAMES")):
+            if os.path.isdir(guess):
+                drives.append({"name": guess, "path": guess, "kind": "dir",
+                               "hint": True})
+        return {"path": "", "up": None, "entries": drives}
+    path = os.path.abspath(path)
+    if not os.path.isdir(path):
+        return {"error": "not a directory", "path": path, "entries": []}
+    dirs, files = [], []
+    try:
+        with os.scandir(path) as it:
+            for e in it:
+                try:
+                    if e.name.startswith("$") or e.name.startswith("."):
+                        continue
+                    if e.is_dir(follow_symlinks=False):
+                        dirs.append({"name": e.name, "path": e.path, "kind": "dir"})
+                    elif e.name.lower().endswith(DISC_EXT):
+                        files.append({"name": e.name, "path": e.path, "kind": "iso",
+                                      "size": e.stat().st_size})
+                except OSError:
+                    continue
+    except PermissionError:
+        return {"error": "permission denied", "path": path, "entries": []}
+    dirs.sort(key=lambda d: d["name"].lower())
+    files.sort(key=lambda f: f["name"].lower())
+    up = os.path.dirname(path)
+    return {"path": path, "up": (up if up != path else ""),
+            "entries": dirs + files}
+
+
+_BOOT_RX = re.compile(rb"BOOT2?\s*=\s*cdrom0?:\\?([A-Z]{4}_\d{3}\.\d{2})", re.I)
+
+
+def probe_iso(path, scan_mb=96):
+    """Read the game's serial straight out of the disc image.
+
+    A PS2 disc carries SYSTEM.CNF with `BOOT2 = cdrom0:\\SLUS_204.07;1`. Rather
+    than implement an ISO9660 walker, stream the head of the image and look for
+    that line - SYSTEM.CNF sits near the start of every retail disc. Returns the
+    normalised serial (SLUS_204.07 -> SLUS-20407).
+    """
+    if not path or not os.path.isfile(path):
+        return {"ok": False, "error": "no such file"}
+    size = os.path.getsize(path)
+    try:
+        with open(path, "rb") as f:
+            read, chunk, tail = 0, 1 << 20, b""
+            while read < scan_mb * (1 << 20):
+                buf = f.read(chunk)
+                if not buf:
+                    break
+                m = _BOOT_RX.search(tail + buf)
+                if m:
+                    raw = m.group(1).decode("ascii", "replace").upper()
+                    serial = raw.replace("_", "-").replace(".", "")
+                    return {"ok": True, "serial": serial, "boot": raw,
+                            "path": path, "size": size,
+                            "name": os.path.splitext(os.path.basename(path))[0]}
+                tail = buf[-64:]
+                read += len(buf)
+    except OSError as e:
+        return {"ok": False, "error": str(e)}
+    return {"ok": False, "error": "no BOOT2 line found in the first "
+                                  f"{scan_mb} MB - is this a PS2 disc image?",
+            "path": path, "size": size,
+            "name": os.path.splitext(os.path.basename(path))[0]}
 
 
 def _restore_active_game():

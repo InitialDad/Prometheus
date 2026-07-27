@@ -860,6 +860,9 @@ const post=(p,b)=>api(p,{method:'POST',headers:{'Content-Type':'application/json
 const T0=Date.now(); let ST={}, SET={}, PLANET={sectors:[]}, TOOLS=[], FLOW=[], SEQ=[], RECOMP={units:[]};
 /* the active project and the roster, filled by refresh() */
 let GAMES={active:null,games:[]};
+/* the claude-CLI mirror state. Declared up here because loop() runs a frame
+   synchronously and the seismograph reads it. */
+let CL={running:false,out:[]}, CL_SEEN=0;
 /* Everything here was computed for ONE serial. A project switch must drop it or
    the new game inherits the old game's call graph and inventory. */
 function resetGameScope(){
@@ -1066,19 +1069,28 @@ const NERVCHROME=(function(){
     const running=jb&&jb!=='STANDBY'&&jb!=='IDLE';
     const r=$('#unitRet'); if(r)r.classList.toggle('live',!!running);
     const lk=$('#unitLock'); if(lk)lk.classList.toggle('on',!!running);
+    // ACTIVE PROJECT. GAMES.active comes straight off /api/games and is the
+    // authoritative answer; ST.game is the enriched row and may not be attached
+    // yet on the first paint, so it is only used for the extra detail.
+    // NB: ST / GAMES / PLANET are `let` bindings, so they are NOT properties of
+    // window - `window.ST` is undefined and guarding on it silently disabled
+    // everything below it. Reference the bindings directly; they are in scope
+    // and initialised at declaration.
+    const gm=ST.game||{};
+    const serial=gm.serial||GAMES.active||'—';
+    // the plate first: it is a control, and a failure further down must not be
+    // able to leave it showing a dash
+    const ps=$('#hexProjSerial');
+    if(ps){
+      ps.textContent=serial.indexOf('-')>0?serial.split('-')[1]:serial;
+      const hb=$('#hexProj');
+      if(hb)hb.title='Active project: '+serial+(gm.name?' — '+gm.name:'')+
+        '  ·  click to switch or start a new decompile';}
     // rails: real scope, not filler
     const rl=$('#railL'), rr=$('#railR');
-    const gm=(window.ST&&ST.game)||{};
-    if(rl){rl.innerHTML='<b>'+esc(gm.serial||'—')+'</b> · 再構築 '+
-        ((window.PLANET&&PLANET.pct)||0)+'%';}
-    const ps=$('#hexProjSerial');
-    if(ps){const s=gm.serial||'—';
-      // the plate shows the numeric half; the full serial is in the tooltip
-      ps.textContent=s.indexOf('-')>0?s.split('-')[1]:s;
-      const hb=$('#hexProj');
-      if(hb)hb.title='Active project: '+s+(gm.name?' — '+gm.name:'')+
-        '  ·  click to switch or start a new decompile';}
-    if(rr){const p=(window.ST&&ST.proc)||{};
+    if(rl){rl.innerHTML='<b>'+esc(serial)+'</b> · 再構築 '+
+        ((PLANET&&PLANET.pct)||0)+'%';}
+    if(rr){const p=ST.proc||{};
       rr.innerHTML='主系統 '+(p.runner_alive?'<b>稼働</b>':'待機')+' · 本部';}
   }
   SPRITES.then(build).then(sync);
@@ -1904,6 +1916,16 @@ const VIEW={
        models, sessions, ghidra, db — and a row in the shared knowledge store.
        Findings stay scoped to the serial, so cross-game patterns can be mined
        later without the folders ever mixing.</div>
+     <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+       <button class="act" id="pjBrowse">▸ PICK DISC IMAGE</button>
+       <span class="kv" id="pjIsoMsg" style="flex:1;overflow:hidden;
+         text-overflow:ellipsis;white-space:nowrap"></span></div>
+     <div id="pjFs" hidden style="border:1px solid var(--acc-dim);background:#000;
+       margin-bottom:8px">
+       <div id="pjFsPath" class="tiny" style="padding:4px 6px;color:var(--grn);
+         border-bottom:1px solid var(--acc-dim);white-space:nowrap;overflow:hidden;
+         text-overflow:ellipsis;direction:rtl;text-align:left"></div>
+       <div class="scroll" id="pjFsList" style="max-height:210px"></div></div>
      <label class="f"><span>SERIAL</span><input id="pjSerial" placeholder="SLUS-20614"></label>
      <label class="f"><span>NAME</span><input id="pjName" placeholder="Game title"></label>
      <label class="f"><span>REGION</span><input id="pjRegion" placeholder="NTSC-U"></label>
@@ -2126,16 +2148,61 @@ const POST={
      $('#pjMsg').textContent='STATE SAVED';seq('project state saved','ok');};
    $('#pjRefresh').onclick=async()=>{GAMES=await api('/api/games');paint();state();
      $('#pjMsg').textContent='RESCANNED';};
+   /* DISC PICKER. The serial is read out of the image's SYSTEM.CNF BOOT2 line
+      rather than typed, because a mistyped serial silently scopes every query
+      in the UI to a game that does not exist. */
+   let PICKED=null;
+   const fsPaint=async(path)=>{
+     const box=$('#pjFsList'), head=$('#pjFsPath');
+     if(!box)return;
+     box.innerHTML='<div class="kv" style="padding:6px">reading…</div>';
+     const d=await api('/api/fs/browse'+(path?'?path='+encodeURIComponent(path):''));
+     head.textContent=d.path||'THIS PC';
+     const row=(txt,cls,attrs)=>`<div class="row" ${attrs} style="cursor:pointer;
+       padding:3px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+       color:${cls}">${txt}</div>`;
+     let html='';
+     if(d.path) html+=row('▲  ..','var(--amb)','data-dir="'+esc(d.up||'')+'"');
+     if(d.error) html+=`<div class="kv" style="padding:6px;color:var(--acc)">${esc(d.error)}</div>`;
+     html+=(d.entries||[]).map(e=>e.kind==='dir'
+       ? row('▸  '+esc(e.name),e.hint?'var(--grn)':'var(--ink)','data-dir="'+esc(e.path)+'"')
+       : row('◈  '+esc(e.name)+'   <span style="color:var(--mut)">'+
+             ((e.size/1073741824).toFixed(2))+' GB</span>','var(--yel,#ffe000)',
+             'data-iso="'+esc(e.path)+'"')).join('');
+     box.innerHTML=html||'<div class="kv" style="padding:6px">nothing here</div>';
+     box.querySelectorAll('[data-dir]').forEach(el=>
+       el.onclick=()=>fsPaint(el.dataset.dir));
+     box.querySelectorAll('[data-iso]').forEach(el=>el.onclick=async()=>{
+       const msg=$('#pjIsoMsg');
+       msg.style.color='var(--mut)';msg.textContent='reading disc…';
+       const r=await api('/api/fs/probe?path='+encodeURIComponent(el.dataset.iso));
+       if(!r.ok){msg.style.color='var(--acc)';
+         msg.textContent=r.error||'could not read';PICKED=null;return;}
+       PICKED=r.path;
+       msg.style.color='var(--grn)';
+       msg.textContent=r.serial+'  ·  '+r.path.split('\\').pop();
+       $('#pjSerial').value=r.serial;
+       if(!$('#pjName').value)$('#pjName').value=r.name||'';
+       $('#pjFs').hidden=true;$('#pjBrowse').textContent='▸ PICK DISC IMAGE';
+       seq('disc read: '+r.serial,'ok');});
+   };
+   $('#pjBrowse').onclick=()=>{
+     const fs=$('#pjFs');fs.hidden=!fs.hidden;
+     $('#pjBrowse').textContent=fs.hidden?'▸ PICK DISC IMAGE':'▾ HIDE BROWSER';
+     if(!fs.hidden)fsPaint('');};
    $('#pjCreate').onclick=async()=>{
      const m=$('#pjNewMsg');m.textContent='…';
      const r=await post('/api/games/create',{
        serial:$('#pjSerial').value.trim(),
        name:$('#pjName').value.trim(),
-       region:$('#pjRegion').value.trim()});
+       region:$('#pjRegion').value.trim(),
+       iso:PICKED});
      if(!r.ok){m.style.color='var(--acc)';m.textContent=r.error;return;}
-     m.style.color='var(--grn)';m.textContent='created '+r.serial;
+     m.style.color='var(--grn)';m.textContent='created '+r.serial+
+       (r.iso?' — disc linked':'');
      seq('project created '+r.serial,'ok');
      $('#pjSerial').value=$('#pjName').value=$('#pjRegion').value='';
+     $('#pjIsoMsg').textContent='';PICKED=null;
      GAMES=await api('/api/games'); paint(); state();};
  },
  vitals:()=>renderVitals(),
@@ -2519,7 +2586,10 @@ function paintSectors(){
 }
 
 /* ---------- state ---------- */
-let CL={running:false,out:[]}, CL_SEEN=0;
+/* CL is declared with the other globals at the top: loop() runs one synchronous
+   frame before this line is reached, and the seismograph reads CL, which threw
+   a TDZ ReferenceError on that first frame. */
+CL={running:false,out:[]}; CL_SEEN=0;
 function seq(t,cls){SEQ.push({t:'> '+t,cls:cls||''});if(SEQ.length>300)SEQ.shift();}
 function health(){const p=ST.proc||{},g=ST.git||{},s=ST.sys||{};return[
  {name:'HUB SERVER',ok:true,note:location.host},
@@ -2735,7 +2805,11 @@ async function refresh(){
   $('#e-en').textContent=bad.length>2?'EMERGENCY':bad.length?'CAUTION':'NOMINAL';
   const chip=$('#healthChip');
   chip.className='healthchip'+(bad.length>2?' bad':bad.length?' warn':'');
-  try{NERVCHROME.sync();}catch(e){}
+  // swallowed so chrome trouble cannot take the render pass down with it, but
+  // reported once so it is not invisible the way applyLabels() was
+  try{NERVCHROME.sync();}
+  catch(e){if(!window.__chromeWarned){window.__chromeWarned=1;
+    console.warn('[prom] NERVCHROME.sync failed',e);}}
   // Three distinct states, not just installed/not:
   //   ACTIVE   the activity tracker saw it work inside the last 4.5s
   //   IDLE     installed and linked, but doing nothing right now

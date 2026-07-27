@@ -483,12 +483,10 @@ class Handler(BaseHTTPRequestHandler):
                     limit=int(q.get("limit", [200])[0])))
             if p == "/api/settings":
                 return self._json(X.get_settings())
-            if p == "/api/games":
-                return self._json({"active": X.SERIAL, "games": X.list_games()})
-            if p == "/api/activity/search":
-                return self._json(X.search_activity(
-                    q.get("q", [""])[0],
-                    limit=int(q.get("limit", [200])[0])))
+            if p == "/api/fs/browse":
+                return self._json(X.browse_fs(q.get("path", [""])[0]))
+            if p == "/api/fs/probe":
+                return self._json(X.probe_iso(q.get("path", [""])[0]))
             if p == "/api/claude":
                 return self._json(X.claude_status())
             if p == "/api/mirror":
@@ -547,7 +545,7 @@ class Handler(BaseHTTPRequestHandler):
             if u.path == "/api/games/create":
                 return self._json(X.create_game(
                     body.get("serial", ""), body.get("name"),
-                    body.get("region"), body.get("notes")))
+                    body.get("region"), body.get("notes"), body.get("iso")))
             if u.path == "/api/settings":
                 return self._json(X.save_settings(body))
             if u.path == "/api/silhouette":

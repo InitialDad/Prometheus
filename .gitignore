@@ -18,6 +18,11 @@ db/*.db-wal
 *.sqlite
 *.sqlite3
 
+# --- compaction artifacts (backups + archived satellites are large and local) ---
+db/*.bak
+db/*.pre-intern-*
+db/archive/
+
 # --- tool INSTALLS (hundreds of MB; install locally, don't version) ---
 06_REFERENCE/tools/
 **/ghidra_*_PUBLIC/

@@ -300,6 +300,35 @@ def cmd_intern(args):
                   % (", ".join("s." + x for x in keep), SEP))
         c.execute("CREATE INDEX IF NOT EXISTS ix_assets_store_serial"
                   " ON assets_store(serial)")
+
+        # WRITE-THROUGH. index_assets.py does `INSERT OR IGNORE INTO assets`,
+        # and a plain view is not insertable - without this trigger interning
+        # would silently break re-indexing. The trigger splits the path back
+        # into directory + basename, interns the directory on first sight, and
+        # writes the physical row. OR IGNORE semantics are preserved by the
+        # unique index on (serial, dir_id, base).
+        c.execute("CREATE UNIQUE INDEX IF NOT EXISTS ux_assets_store_file"
+                  " ON assets_store(serial, dir_id, base)")
+        ins_cols = [x for x in keep if x != "id"]
+        # rtrim(p, replace(p,SEP,'')) strips every trailing character that is
+        # not a separator, i.e. the basename, leaving "dir<SEP>". DIRSEP is that
+        # string; DIR drops the trailing separator to match rsplit() above; BASE
+        # is whatever follows it.
+        dirsep = "rtrim(NEW.path, replace(NEW.path,'{s}',''))".format(s=SEP)
+        dirx = ("CASE WHEN {d}='' THEN '' ELSE substr({d},1,length({d})-1) END"
+                .format(d=dirsep))
+        basex = "substr(NEW.path, length({d})+1)".format(d=dirsep)
+        c.execute("""
+            CREATE TRIGGER assets_insert INSTEAD OF INSERT ON assets
+            BEGIN
+              INSERT OR IGNORE INTO asset_dirs(dir) VALUES({dirx});
+              INSERT OR IGNORE INTO assets_store({cols}, dir_id, base)
+              VALUES({vals},
+                     (SELECT id FROM asset_dirs WHERE dir = {dirx}),
+                     {basex});
+            END""".format(dirx=dirx, basex=basex,
+                          cols=", ".join(ins_cols),
+                          vals=", ".join("NEW." + x for x in ins_cols)))
         c.commit()
 
     with connect() as c:
