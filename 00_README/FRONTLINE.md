@@ -91,20 +91,33 @@ now encodes that.
   stores none) but `C=0` selects SOURCE alpha, so the trap never bites.
 * **PSMT8 swizzle** — see the withdrawal above.
 
-## CURRENT BLOCKER (2026-07-27) — an EE thread stuck, not a wedged pipeline
+## CURRENT BLOCKER (2026-07-27) — the DECI2 TTY drain, at 0x110328
 
-With the load unblocked the port no longer stalls at `0x8dcb00`. It gets much
-further, then run 2 alternates:
+    [run:tick] tick=242040 pc=0x110328 activeThreads=4
+               dma=1198986 gif=12649 gsw=0 vif=20      <- both FROZEN
+    "CPU is doing some work at PC 0x110328. PC not updating."  (repeating)
+    frame uploads stop at idx=3242
 
-    pc=0x10f1d0  -> inside stdcpp_node_0010f180
-    pc=0x1033c8  -> inside mem_node_00103360
+`0x110328` is the **DECI2 TTY drain busy-wait**: loop `FUN_00110220+0x108` calls
+`sub_0010FEA0` -> `Deci2Call(code=4 Poll, socket...)`. See finding
+`deci2_poll_must_drive_tty_handler`.
 
-`activeThreads=4`, and DMA/GIF are STILL CLIMBING between samples
-(dma 1,192,315 -> 1,196,515, gif 12,105 -> 12,225). So the machine is not frozen:
-work is still being submitted while the EE thread sits in these two functions.
-Both names are allocator / C++ runtime territory, which lines up with the
-standing finding that boot instability had ONE systemic allocator cause rather
-than many downstream sites. NOT yet diagnosed.
+**This contradicts a `verified` roadmap item.** `km_roadmap.deci2-tty-drain` was
+`status=verified` on the verify_method "No-path drive passes 0x110328 (magenta
+screen) to title", evidenced by the 2026-07-21 drive reaching FRAMES_ADVANCING.
+That verification only ever held for a path that never got past the refused asset
+load — a shallower path. Unblocking the loader takes execution deeper and the
+same address wedges immediately. **Status downgraded to `in_progress`**, prior
+evidence preserved.
+
+STATE_2026-07-21 had already flagged this exact item as resting on two
+`investigated` findings with an explicit scope limit ("the DECI2 drain no longer
+wedges, *not* that the title renders"). That caution was correct.
+
+  CORRECTION: an earlier version of this section named `stdcpp_node_0010f180` and
+  `mem_node_00103360` as the stall and said DMA/GIF were still climbing. Those
+  were mid-watch samples taken while the run was still progressing, not the
+  terminal state. The run ends wedged at 0x110328 with DMA and GIF both frozen.
 
 ## PRESENTATION — still untested
 
