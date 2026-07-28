@@ -160,12 +160,16 @@ body.noscan #scan{display:none}
 .logo-wrap .pm{font-size:9px;letter-spacing:.42em;color:var(--acc-dim)}
 
 /* main system */
-#b-main{border:1px solid var(--acc-dim);display:flex;flex-direction:column;background:rgba(3,1,2,.72)}
+/* MAIN SYSTEM: the welcome panel is nearly transparent so the large mouse-
+   reactive #bg-logo shows through behind the START block. The operator console
+   (#msConsole) carries its own readable fill so console text stays legible. */
+#b-main{border:1px solid var(--acc-dim);display:flex;flex-direction:column;background:rgba(3,1,2,.10)}
+#msConsole{background:rgba(3,1,2,.86)}
 .ms-h{display:flex;justify-content:space-between;font-size:10.5px;color:var(--grn);
   border-bottom:1px solid var(--grn-dim);padding-bottom:3px}
 .ms-b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:0}
 .wel{font-family:var(--disp);font-weight:700;font-size:clamp(20px,2.5vw,36px);letter-spacing:.13em;color:var(--grn);
-  text-shadow:0 0 20px rgba(var(--grn-rgb),.6)}
+  text-align:center;text-shadow:0 0 20px rgba(var(--grn-rgb),.6)}
 .wel-jp{font-size:14px;letter-spacing:.28em;color:var(--grn-dim)}
 .gate{font-size:11px;letter-spacing:.2em;color:var(--acc);margin-top:6px}
 .startrow{display:flex;align-items:center;gap:10px;width:78%;justify-content:center}
@@ -287,12 +291,15 @@ button.act.sm{font-size:11px;padding:3px 9px}
 /* the sigil: large, centred, very faint, sitting deepest in the plate.
    Tinted toward the accent (sepia first, because hue-rotate does nothing to a
    greyscale source) and vignetted so its edges dissolve into the background. */
+/* Centred on the MAIN column stack, not the viewport: the right sidebar (max
+   340px) is wider than the left (max 250px), so true centre is 45px left of the
+   viewport midline — aligning the sigil with the PROMETHEUS title + START. */
 #bg-logo{--d:4;opacity:.30;
   background-image:url('/assets/logo.png');
-  background-repeat:no-repeat;background-position:center 44%;background-size:auto 118%;
+  background-repeat:no-repeat;background-position:calc(50% - 62px) 44%;background-size:auto 118%;
   filter:grayscale(.35) brightness(.72) contrast(1.18);
-  -webkit-mask:radial-gradient(62% 62% at 50% 44%,#000 46%,transparent 82%);
-  mask:radial-gradient(62% 62% at 50% 44%,#000 46%,transparent 82%)}
+  -webkit-mask:radial-gradient(62% 62% at calc(50% - 62px) 44%,#000 46%,transparent 82%);
+  mask:radial-gradient(62% 62% at calc(50% - 62px) 44%,#000 46%,transparent 82%)}
 #bg-sweep{position:fixed;left:0;right:0;height:34vh;z-index:0;pointer-events:none;
   background:linear-gradient(180deg,transparent,rgba(var(--acc-rgb),.045) 45%,transparent);
   animation:sweep 13s linear infinite}
@@ -497,10 +504,11 @@ label.f input,label.f select{flex:1}
   background:linear-gradient(90deg,rgba(var(--grn-rgb),.14),rgba(var(--grn-rgb),.02) 62%,transparent)}
 #b-main .ms-h::before{background:var(--grn);box-shadow:0 0 10px rgba(var(--grn-rgb),.6)}
 #b-main{padding:5px 8px}
-#b-main>.chrome{--c-edge:var(--grn-dim)}
-#b-main>.chrome::before{background:
-  linear-gradient(180deg,rgba(var(--grn-rgb),.10),transparent 46px),
-  linear-gradient(180deg,#040c09,#010302)}
+/* MAIN SYSTEM plate: near-transparent (no opaque green plate) so the large
+   mouse-reactive background logo shows through behind the welcome/START. The
+   operator console (#msConsole) keeps its own readable fill. */
+#b-main>.chrome{--c-edge:var(--grn-dim);background:transparent}
+#b-main>.chrome::before{background:rgba(4,7,6,.12)}
 
 /* ---- corner lugs ---- */
 .lug{position:absolute;width:15px;height:15px;color:var(--acc);opacity:.55;z-index:3;
@@ -1684,7 +1692,9 @@ const rgba=(hex,a)=>'rgba('+(RGB[hex]||'255,47,61')+','+a+')';
    brightens as more of the game is rebuilt. */
 function buildInvPoints(){
   if(!INVENTORY||!INVENTORY.categories)return;
-  const budget=1500, cats=INVENTORY.categories, tot=INVENTORY.total||1, arr=[];
+  // Plot one dot per real artifact (fillRect is cheap; far side is culled).
+  // Cap only as a safety valve for a pathologically huge inventory.
+  const cats=INVENTORY.categories, tot=INVENTORY.total||1, budget=Math.min(tot,45000), arr=[];
   cats.forEach(c=>{const nn=Math.max(24,Math.round(budget*c.count/tot));
     for(let i=0;i<nn;i++)arr.push(c.color);});
   for(let i=arr.length-1;i>0;i--){const j=((i*2654435761)>>>0)%(i+1);const t=arr[i];arr[i]=arr[j];arr[j]=t;}
@@ -2227,7 +2237,10 @@ const VIEW={
          -webkit-mask:var(--silm) center/contain no-repeat;mask:var(--silm) center/contain no-repeat"></div>
      </div></div>
    <div class="zp"><h3>Theme Studio <span class="kx" id="themeMsg"></span></h3>
-     <div class="scroll" id="themeBox"></div></div></div>`,
+     <div class="scroll" id="themeBox"></div>
+     <h3 style="margin-top:10px">Text Size</h3>
+     <div class="kv" style="color:var(--mut)">Each region scales independently; sizes persist.</div>
+     <div id="fsBox" style="margin-top:4px"></div></div></div>`,
  planet:()=>`<div class="zgrid" style="grid-template-columns:1.3fr 1fr">
    <div class="zp"><h3>Recompile Sphere <span style="margin-left:auto">
      <button class="act sm" data-orbit-reset="cv-planet,z-planet"
@@ -2508,7 +2521,8 @@ const POST={
    $('#silIn').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
      r.onload=async()=>{await post('/api/silhouette',{data:r.result});applySil();$('#setMsg').textContent='silhouette saved.';};
      r.readAsDataURL(f);};
-   try{renderTheme();}catch(e){}},
+   try{renderTheme();}catch(e){}
+   try{buildFontControls(document.getElementById('fsBox'));}catch(e){}},
  planet:()=>{paintSectors();
    // a drag that ends on a node must not also select that node
    const cv=$('#z-planet');if(cv)cv.onclick=e=>{if(Orbit.wasDrag(cv))return;planetPick(cv,e);};},
@@ -3163,6 +3177,88 @@ setInterval(refresh,4000);
 setInterval(pumpMirror,1500);pumpMirror();
 setInterval(()=>{const t=new Date().toTimeString().slice(0,8);
   $('#m-clock').textContent=t;$('#tick-clock').textContent=t;},1000);
+
+/* ---- PER-ELEMENT FONT SIZE CONTROLLER --------------------------------------
+   Each named text group is scaled individually so the operator can make every
+   region fit + readable. Scales persist in localStorage and re-apply on load;
+   MASTER scales the whole HQ via zoom. Bases are measured from live CSS before
+   any override, so scaling stays relative to the design size. */
+(function(){
+  const FS_KEY='promFontScales';
+  const T=[
+    {k:'master', name:'MASTER (whole UI)', master:true},
+    {k:'bt',     name:'Block titles',      sel:'.bt',     cls:'bt'},
+    {k:'bj',     name:'Block titles (JP)', sel:'.bj',     cls:'bj'},
+    {k:'mshdr',  name:'Main header',       sel:'.ms-h',   cls:'ms-h'},
+    {k:'wel',    name:'Welcome title',     sel:'.wel',    cls:'wel'},
+    {k:'weljp',  name:'Welcome (JP)',      sel:'.wel-jp', cls:'wel-jp'},
+    {k:'log',    name:'System log',        sel:'.logline',cls:'logline'},
+    {k:'cli',    name:'Console text',      sel:'#cliOut', cls:null},
+    {k:'kv',     name:'Key / value rows',  sel:'.kv',     cls:'kv'},
+    {k:'tiny',   name:'Tiny labels',       sel:'.tiny',   cls:'tiny'}
+  ];
+  const bases={};
+  const load=()=>{try{return JSON.parse(localStorage.getItem(FS_KEY))||{};}catch(e){return {};}};
+  const save=s=>{try{localStorage.setItem(FS_KEY,JSON.stringify(s));}catch(e){}};
+  function measure(t){
+    if(t.master) return 0;
+    let el=document.querySelector(t.sel), tmp=false;
+    if(!el&&t.cls){el=document.createElement('div');el.className=t.cls;
+      el.style.cssText='position:absolute;visibility:hidden;left:-9999px';
+      document.body.appendChild(el);tmp=true;}
+    if(!el) return null;
+    const px=parseFloat(getComputedStyle(el).fontSize)||null;
+    if(tmp) el.remove();
+    return px;
+  }
+  const ov=document.createElement('style');ov.id='fsOverrides';document.head.appendChild(ov);
+  function apply(){
+    const s=load();let css='';
+    for(const t of T){
+      if(t.master) continue;
+      const sc=s[t.k]||1; if(Math.abs(sc-1)<0.001) continue;
+      if(bases[t.k]==null) bases[t.k]=measure(t);
+      if(!bases[t.k]) continue;
+      css+=t.sel+'{font-size:'+(bases[t.k]*sc).toFixed(2)+'px !important}\n';
+    }
+    ov.textContent=css;
+    const hq=document.getElementById('hq'); if(hq) hq.style.zoom=(s.master||1);
+  }
+  for(const t of T){ if(!t.master) bases[t.k]=measure(t); }
+  apply();
+  const css=document.createElement('style');
+  css.textContent=
+    '.fsRow{display:flex;align-items:center;gap:6px;margin:5px 0}'+
+    '.fsRow label{flex:0 0 96px;color:#9ba;font-size:10px;overflow:hidden;'+
+      'text-overflow:ellipsis;white-space:nowrap}'+
+    '.fsRow input[type=range]{flex:1;min-width:0;accent-color:var(--acc,#fa4)}'+
+    '.fsRow .fsv{flex:0 0 36px;text-align:right;color:var(--acc,#fa4)}'+
+    '.fsRow .fsz{flex:0 0 14px;cursor:pointer;color:#9ba;text-align:center}'+
+    '.fsReset{margin-top:8px;width:100%;padding:4px;background:rgba(20,6,4,.9);'+
+      'border:1px solid var(--acc-dim,#843);color:#cdd;cursor:pointer;font:10px monospace}';
+  document.head.appendChild(css);
+  // Rendered on demand into Settings > Text Size (no floating UI).
+  window.buildFontControls=function(box){
+    if(!box) return; box.innerHTML=''; const s0=load();
+    for(const t of T){
+      const cur=s0[t.k]||1, row=document.createElement('div');row.className='fsRow';
+      row.innerHTML='<label title="'+t.name+'">'+t.name+'</label>'+
+        '<input type="range" min="0.6" max="2" step="0.05" value="'+cur+'">'+
+        '<span class="fsv">'+Math.round(cur*100)+'%</span>'+
+        '<span class="fsz" title="reset">⟲</span>';
+      const rng=row.querySelector('input'), val=row.querySelector('.fsv');
+      rng.addEventListener('input',()=>{const s=load();s[t.k]=parseFloat(rng.value);save(s);
+        val.textContent=Math.round(rng.value*100)+'%';apply();});
+      row.querySelector('.fsz').addEventListener('click',()=>{const s=load();s[t.k]=1;save(s);
+        rng.value=1;val.textContent='100%';apply();});
+      box.appendChild(row);
+    }
+    const rst=document.createElement('button');rst.className='fsReset';rst.textContent='RESET ALL';
+    rst.addEventListener('click',()=>{save({});box.querySelectorAll('.fsRow').forEach(r=>{
+      r.querySelector('input').value=1;r.querySelector('.fsv').textContent='100%';});apply();});
+    box.appendChild(rst);
+  };
+})();
 </script>
 </body>
 </html>
