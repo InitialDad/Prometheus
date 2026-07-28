@@ -2702,13 +2702,20 @@ async function pumpMirror(){
     if(ind){ind.classList.toggle('off',!m.enabled);
       $('#mirrorTxt').textContent=m.enabled
         ? 'MIRROR '+(m.session?String(m.session).slice(0,8):'—') : 'MIRROR OFF';}
-    // only append lines we have not shown yet
-    if(m.out&&m.out.length){
-      if(MIR_SEEN===0){MIR_SEEN=m.out.length;}          // don't dump backlog
-      else if(m.out.length>MIR_SEEN){
-        const fresh=m.out.slice(MIR_SEEN);MIR_SEEN=m.out.length;
-        cliAppend(fresh.map(l=>`<span class="m">${esc(l)}</span>`).join('\n')+'\n');}
-      else if(m.out.length<MIR_SEEN){MIR_SEEN=m.out.length;}
+    // Append only unseen lines. Cursor on the monotonic `total` the backend
+    // emits, NOT on m.out.length — the API caps `out` to the last 500, so once
+    // the session passes 500 lines out.length pins at 500 and a length-based
+    // cursor freezes forever (the old bug). `out` is still the last-500 tail, so
+    // take the final (total-seen) of it, clamped to what the tail actually holds.
+    if(m.out){
+      const total=(typeof m.total==='number')?m.total:m.out.length;
+      if(MIR_SEEN===0||MIR_SEEN>total){MIR_SEEN=total;}   // start at tail / reset on rotate
+      else if(total>MIR_SEEN){
+        const n=Math.min(total-MIR_SEEN,m.out.length);
+        const fresh=m.out.slice(m.out.length-n);
+        MIR_SEEN=total;
+        if(n)cliAppend(fresh.map(l=>`<span class="m">${esc(l)}</span>`).join('\n')+'\n');
+      }
     }
   }catch(e){}
 }

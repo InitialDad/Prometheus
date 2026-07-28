@@ -1799,7 +1799,7 @@ def _newest_transcript(cwd):
 
 
 _mirror = {"enabled": True, "file": None, "session": None, "pos": 0,
-           "out": [], "ts": 0}
+           "out": [], "ts": 0, "total": 0}
 _mirror_lock = threading.Lock()
 _MIRROR_MAX = 800
 
@@ -1844,6 +1844,7 @@ def _mirror_emit(txt, tag=""):
     with _mirror_lock:
         for ln in txt.split("\n"):
             _mirror["out"].append((tag + ln) if tag else ln)
+            _mirror["total"] += 1          # monotonic; never trimmed (cursor for the UI)
         if len(_mirror["out"]) > _MIRROR_MAX:
             del _mirror["out"][:len(_mirror["out"]) - _MIRROR_MAX]
 
@@ -1893,7 +1894,8 @@ def mirror_status():
         return {"enabled": _mirror["enabled"], "session": _mirror["session"],
                 "file": _mirror["file"],
                 "out": list(_mirror["out"])[-500:],
-                "lines": len(_mirror["out"]), "ts": _mirror["ts"]}
+                "lines": len(_mirror["out"]), "total": _mirror["total"],
+                "ts": _mirror["ts"]}
 
 
 def mirror_set(enabled):
