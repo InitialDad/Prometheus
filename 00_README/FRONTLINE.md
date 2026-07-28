@@ -1,7 +1,47 @@
 # FRONTLINE — where the project is, right now
 
 > One file. Updated at the end of every session. Read it first when you sit down.
-> Last updated: 2026-07-25
+> Last updated: 2026-07-28
+
+---
+
+## WIN 2026-07-28 — MC-CREATE LIVELOCK BROKEN (verified, paired-counter)
+
+Three blockers now cleared in sequence: rodata guard (07-27) → DECI2 socket (07-27)
+→ **MC-create livelock (07-28)**. The port advances past the memory-card
+"create system file?" dialog for the first time.
+
+The `wosSceMcMkdir_0x11abf8` override (bind 0x11ABF8 = HLE sceMcMkdir + write
+libmc current-func `@0x200748 = 0xB`; 0x11B7C0 rebound to sceMcFormat) has been
+compiled into the exe since 07-27 21:44 but was **never behaviourally tested** —
+upstream blockers stopped execution reaching the dialog, and the 07-28 "42 [mc]
+ops / 0 SifCallRpc" note was a *passive pre-press* observation, not a real Yes
+press. Drive `drive_p7k2.ps1` reached the dialog on a clean boot and pressed X
+(CROSS = Yes). Result, paired counters (each satisfiable one way only):
+
+* `[mc] Mkdir port=0 slot=0 pathAddr=0x0021CE60` fired (0→1) — 0x21CE60 =
+  "/BASLUS-20407", the path `save_worker_sema_chain.md` predicted.
+* EE UI thread **left** the p7d spin `pc=0x151910` → ran 0x149d64/0x1e0b3c/0x1b5150…
+* **SifCallRpc inverted**: p7d signature was "ZERO SifCallRpc after Yes"; now
+  firing rpcNum 0x8000 / 0x8010 ×8 / 0xff (the save RPC actually executes).
+* DMA unfroze 27,535 → **1,022,466+** and climbing; frame:upload idx past 5,277.
+  Deepest the port has ever run. No hang / inner-dispatch / PC-not-updating.
+
+Findings: mods.db `p7k_mc_create_livelock_BROKEN_by_wosSceMcMkdir` (id 215),
+setup/reconciliation id 214. Caveat: on-screen visual is obscured by the ImGui
+Runtime Debugger overlay — this win rests on paired counters, **not** a clean game
+screenshot. Next session: get a debugger-off screenshot for visual confirmation.
+
+### GATEKEEPER — intermittent boot corruptor 0x8dcb00 (~50% of boots)
+Some boots spin the 3-address cycle `0x8dcb00 → 0x11fd90 → 0x100a00` (tick
+advances, DMA frozen at pre-loader 27,535, 527KB load never runs). `sub_0011FD90`
+dispatches through a fn-ptr table @0x223650 (inside the guarded jump-table band);
+one entry resolves to 0x8dcb00, a mapped-but-non-code data address = the
+"residual-corruptor-jumptable" open item. Fires PRE-loader (not the overlay
+write). Workaround: `drive_p7k2.ps1` fail-fasts the spin at ~45s and relaunches;
+a clean boot lands within ~2 tries. Finding id 216. This is now the top obstacle
+to *reliably* driving the port. **The NEXT frontier is whatever the game does
+after the save creates — sample the new resting state.**
 
 ---
 
