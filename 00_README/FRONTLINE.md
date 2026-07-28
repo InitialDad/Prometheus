@@ -5,32 +5,41 @@
 
 ---
 
-## WIN 2026-07-28 — MC-CREATE LIVELOCK BROKEN (verified, paired-counter)
+## 2026-07-28 — MC-CREATE PARTIAL: create STARTS, does NOT complete
 
-Three blockers now cleared in sequence: rodata guard (07-27) → DECI2 socket (07-27)
-→ **MC-create livelock (07-28)**. The port advances past the memory-card
-"create system file?" dialog for the first time.
+Correction to an over-claim made earlier this session (finding 215 said "BROKEN";
+finding 217 corrects it). **User visual ground truth: the window still shows the
+flashing "Creating a system file… do not remove memory card" screen.** The create
+did not finish.
 
-The `wosSceMcMkdir_0x11abf8` override (bind 0x11ABF8 = HLE sceMcMkdir + write
-libmc current-func `@0x200748 = 0xB`; 0x11B7C0 rebound to sceMcFormat) has been
-compiled into the exe since 07-27 21:44 but was **never behaviourally tested** —
-upstream blockers stopped execution reaching the dialog, and the 07-28 "42 [mc]
-ops / 0 SifCallRpc" note was a *passive pre-press* observation, not a real Yes
-press. Drive `drive_p7k2.ps1` reached the dialog on a clean boot and pressed X
-(CROSS = Yes). Result, paired counters (each satisfiable one way only):
+What is real: rodata guard (07-27) → DECI2 socket (07-27) → **Mkdir now fires**.
+Pressing X (CROSS=Yes) at the "create?" dialog runs the `wosSceMcMkdir_0x11abf8`
+override for the first time — `[mc] Mkdir port=0 slot=0 pathAddr=0x0021CE60`
+(0x21CE60 = "/BASLUS-20407"). That is genuine progress past p7d (which fired zero
+SifCallRpc and never reached Mkdir). The dialog advances exactly **one** step,
+`create?` → `Creating…`.
 
-* `[mc] Mkdir port=0 slot=0 pathAddr=0x0021CE60` fired (0→1) — 0x21CE60 =
-  "/BASLUS-20407", the path `save_worker_sema_chain.md` predicted.
-* EE UI thread **left** the p7d spin `pc=0x151910` → ran 0x149d64/0x1e0b3c/0x1b5150…
-* **SifCallRpc inverted**: p7d signature was "ZERO SifCallRpc after Yes"; now
-  firing rpcNum 0x8000 / 0x8010 ×8 / 0xff (the save RPC actually executes).
-* DMA unfroze 27,535 → **1,022,466+** and climbing; frame:upload idx past 5,277.
-  Deepest the port has ever run. No hang / inner-dispatch / PC-not-updating.
+But then it stalls: **zero `[mc]` ops after the single Mkdir** (no Sync, GetInfo,
+Open, or Write — the manager stops issuing MC calls), and the EE UI thread returns
+to the **same p7d spin `pc=0x151910`**, now animating the "Creating…" blink. The
+livelock **moved one step downstream (create-start → create-complete); it did not
+break.**
 
-Findings: mods.db `p7k_mc_create_livelock_BROKEN_by_wosSceMcMkdir` (id 215),
-setup/reconciliation id 214. Caveat: on-screen visual is obscured by the ImGui
-Runtime Debugger overlay — this win rests on paired counters, **not** a clean game
-screenshot. Next session: get a debugger-off screenshot for visual confirmation.
+METHOD FAILURE, recorded so it isn't repeated: the "advanced/BROKEN" claim rested
+on climbing `dma` (27,535→1.42M), `gif`, and `frame:upload idx`. Those climb
+**identically** whether the game advanced OR just kept **blinking** the Creating…
+dialog (double-buffer flip `displayFbp 70↔0` every frame). That is precisely the
+rule-1 trap (a metric satisfied two ways). The only one-way-valid signals are
+`[mc] Mkdir` 0→1 and `SifCallRpc>0` — they prove the create *started*, nothing
+more. `SifCallRpc` stopped at 10 total and those are libsdr **sound** codes
+(0x8000/0x8010/0xff), not the MC write.
+
+NEXT TARGET: why the "Creating…" state never resolves. After Mkdir the game never
+issues the icon.sys / system-file write. Instrument that UI state — does it poll
+the Mkdir-completion gate `sub_00154DC0` (and does `sceMcSync` report cmd 0xB), or
+does the completion jump-table @0x218720 lack a cmd=0xB handler so it never
+advances to `sceMcOpen(icon.sys)`? (Live manager probe was inconclusive — the
+manager heap addr is not 0x010333F0 this run; RDRAM base 0x23664914000.)
 
 ### GATEKEEPER — intermittent boot corruptor 0x8dcb00 (~50% of boots)
 Some boots spin the 3-address cycle `0x8dcb00 → 0x11fd90 → 0x100a00` (tick
