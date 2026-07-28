@@ -1121,6 +1121,98 @@ addEventListener('focus',fitAll);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)fitAll();});
 setInterval(fitAll,2500);
 
+/* ---------- ORBIT — the interaction layer (masterplan 0.3) ----------
+   One controller per canvas: left-drag rotates, wheel zooms, right-drag pans.
+   State is keyed by canvas id, so the small home block and the fullscreen copy
+   of the same visual are steered independently (that is what "per-canvas view
+   state" means in the plan).
+
+   Auto-spin -> manual: while `touched` is false the renderer's own auto angles
+   are used and recorded; the first real drag seeds the manual angles from the
+   angles the auto-spin had reached, so the view never jumps. Wheel zoom alone
+   does NOT stop the auto-spin - zoom is orthogonal to rotation and killing the
+   spin on a scroll reads as a bug. RESET restores auto.
+
+   Click-through is load-bearing: every .blk[data-z] opens fullscreen on click,
+   so a press that never moved must still reach that handler. Only a drag past
+   DEAD px swallows the click. */
+const Orbit=(function(){
+  const DEAD=4;                                   // px before a press is a drag
+  const IDS=['cv-planet','z-planet','cv-unit','z-unit','cv-map','z-map'];
+  // The code map is a top-down circuit board - rotating it is meaningless, so
+  // left-drag PANS it there instead of rotating (wheel zoom and right-drag pan
+  // stay as-is on every canvas). The sphere and mech still rotate on left-drag.
+  const NO_ROTATE=new Set(['cv-map','z-map']);
+  const S={};
+  let hover=null;
+  function st(id){return S[id]||(S[id]={yaw:0,pitch:0,zoom:1,ox:0,oy:0,
+    touched:false,autoYaw:0,autoPitch:0,suppress:false});}
+  /* renderers call this once per frame with the angles their auto-spin wants */
+  function view(id,autoYaw,autoPitch){const v=st(id);
+    if(!v.touched){v.autoYaw=autoYaw;v.autoPitch=autoPitch;
+      return {yaw:autoYaw,pitch:autoPitch,zoom:v.zoom,ox:v.ox,oy:v.oy,manual:false};}
+    return {yaw:v.yaw,pitch:v.pitch,zoom:v.zoom,ox:v.ox,oy:v.oy,manual:true};}
+  function reset(ids){String(ids==null?'':ids).split(',').forEach(k=>{
+    const v=S[k.trim()];if(!v)return;
+    v.touched=false;v.zoom=1;v.ox=0;v.oy=0;v.yaw=0;v.pitch=0;});}
+  function resetAll(){IDS.forEach(reset);}
+  /* a drag just ended on this canvas -> the click that follows is not a click */
+  function wasDrag(c){const v=S[c&&c.id];return !!(v&&v.suppress);}
+  function attach(c){
+    if(!c||c.__orbit)return;c.__orbit=1;
+    const v=st(c.id);
+    c.style.cursor='grab';c.style.touchAction='none';
+    let px=0,py=0,btn=0,down=false,moved=false;
+    c.addEventListener('pointerenter',()=>{hover=c;});
+    c.addEventListener('pointerdown',e=>{
+      if(e.button!==0&&e.button!==2)return;
+      down=true;moved=false;btn=e.button;px=e.clientX;py=e.clientY;
+      try{c.setPointerCapture(e.pointerId);}catch(_){}
+    });
+    c.addEventListener('pointermove',e=>{
+      hover=c;if(!down)return;
+      const dx=e.clientX-px,dy=e.clientY-py;
+      if(!moved&&Math.hypot(dx,dy)<DEAD)return;
+      if(!moved){moved=true;c.style.cursor='grabbing';
+        if(!v.touched){v.touched=true;v.yaw=v.autoYaw||0;v.pitch=v.autoPitch||0;}}
+      px=e.clientX;py=e.clientY;
+      // right-drag always pans; on a no-rotate canvas left-drag pans too
+      if(btn===2||NO_ROTATE.has(c.id)){v.ox+=dx*DPR;v.oy+=dy*DPR;}
+      else{v.yaw+=dx*0.01;
+           v.pitch=Math.max(-1.45,Math.min(1.45,v.pitch+dy*0.01));}
+      e.preventDefault();
+    });
+    const end=e=>{if(!down)return;down=false;c.style.cursor='grab';
+      try{c.releasePointerCapture(e.pointerId);}catch(_){}
+      if(moved){v.suppress=true;setTimeout(()=>{v.suppress=false;},400);}};
+    c.addEventListener('pointerup',end);
+    c.addEventListener('pointercancel',end);
+    c.addEventListener('click',e=>{if(v.suppress){
+      e.stopPropagation();e.stopImmediatePropagation();e.preventDefault();}},true);
+    c.addEventListener('contextmenu',e=>{e.preventDefault();e.stopPropagation();});
+    c.addEventListener('wheel',e=>{
+      e.preventDefault();e.stopPropagation();
+      v.zoom=Math.max(0.25,Math.min(6,v.zoom*Math.exp(e.deltaY>0?-0.12:0.12)));
+    },{passive:false});
+  }
+  /* called from the draw loop: fullscreen canvases only exist after render() */
+  function sync(){for(let i=0;i<IDS.length;i++){
+    const c=document.getElementById(IDS[i]);if(c&&!c.__orbit)attach(c);}}
+  /* RESET VIEW buttons live inside panel headers that sit in .blk containers,
+     so the click is caught in capture and stopped before it re-opens a view */
+  document.addEventListener('click',e=>{
+    const b=e.target&&e.target.closest&&e.target.closest('[data-orbit-reset]');
+    if(!b)return;e.stopPropagation();reset(b.dataset.orbitReset);},true);
+  /* R resets the canvas under the pointer (all of them if none) */
+  addEventListener('keydown',e=>{
+    if(e.key!=='r'&&e.key!=='R')return;
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    const t=e.target;if(t&&/^(input|textarea|select)$/i.test(t.tagName||''))return;
+    if(hover&&hover.id&&S[hover.id])reset(hover.id);else resetAll();});
+  return {view,reset,resetAll,attach,sync,wasDrag,ids:IDS,state:st};
+})();
+window.Orbit=Orbit;      // reachable for the headless verify pass and debugging
+
 /* ---------- ambient canvases ---------- */
 let tt=0;
 function hexfield(){const c=$('#hexfield');if(c.width){const d=c.getContext('2d'),W=c.width,H=c.height;
@@ -1310,10 +1402,13 @@ function unit(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
     d.fillStyle=col;d.font="700 13px 'Arial Narrow',Impact,sans-serif";
     d.textAlign='center';d.fillText('LOADING UNIT…',W/2,H/2);return;}
   const isImported=(EDG===SIN);
-  // slow turntable sway so the form reads as solid 3D rather than a decal
-  const ang=Math.sin(tt*0.28)*0.85-0.18, tilt=0.16;
+  // slow turntable sway so the form reads as solid 3D rather than a decal —
+  // until the operator drags, from which point the angles are theirs (0.3)
+  const V=Orbit.view(cid,Math.sin(tt*0.28)*0.85-0.18,0.16);
+  const ang=V.yaw, tilt=V.pitch;
   const bob=Math.sin(tt*1.1)*0.045;
-  const S=Math.min(W/4.6,H/7.6)*(isImported?1.28:1), cx=W/2, cy=H/2+S*(isImported?0.10:0.55);
+  const S=Math.min(W/4.6,H/7.6)*(isImported?1.28:1)*V.zoom,
+        cx=W/2+V.ox, cy=H/2+S*(isImported?0.10:0.55)+V.oy;
   const ca=Math.cos(ang),sa=Math.sin(ang),ct=Math.cos(tilt),stt=Math.sin(tilt);
   function proj(p){
     const x=p[0]*ca+p[2]*sa, z=-p[0]*sa+p[2]*ca, y=p[1]+bob;
@@ -1598,9 +1693,12 @@ function buildInvPoints(){
     return {c:col, x:Math.cos(th)*rr, y:y, z:Math.sin(th)*rr};});
 }
 function planet(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
-  const d=c.getContext('2d'),W=c.width,H=c.height,cx=W/2,cy=H*0.46,R=Math.min(W,H*1.3)*0.38;
+  const d=c.getContext('2d'),W=c.width,H=c.height;
   d.clearRect(0,0,W,H);
-  const spin=tt*0.13, tilt=0.34, restored=(PLANET.pct||0)/100;
+  // view state (0.3): auto turntable until the operator grabs it
+  const V=Orbit.view(cid,tt*0.13,0.34);
+  const R=Math.min(W,H*1.3)*0.38*V.zoom, cx=W/2+V.ox, cy=H*0.46+V.oy;
+  const spin=V.yaw, tilt=V.pitch, restored=(PLANET.pct||0)/100;
   const ca=Math.cos(spin),sa=Math.sin(spin),ct=Math.cos(tilt),stt=Math.sin(tilt);
   const proj=(x,y,z)=>{const rx=x*ca+z*sa, rz=-x*sa+z*ca;
     const ry2=y*ct-rz*stt, rz2=y*stt+rz*ct, f=1/(1-rz2*0.30);
@@ -1730,95 +1828,269 @@ let pk=[];                 // in-flight packets on the code map
 let PIPELINE=null, CODEMAP_MODE='pipeline';   // 'pipeline' | 'graph' (toggle)
 const PSTAT={done:'#00ff9c',active:'#ff8a00',blocked:'#ff2f3d',raw:'#6d2229'};
 
-/* PIPELINE MAP: the real recompile pipeline as a flowing circuit of stages,
-   each lit by real status, data pulsing between completed stages. */
+/* ===== CIRCUIT CITY (masterplan 1.1) =================================
+   The code map is a printed-circuit board seen from above. Every chip is a
+   REAL recompiled translation unit from /api/callgraph (199 of them), sized by
+   its real byte count; every trace is a REAL static call edge (a `jal` found in
+   the generated C++, 182 of them), routed Manhattan - right angles only, like
+   actual PCB autorouting, never a diagonal. Packets ride those traces. The
+   function the port is executing RIGHT NOW (pc from /api/runtime) is the hot
+   chip: brightest, ringed, and its own edges always fire. Nothing is invented -
+   no chip without a TU, no trace without a call. */
+const CM={key:'',lay:null,rkey:'',routes:null};
+let CODEMAP_HIT=[];        // {addr,name,x,y,w,h,...} canvas px - for picking
+
+function cmHash(n){n=n>>>0;n=(n^61)^(n>>>16);n=(n+(n<<3))>>>0;n=n^(n>>>4);
+  n=Math.imul(n,0x27d4eb2d)>>>0;n=n^(n>>>15);return (n>>>0)/4294967296;}
+
+/* chip placement: sorted by EE address and snaked across the board so
+   neighbouring addresses are physical neighbours - that is what keeps the
+   copper short and makes it read as a board instead of a hairball. */
+function cmLayout(N,W,H){
+  const key=N.length+'/'+W+'/'+H;
+  if(CM.lay&&CM.key===key)return CM.lay;
+  const S=N.slice().sort((a,b)=>(a.addr||0)-(b.addr||0));
+  const cols=Math.max(3,Math.min(26,Math.round(Math.sqrt(S.length*(W/Math.max(1,H))*1.2))));
+  const rows=Math.max(1,Math.ceil(S.length/cols));
+  const mx=W*0.05, y0=H*0.10, cw=(W-mx*2)/cols, chh=(H-y0-H*0.10)/rows;
+  let lmn=1e9,lmx=-1e9;
+  S.forEach(u=>{const v=Math.log(1+(u.bytes||1));if(v<lmn)lmn=v;if(v>lmx)lmx=v;});
+  const P={},list=[];
+  S.forEach((u,i)=>{const r=Math.floor(i/cols); let c=i%cols; if(r%2)c=cols-1-c;
+    const t=(Math.log(1+(u.bytes||1))-lmn)/Math.max(1e-6,lmx-lmn);
+    const o={u:u,addr:u.addr,t:t,row:r,col:c,deg:0,
+      x:mx+cw*(c+0.5), y:y0+chh*(r+0.5),
+      w:Math.max(5,cw*(0.30+0.44*t)), h:Math.max(4,chh*(0.26+0.42*t))};
+    P[u.addr]=o;list.push(o);});
+  CM.key=key;CM.lay={P:P,list:list,cols:cols,rows:rows,cw:cw,ch:chh,mx:mx,y0:y0,degDone:0};
+  return CM.lay;
+}
+
+/* Manhattan router - drop into the nearest wiring channel, run across it, drop
+   back in. Same-row calls detour through the channel above. */
+function cmRoute(a,b,l){
+  if(Math.abs(a.y-b.y)<0.5){const cy=a.y-l.ch*0.42;
+    return [[a.x,a.y],[a.x,cy],[b.x,cy],[b.x,b.y]];}
+  let g=Math.round((((a.y+b.y)/2)-l.y0)/l.ch);
+  g=Math.max(0,Math.min(l.rows,g));
+  const cy=l.y0+l.ch*g;
+  return [[a.x,a.y],[a.x,cy],[b.x,cy],[b.x,b.y]];}
+function cmRoutes(l,E){
+  const key=CM.key+'#'+E.length;
+  if(CM.routes&&CM.rkey===key)return CM.routes;
+  const R=E.map(e=>{const a=l.P[e[0]],b=l.P[e[1]];return (a&&b)?cmRoute(a,b,l):null;});
+  CM.rkey=key;CM.routes=R;return R;}
+/* stroke a right-angle path with 45 degree corner chamfers (PCB house style) */
+function cmStroke(d,P,k){
+  d.beginPath();d.moveTo(P[0][0],P[0][1]);
+  for(let i=1;i<P.length-1;i++){const p=P[i-1],c=P[i],n=P[i+1];
+    const d1=Math.hypot(c[0]-p[0],c[1]-p[1])||1, d2=Math.hypot(n[0]-c[0],n[1]-c[1])||1;
+    const kk=Math.min(k,d1*0.45,d2*0.45);
+    if(kk<0.7){d.lineTo(c[0],c[1]);continue;}
+    d.lineTo(c[0]+(p[0]-c[0])/d1*kk,c[1]+(p[1]-c[1])/d1*kk);
+    d.lineTo(c[0]+(n[0]-c[0])/d2*kk,c[1]+(n[1]-c[1])/d2*kk);}
+  d.lineTo(P[P.length-1][0],P[P.length-1][1]);d.stroke();}
+function cmAt(P,t){
+  let tot=0;const seg=[];
+  for(let i=1;i<P.length;i++){const L=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);seg.push(L);tot+=L;}
+  if(tot<=0)return [P[0][0],P[0][1]];
+  let want=Math.max(0,Math.min(1,t))*tot;
+  for(let i=0;i<seg.length;i++){
+    if(want<=seg[i]||i===seg.length-1){const f=seg[i]?want/seg[i]:0;
+      return [P[i][0]+(P[i+1][0]-P[i][0])*f,P[i][1]+(P[i+1][1]-P[i][1])*f];}
+    want-=seg[i];}
+  return [P[P.length-1][0],P[P.length-1][1]];}
+
+/* board substrate: solder-mask grid, copper-pour hatch, vias, board outline */
+function cmBoard(d,W,H){
+  const S=Math.max(1,Math.min(W,H)/260), g=Math.max(14,Math.min(W,H)/16);
+  d.strokeStyle='rgba(0,255,156,.055)';d.lineWidth=S;
+  for(let x=g/2;x<W;x+=g){d.beginPath();d.moveTo(x,0);d.lineTo(x,H);d.stroke();}
+  for(let y=g/2;y<H;y+=g){d.beginPath();d.moveTo(0,y);d.lineTo(W,y);d.stroke();}
+  d.strokeStyle='rgba(0,255,156,.028)';
+  for(let k=-H;k<W;k+=g*1.5){d.beginPath();d.moveTo(k,0);d.lineTo(k+H,H);d.stroke();}
+  d.fillStyle='rgba(255,106,114,.13)';
+  for(let x=g;x<W;x+=g*2)for(let y=g;y<H;y+=g*2){
+    if(cmHash((x*73856093)^(y*19349663))<0.35)continue;
+    d.beginPath();d.arc(x,y,1.2*S,0,7);d.fill();}
+  d.strokeStyle='rgba(255,47,61,.18)';d.lineWidth=S;
+  d.strokeRect(W*0.012,H*0.02,W*0.976,H*0.96);}
+
+/* the hot chip: real pc from /api/runtime resolved to the TU that contains it,
+   falling back to the resolved symbol name. 0 when the port is not ticking. */
+function cmHot(list){
+  const rt=(ST&&ST.runtime)||{};
+  if(typeof rt.pc==='number'){let best=null;
+    for(const o of list){if(o.addr<=rt.pc&&(!best||o.addr>best.addr))best=o;}
+    if(best&&(rt.pc-best.addr)<0x40000)return best.addr;}
+  const f=rt.func?String(rt.func).toLowerCase():'';
+  if(f.length>3){for(const o of list){
+    if((o.u.name||'').toLowerCase().indexOf(f.slice(0,10))>=0)return o.addr;}}
+  return 0;}
+function cmName(u){return String(u.name||'').replace(/_?0[xX][0-9a-fA-F]+\.cpp$/,'').replace(/\.cpp$/,'');}
+
+/* THE CITY. dim=true draws it as the substrate beneath the pipeline districts.
+   Returns the hot address (0 if none). */
+function cmCity(d,W,H,dim){
+  const G=CALLGRAPH||{nodes:[],edges:[]},N=G.nodes||[],E=G.edges||[];
+  if(!N.length)return 0;
+  const l=cmLayout(N,W,H), S=Math.max(1,Math.min(W,H)/260);
+  if(!l.degDone){E.forEach(e=>{if(l.P[e[0]])l.P[e[0]].deg++;if(l.P[e[1]])l.P[e[1]].deg++;});l.degDone=1;}
+  const routes=cmRoutes(l,E), hot=cmHot(l.list);
+  // copper first - chips are soldered on top, so traces run *under* them
+  d.lineCap='butt';d.lineJoin='miter';
+  routes.forEach((R,i)=>{if(!R)return;const e=E[i];
+    const isHot=hot&&(e[0]===hot||e[1]===hot);
+    d.lineWidth=(isHot?2.0:1.1)*S;
+    d.strokeStyle=isHot?'rgba(255,224,0,'+(dim?0.30:0.60)+')'
+                       :'rgba(0,255,156,'+(dim?0.06:0.16)+')';
+    cmStroke(d,R,l.ch*0.25);});
+  // packets on REAL edges. The hot chip's own calls always fire; the rest is a
+  // slowly rotating window so every real edge gets its turn.
+  if(E.length){
+    const budget=dim?10:Math.min(44,E.length), order=[];
+    if(hot)E.forEach((e,i)=>{if(order.length<budget&&(e[0]===hot||e[1]===hot))order.push(i);});
+    const base=Math.floor(tt*0.30)*17;
+    for(let k=0;order.length<budget&&k<E.length;k++){
+      const i=(base+k*7)%E.length;if(order.indexOf(i)<0)order.push(i);}
+    order.forEach(i=>{const R=routes[i];if(!R)return;
+      const h=cmHash(i+1), ph=(tt*(0.22+h*0.38)+h)%1, e=E[i];
+      const isHot=hot&&(e[0]===hot||e[1]===hot);
+      d.shadowColor=isHot?'#ffe000':'#00ff9c';d.shadowBlur=(isHot?14:8)*S;
+      d.fillStyle=isHot?'#ffe000':'#7dffb8';
+      for(let q=0;q<3;q++){const p=cmAt(R,Math.max(0,ph-q*0.035));
+        d.globalAlpha=(dim?0.5:1)*(q?0.3/q:1);
+        d.beginPath();d.arc(p[0],p[1],(isHot?2.6:2.0)*S*(q?0.7:1),0,7);d.fill();}
+      d.globalAlpha=1;d.shadowBlur=0;});}
+  // chips: size = real TU bytes, pins = real call degree, colour = kind
+  const showLbl=!dim&&l.cw>54, FS=Math.max(7,Math.min(13,l.cw*0.20));
+  d.textAlign='center';d.textBaseline='alphabetic';
+  d.font='700 '+FS+"px 'Arial Narrow',Impact,sans-serif";
+  CODEMAP_HIT=[];
+  l.list.forEach(o=>{
+    const isHot=hot&&o.addr===hot;
+    const hle=(o.u.kind==='hle')||/hle|gs_|gif|dma|vif|audio|game_override/i.test(o.u.name||'');
+    const col=isHot?'#ffe000':hle?'#ff8a00':'#00ff9c';
+    const x=o.x-o.w/2,y=o.y-o.h/2, A=dim?0.34:1;
+    const act=isHot?1:0.35+0.65*Math.min(1,o.deg/8)*(0.6+0.4*Math.sin(tt*2.2+cmHash(o.addr)*6.283));
+    if(isHot){const t=(tt*1.1)%1, pl=(Math.sin(tt*4.5)+1)/2;
+      d.strokeStyle='rgba(255,224,0,'+(0.55*(1-t)).toFixed(3)+')';d.lineWidth=2*S;
+      d.strokeRect(x-t*o.w*0.8,y-t*o.h*0.8,o.w*(1+t*1.6),o.h*(1+t*1.6));
+      d.shadowColor='#ffe000';d.shadowBlur=(10+pl*16)*S;}
+    d.fillStyle=dim?'rgba(6,14,10,.75)':'#07130d';d.fillRect(x,y,o.w,o.h);
+    d.globalAlpha=A*(isHot?1:0.35+0.55*act);d.strokeStyle=col;
+    d.lineWidth=(isHot?2.2:1.2)*S;d.strokeRect(x,y,o.w,o.h);d.shadowBlur=0;
+    const np=Math.min(Math.max(1,o.deg),Math.max(1,Math.floor(o.w/(4*S))));
+    d.globalAlpha=A*0.5;d.lineWidth=Math.max(1,S);
+    for(let q=0;q<np;q++){const px=x+o.w*(q+0.5)/np;
+      d.beginPath();d.moveTo(px,y);d.lineTo(px,y-2.4*S);
+      d.moveTo(px,y+o.h);d.lineTo(px,y+o.h+2.4*S);d.stroke();}
+    d.globalAlpha=A*0.8;d.fillStyle=col;
+    d.beginPath();d.arc(x+2.5*S,y+2.5*S,Math.max(1,1.1*S),0,7);d.fill();
+    d.globalAlpha=1;
+    if(showLbl||isHot){d.fillStyle=col;d.globalAlpha=isHot?1:0.85;
+      d.fillText(cmName(o.u).slice(0,14).toUpperCase(),o.x,y-4*S);
+      if(isHot){d.fillStyle='rgba(255,224,0,.9)';
+        d.fillText('PC 0x'+((((ST&&ST.runtime)||{}).pc)||o.addr).toString(16),o.x,y+o.h+FS+2*S);}
+      d.globalAlpha=1;}
+    CODEMAP_HIT.push({addr:o.addr,name:cmName(o.u),x:o.x,y:o.y,w:o.w,h:o.h,
+                      bytes:o.u.bytes||0,deg:o.deg,hot:!!isHot});});
+  return hot;}
+
+/* PIPELINE DISTRICTS: the 8 REAL stages from /api/pipeline as big board
+   districts wired by a right-angle bus, laid over the dimmed real code city.
+   Status colour and metric come straight from the API; packets only ride a bus
+   segment whose upstream stage has actually completed or is running. */
 function drawPipeline(d,W,H){
-  const st=(PIPELINE&&PIPELINE.stages)||[]; if(!st.length)return;
-  const n=st.length, pad=W*0.09, y0=H*0.5;
-  const xs=st.map((s,i)=>pad+(W-2*pad)*(n<2?0.5:i/(n-1)));
-  const ys=st.map((s,i)=>y0+Math.sin(i*0.9+tt*0.3)*H*0.13);
-  const r=Math.max(7,Math.min(H*0.07,W*0.026));
-  d.font="700 "+Math.max(8,r*0.9)+"px 'Arial Narrow',Impact,sans-serif";d.textAlign='center';
-  for(let i=0;i<n-1;i++){const done=st[i].status==='done';
-    d.strokeStyle=done?'rgba(0,255,156,.4)':'rgba(255,47,61,.18)';d.lineWidth=1.5;
-    const mx=(xs[i]+xs[i+1])/2, my=(ys[i]+ys[i+1])/2-H*0.06;
-    d.beginPath();d.moveTo(xs[i]+r,ys[i]);d.quadraticCurveTo(mx,my,xs[i+1]-r,ys[i+1]);d.stroke();
-    if(done){const ph=((tt*0.5+i*0.22)%1),uu=1-ph;
-      const x=uu*uu*(xs[i]+r)+2*uu*ph*mx+ph*ph*(xs[i+1]-r), y=uu*uu*ys[i]+2*uu*ph*my+ph*ph*ys[i+1];
-      d.beginPath();d.arc(x,y,2.6,0,7);d.fillStyle='#7dffb8';d.shadowColor='#00ff9c';d.shadowBlur=9;d.fill();d.shadowBlur=0;}}
-  st.forEach((s,i)=>{const col=PSTAT[s.status]||'#6d2229', pulse=s.status==='active'?(Math.sin(tt*3.5)+1)/2:0;
-    if(s.status==='active'){d.strokeStyle=col;d.globalAlpha=0.5*(1-((tt*1.2)%1));d.lineWidth=2;
-      d.beginPath();d.arc(xs[i],ys[i],r+((tt*1.2)%1)*r*1.8,0,7);d.stroke();d.globalAlpha=1;}
-    d.beginPath();d.arc(xs[i],ys[i],r,0,7);d.fillStyle='#0a0305';d.fill();
-    d.strokeStyle=col;d.lineWidth=2.2;d.shadowColor=col;d.shadowBlur=6+pulse*12;d.stroke();d.shadowBlur=0;
-    d.fillStyle=col;d.textBaseline='middle';d.fillText(String(i+1),xs[i],ys[i]);
-    d.textBaseline='alphabetic';d.fillText(s.name.slice(0,11),xs[i],ys[i]-r-4);
-    d.fillStyle='rgba(255,106,114,.75)';d.font="700 "+Math.max(7,r*0.7)+"px 'Arial Narrow',Impact,sans-serif";
-    d.fillText((s.metric||'').slice(0,16),xs[i],ys[i]+r+11);
-    d.font="700 "+Math.max(8,r*0.9)+"px 'Arial Narrow',Impact,sans-serif";});
-  d.fillStyle='rgba(0,255,156,.6)';d.textAlign='left';d.font="600 10px Consolas,monospace";
-  d.fillText('PIPELINE · real stage status', 6, H-8);
+  const st=(PIPELINE&&PIPELINE.stages)||[], S=Math.max(1,Math.min(W,H)/260);
+  cmCity(d,W,H,true);                 // real code substrate, dimmed
+  if(!st.length){d.textAlign='center';d.fillStyle='rgba(0,255,156,.5)';
+    d.font='600 '+Math.max(10,10*S)+"px Consolas,monospace";
+    d.fillText('PIPELINE · waiting for /api/pipeline',W/2,H/2);d.textAlign='left';return;}
+  const cols=(W>H*1.35)?4:2, rows=Math.ceil(st.length/cols);
+  const mx=W*0.055,my=H*0.10,gx=W*0.035,gy=H*0.09;
+  const cw=(W-2*mx-(cols-1)*gx)/cols, chh=(H-2*my-(rows-1)*gy)/rows;
+  const D=st.map((s,i)=>{const r=Math.floor(i/cols);let c=i%cols;if(r%2)c=cols-1-c;
+    const x=mx+c*(cw+gx), y=my+r*(chh+gy);
+    return {s:s,i:i,r:r,c:c,x:x,y:y,w:cw,h:chh,cx:x+cw/2,cy:y+chh/2};});
+  for(let i=0;i<D.length-1;i++){
+    const A=D[i],B=D[i+1],flow=(A.s.status==='done'||A.s.status==='active');
+    let P;
+    if(A.r===B.r){const dir=(B.cx>A.cx)?1:-1;
+      P=[[A.cx+dir*A.w/2,A.cy],[(A.cx+B.cx)/2,A.cy],[(A.cx+B.cx)/2,B.cy],[B.cx-dir*B.w/2,B.cy]];}
+    else{const midY=(A.y+A.h+B.y)/2;
+      P=[[A.cx,A.y+A.h],[A.cx,midY],[B.cx,midY],[B.cx,B.y]];}
+    d.lineCap='butt';d.lineJoin='miter';
+    d.strokeStyle=flow?'rgba(0,255,156,.13)':'rgba(255,47,61,.07)';
+    d.lineWidth=7*S;cmStroke(d,P,9*S);
+    d.strokeStyle=flow?'rgba(0,255,156,.5)':'rgba(255,47,61,.24)';
+    d.lineWidth=2.2*S;cmStroke(d,P,9*S);
+    if(flow)for(let q=0;q<2;q++){const p=cmAt(P,(tt*0.45+i*0.17+q*0.5)%1);
+      d.fillStyle='#7dffb8';d.shadowColor='#00ff9c';d.shadowBlur=10*S;
+      d.beginPath();d.arc(p[0],p[1],2.8*S,0,7);d.fill();d.shadowBlur=0;}}
+  const FS=Math.max(9,Math.min(21,cw*0.135));
+  d.textBaseline='alphabetic';
+  D.forEach(o=>{const s=o.s,col=PSTAT[s.status]||'#6d2229',act=(s.status==='active');
+    d.fillStyle='rgba(4,10,7,.88)';d.fillRect(o.x,o.y,o.w,o.h);
+    d.save();d.beginPath();d.rect(o.x,o.y,o.w,o.h);d.clip();
+    d.strokeStyle=col;d.globalAlpha=0.10;d.lineWidth=S;
+    for(let k=-o.h;k<o.w;k+=9*S){d.beginPath();d.moveTo(o.x+k,o.y);d.lineTo(o.x+k+o.h,o.y+o.h);d.stroke();}
+    d.restore();
+    if(act){const t=(tt*0.9)%1;d.strokeStyle=col;d.globalAlpha=0.5*(1-t);d.lineWidth=2*S;
+      d.strokeRect(o.x-t*10*S,o.y-t*10*S,o.w+t*20*S,o.h+t*20*S);d.globalAlpha=1;}
+    d.strokeStyle=col;d.lineWidth=2*S;d.shadowColor=col;d.shadowBlur=(act?12:5)*S;
+    d.strokeRect(o.x,o.y,o.w,o.h);d.shadowBlur=0;
+    const lg=Math.min(o.w,o.h)*0.13;d.lineWidth=1.5*S;
+    [[o.x,o.y,1,1],[o.x+o.w,o.y,-1,1],[o.x,o.y+o.h,1,-1],[o.x+o.w,o.y+o.h,-1,-1]].forEach(q=>{
+      d.beginPath();d.moveTo(q[0]+q[2]*lg,q[1]);d.lineTo(q[0],q[1]);d.lineTo(q[0],q[1]+q[3]*lg);d.stroke();});
+    d.textAlign='left';d.fillStyle=col;
+    d.font='700 '+FS+"px 'Arial Narrow',Impact,sans-serif";
+    d.fillText((o.i+1)+'. '+String(s.name).slice(0,13),o.x+7*S,o.y+FS+4*S);
+    d.textAlign='right';d.font='600 '+Math.max(8,FS*0.5)+"px Consolas,monospace";
+    d.fillText(String(s.status||'').toUpperCase(),o.x+o.w-7*S,o.y+FS+3*S);
+    d.textAlign='left';d.fillStyle='rgba(255,106,114,.9)';
+    d.fillText(String(s.metric||'').slice(0,22),o.x+7*S,o.y+FS+Math.max(8,FS*0.5)+9*S);
+    if(o.h>FS*3.2){d.fillStyle='rgba(255,106,114,.55)';
+      d.fillText(String(s.detail||'').slice(0,26),o.x+7*S,o.y+o.h-7*S);}});
+  d.textAlign='left';d.fillStyle='rgba(0,255,156,.6)';
+  d.font='600 '+Math.max(9,9*S)+"px Consolas,monospace";
+  d.fillText('PIPELINE DISTRICTS · real stage status',6*S,H-8*S);
 }
 
 /* CODE MAP - real static call graph OR the pipeline (toggle). */
 function codemap(cid){const c=document.getElementById(cid);if(!c||!c.width)return;
   const d=c.getContext('2d'),W=c.width,H=c.height;d.clearRect(0,0,W,H);
-  d.strokeStyle='rgba(255,47,61,.10)';d.lineWidth=1;
-  for(let x=0;x<W;x+=W/18){d.beginPath();d.moveTo(x,0);d.lineTo(x,H);d.stroke()}
-  for(let y=0;y<H;y+=H/9){d.beginPath();d.moveTo(0,y);d.lineTo(W,y);d.stroke()}
+  /* The map is flat, so the orbit state is applied as a canvas transform about
+     the centre: drag = rotate, wheel = zoom, right-drag = pan. It has no
+     auto-spin to preserve, so the untouched view is exactly the old one.
+     The body keeps its early `return`s, hence try/finally — a transform left
+     on the context would compound every frame and smear the map away. */
+  const V=Orbit.view(cid,0,0);
+  d.save();
+  d.translate(W/2+V.ox,H/2+V.oy);d.scale(V.zoom,V.zoom);d.rotate(V.yaw);
+  d.translate(-W/2,-H/2);
+  try{codemapBody(d,W,H);}finally{d.restore();}}
+function codemapBody(d,W,H){
+  const S=Math.max(1,Math.min(W,H)/260);
+  cmBoard(d,W,H);                                     // the board itself
   if(CODEMAP_MODE==='pipeline'){drawPipeline(d,W,H);return;}
-  const G=CALLGRAPH||{nodes:[],edges:[]};
-  const N=G.nodes||[];if(!N.length)return;
-  const mxB=Math.max(1,...N.map(u=>u.bytes||1));
-  const FS=Math.max(9,Math.min(14,Math.min(W,H)*.026));
-  d.font='700 '+FS+"px 'Arial Narrow',Impact,sans-serif";
-  // stable golden-angle layout keyed by node index; map addr -> position
-  const P={};
-  N.forEach((u,i)=>{const a=i*2.39996, r=Math.sqrt((i+0.6)/N.length);
-    P[u.addr]={x:W*(.5+.40*r*Math.cos(a)), y:H*(.5+.38*r*Math.sin(a)), u:u,
-               deg:0};});
-  (G.edges||[]).forEach(e=>{if(P[e[0]])P[e[0]].deg++;if(P[e[1]])P[e[1]].deg++;});
-
-  // REAL edges: a static call from a->b. Curved, faint, thicker if either end
-  // is a hub. The current runtime PC lights its function.
-  const live=(ST.runtime&&ST.runtime.func)||null;
-  (G.edges||[]).forEach(e=>{const a=P[e[0]],b=P[e[1]];if(!a||!b)return;
-    const mx=(a.x+b.x)/2,my=(a.y+b.y)/2-Math.hypot(b.x-a.x,b.y-a.y)*0.12;
-    d.strokeStyle='rgba(0,255,156,.16)';d.lineWidth=1;
-    d.beginPath();d.moveTo(a.x,a.y);d.quadraticCurveTo(mx,my,b.x,b.y);d.stroke();});
-
-  // pulses along real edges (call flow). One pool, phase-cycled.
-  const E=G.edges||[];
-  if(E.length){
-    for(let k=0;k<Math.min(E.length,10);k++){
-      const e=E[(k*3+Math.floor(tt*0.6))%E.length],a=P[e[0]],b=P[e[1]];
-      if(!a||!b)continue;
-      const ph=(tt*0.5+k*0.19)%1, mx=(a.x+b.x)/2,my=(a.y+b.y)/2-Math.hypot(b.x-a.x,b.y-a.y)*0.12;
-      const uu=1-ph,x=uu*uu*a.x+2*uu*ph*mx+ph*ph*b.x,y=uu*uu*a.y+2*uu*ph*my+ph*ph*b.y;
-      d.beginPath();d.arc(x,y,2.6,0,7);d.fillStyle='#7dffb8';
-      d.shadowColor='#00ff9c';d.shadowBlur=9;d.fill();d.shadowBlur=0;}
-  }
-
-  // nodes: size by bytes, ring by degree (how connected), glow if it's the
-  // function the port is executing RIGHT NOW.
-  d.textBaseline='alphabetic';
-  Object.values(P).forEach(p=>{
-    const mag=(p.u.bytes||1)/mxB, hle=/hle|game_overrides|gs_|gif|dma|audio/i.test(p.u.name||'');
-    const isLive=live && (p.u.name||'').toLowerCase().includes(String(live).toLowerCase().slice(0,10));
-    const col=isLive?'#ffe000':hle?'#ff8a00':'#00ff9c';
-    const rad=3+mag*7+Math.min(p.deg,6)*0.6;
-    if(isLive){const pl=(Math.sin(tt*4)+1)/2;
-      d.beginPath();d.arc(p.x,p.y,rad+4+pl*6,0,7);d.strokeStyle='#ffe000';
-      d.globalAlpha=.5;d.lineWidth=2;d.stroke();d.globalAlpha=1;}
-    d.beginPath();d.arc(p.x,p.y,rad,0,7);d.fillStyle=col;
-    d.shadowColor=col;d.shadowBlur=isLive?16:8;d.fill();d.shadowBlur=0;
-    d.fillStyle=col;d.textAlign='center';
-    d.fillText((p.u.name||'').slice(0,18).toUpperCase(),p.x,p.y-rad-3);
-    d.fillStyle='rgba(255,106,114,.7)';
-    d.fillText('0x'+p.u.addr.toString(16),p.x,p.y+rad+FS);});
-  // legend
-  d.fillStyle='rgba(0,255,156,.6)';d.textAlign='left';d.font="600 10px Consolas,monospace";
-  d.fillText((G.n_edges||0)+' real call edges', 6, H-8);}
+  const G=CALLGRAPH||{nodes:[],edges:[]}, N=G.nodes||[], E=G.edges||[];
+  if(!N.length){d.textAlign='center';d.fillStyle='rgba(0,255,156,.5)';
+    d.font='600 '+Math.max(10,10*S)+"px Consolas,monospace";
+    d.fillText('CALL GRAPH · waiting for /api/callgraph',W/2,H/2);d.textAlign='left';return;}
+  const hot=cmCity(d,W,H,false);                      // chips + copper + packets
+  // silkscreen: real counts left, live PC right
+  d.font='600 '+Math.max(9,9*S)+"px Consolas,monospace";d.textBaseline='alphabetic';
+  d.textAlign='left';d.fillStyle='rgba(0,255,156,.65)';
+  d.fillText((G.n_nodes||N.length)+' CHIPS · '+(G.n_edges||E.length)+' REAL TRACES',6*S,H-8*S);
+  const rt=(ST&&ST.runtime)||{};
+  d.textAlign='right';
+  if(hot){const o=CODEMAP_HIT.find(h=>h.addr===hot);d.fillStyle='#ffe000';
+    d.fillText('HOT · '+(o?o.name:'0x'+hot.toString(16))
+      +(typeof rt.pc==='number'?' · PC 0x'+rt.pc.toString(16):''),W-6*S,H-8*S);}
+  else{d.fillStyle='rgba(255,106,114,.6)';
+    d.fillText(rt.alive?'PORT ALIVE · NO PC TICK':'PORT IDLE · NO HOT CHIP',W-6*S,H-8*S);}
+  d.textAlign='left';}
 
 /* BURN-UP CHART — cumulative findings + commits */
 function chart(cid){const c=document.getElementById(cid);if(!c||!c.width||!CHART)return;
@@ -1862,6 +2134,7 @@ function _draw(fn,id){try{fn(id);}catch(e){
   if(!_drawErr[id]){_drawErr[id]=1;console.warn('[prom] draw error in',id,e);}}}
 function loop(){
   tt+=.012;
+  try{Orbit.sync();}catch(e){}     // pick up canvases the fullscreen view made
   try{seisTick();}catch(e){}
   if(!ZOOM){_draw(unit,'cv-unit');_draw(magi,'cv-magi');_draw(seisDraw,'cv-ecg');
     _draw(planet,'cv-planet');_draw(codemap,'cv-map');}
@@ -1889,7 +2162,9 @@ const VIEW={
  unit:()=>`<div class="zgrid" style="grid-template-columns:1fr 1fr">
    <div class="zp"><h3>Unit-01 <span style="margin-left:auto;display:flex;gap:5px">
      <button class="act sm" data-mech="sinanju">SINANJU</button>
-     <button class="act sm" data-mech="zaku">ZAKU</button></span></h3>
+     <button class="act sm" data-mech="zaku">ZAKU</button>
+     <button class="act sm" data-orbit-reset="cv-unit,z-unit"
+       title="drag = rotate · wheel = zoom · right-drag = pan · R">RESET VIEW</button></span></h3>
      <canvas class="cv" id="z-unit"></canvas></div>
    <div class="zp"><h3>Job Control</h3><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
      <button class="act" data-act="build">BUILD</button><button class="act" data-act="drive">DRIVE</button>
@@ -1954,13 +2229,18 @@ const VIEW={
    <div class="zp"><h3>Theme Studio <span class="kx" id="themeMsg"></span></h3>
      <div class="scroll" id="themeBox"></div></div></div>`,
  planet:()=>`<div class="zgrid" style="grid-template-columns:1.3fr 1fr">
-   <div class="zp"><h3>Recompile Sphere</h3><canvas class="cv" id="z-planet"></canvas></div>
+   <div class="zp"><h3>Recompile Sphere <span style="margin-left:auto">
+     <button class="act sm" data-orbit-reset="cv-planet,z-planet"
+       title="drag = rotate · wheel = zoom · right-drag = pan · R">RESET VIEW</button></span></h3>
+     <canvas class="cv" id="z-planet"></canvas></div>
    <div class="zp"><h3>Sectors</h3><div class="grid4" id="zk-pt" style="flex:none;margin-bottom:8px"></div>
      <div class="scroll" id="zk-sec"></div></div></div>`,
  codemap:()=>`<div class="zgrid" style="grid-template-columns:1.3fr 1fr">
    <div class="zp"><h3>Map <span style="margin-left:auto;display:flex;gap:5px">
      <button class="act sm" data-cm="pipeline">PIPELINE</button>
-     <button class="act sm" data-cm="graph">CALL GRAPH</button></span></h3>
+     <button class="act sm" data-cm="graph">CALL GRAPH</button>
+     <button class="act sm" data-orbit-reset="cv-map,z-map"
+       title="drag = pan · wheel = zoom · R resets view">RESET VIEW</button></span></h3>
      <canvas class="cv" id="z-map"></canvas></div>
    <div class="zp"><h3 id="cmSideTitle">Pipeline Stages</h3><div class="scroll" id="zk-flow"></div></div></div>`,
  alert:()=>`<div class="zgrid" style="grid-template-columns:1fr 1fr">
@@ -2230,7 +2510,8 @@ const POST={
      r.readAsDataURL(f);};
    try{renderTheme();}catch(e){}},
  planet:()=>{paintSectors();
-   const cv=$('#z-planet');if(cv)cv.onclick=e=>planetPick(cv,e);},
+   // a drag that ends on a node must not also select that node
+   const cv=$('#z-planet');if(cv)cv.onclick=e=>{if(Orbit.wasDrag(cv))return;planetPick(cv,e);};},
  _planetOld:()=>{const s=PLANET.sectors||[];
    $('#zk-pt').innerHTML=[['restored',PLANET.restored],['total',PLANET.total],
      ['active',s.filter(x=>x.state==='active').length],['pct',(PLANET.pct||0)+'%']]
