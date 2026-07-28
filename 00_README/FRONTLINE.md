@@ -56,7 +56,63 @@ Sprite state at the title is otherwise sane: tme=1, TEX0 tbp=0x71000 (word addr
 point = texels 1.0..127.0, screen rect (475,150)..(603,214) — well inside
 scissor. TEST=0x5001B: ATE=1 ATST=GEQUAL AREF=1 AFAIL=KEEP, ZTE=1 ZTST=GEQUAL.
 
-## NEXT (probe built 2026-07-27, not yet run)
+## VERIFIED FIX (2026-07-27 19:46) — the asset load is unblocked
+
+`game_overrides.cpp` refused every bulk gzmfs read whose span merely CROSSED the
+`[0x220000,0x224880)` jump-table band. The game's single 527,456-byte load at
+`dst=0x0021D808` (span `0x21D808..0x29E4E8`) was refused **19,774 times** from one
+call site; it retried forever and texture sampling stopped dead.
+
+Guard now refuses only the corrupt-dst signature (a SMALL read STARTING INSIDE
+the band). Bulk spanning loads pass. Verified in run 2:
+
+    [p4:rodata-span] gzmfs READ fd=0 dst=0x0021d808 want=527456 ra=0x001b5b60
+                     spans the jump-table band -> ALLOWED (bulk load, not a wild store)
+    [gzmfs] READ fd=0 pos=93194240 len=527456 -> 527456 dst=0x0021D808
+
+Asked 527,456 bytes, got 527,456, ONCE. Progression: DMA 27,536 -> 1,196,515
+(43x), GIF 997 -> 12,225 (12x), sprites/vblank 12.7 -> 29.6 (2.3x).
+
+**METHOD WARNING, do not skip.** Run 1 of this exact build "passed"
+`rodata_refused -> 0` while testing NOTHING: it froze at `0x8dcb00` before ever
+reaching the loader (`bulk_read_seen=0`). A counter reaching zero is satisfied
+equally by "the fix works" and by "we never got there". Only `bulk_read_seen>0`
+AND `rodata_allowed>0` discriminate. Use `hunts_parscan/compare_runs.py`, which
+now encodes that.
+
+## ELIMINATED BY MEASUREMENT (2026-07-27)
+
+* **CLUT** — `coloured=75,416,128` resolutions, `~876,544` distinct values over
+  212.5M samples. Indices resolve to real varied colours. Not a palette problem.
+* **Blend / ALPHA** — `ALPHA=0x0000008000000044` = A0 B1 C0 D1 fix128 =
+  `(Cs-Cd)*As/128 + Cd`. Of 8,857,959 coloured sources only **2,070** became
+  black; sample `src(0,0,0) dst(79,79,79) -> (77,77,77)`. Destination alpha IS
+  always zero (`dstAlpha_zero=202,000,000 of 202,000,000`, confirming PSMCT24
+  stores none) but `C=0` selects SOURCE alpha, so the trap never bites.
+* **PSMT8 swizzle** — see the withdrawal above.
+
+## CURRENT BLOCKER (2026-07-27) — an EE thread stuck, not a wedged pipeline
+
+With the load unblocked the port no longer stalls at `0x8dcb00`. It gets much
+further, then run 2 alternates:
+
+    pc=0x10f1d0  -> inside stdcpp_node_0010f180
+    pc=0x1033c8  -> inside mem_node_00103360
+
+`activeThreads=4`, and DMA/GIF are STILL CLIMBING between samples
+(dma 1,192,315 -> 1,196,515, gif 12,105 -> 12,225). So the machine is not frozen:
+work is still being submitted while the EE thread sits in these two functions.
+Both names are allocator / C++ runtime territory, which lines up with the
+standing finding that boot instability had ONE systemic allocator cause rather
+than many downstream sites. NOT yet diagnosed.
+
+## PRESENTATION — still untested
+
+The `[p4:present]` probe exists now but run 1's census (fbp0=46 vs fbp70=50,954)
+was collected almost entirely AFTER a freeze, so it proves nothing. Presents
+#1-#5 alternate normally. Needs a clean long run before any claim.
+
+## OLDER NOTES (probe built 2026-07-27)
 
 Indices are proven good; what the CLUT turns them into is NOT measured. If
 varied indices all resolve to one black entry, the defect is the CLUT (upload,
