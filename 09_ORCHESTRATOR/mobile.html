@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#050203">
+<title>PROMETHEUS HQ ▸ MOBILE</title>
+<link rel="icon" href="/assets/icon.png" type="image/png">
+<style>
+:root{
+  --acc:#ff2f3d; --acc-dim:#8e1520; --grn:#00ff9c; --grn-dim:#0b6b45;
+  --amb:#ff8a00; --yel:#ffe000; --ink:#ff6a72; --mut:#6d2229;
+  --void:#050203; --pnl:#0a0305; --pnl2:#12060a;
+  --mono:'Consolas','DejaVu Sans Mono','Courier New',monospace;
+  --disp:'Arial Narrow','Roboto Condensed','Impact',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--void);color:var(--ink);font-family:var(--mono);font-size:13px;letter-spacing:.03em}
+body{padding:8px 8px 40px;background-image:radial-gradient(120% 90% at 50% 0%,#0b0304,#000)}
+#scan{position:fixed;inset:0;z-index:900;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+h1{font-family:var(--disp);font-weight:700;font-size:22px;letter-spacing:.18em;color:var(--acc);
+  text-shadow:0 0 14px rgba(255,47,61,.6);line-height:1}
+.sub{font-size:9px;letter-spacing:.26em;color:var(--mut);margin-top:2px}
+header{display:flex;justify-content:space-between;align-items:flex-start;
+  border-bottom:1px solid var(--acc-dim);padding-bottom:7px;margin-bottom:8px}
+.hz{height:6px;margin:7px 0;background:repeating-linear-gradient(45deg,var(--yel) 0 9px,#000 9px 18px);opacity:.75}
+
+.card{background:linear-gradient(180deg,var(--pnl2),var(--pnl));border:1px solid var(--acc-dim);
+  padding:9px 10px;margin-bottom:8px;position:relative}
+.card::before{content:'';position:absolute;left:-1px;top:-1px;width:12px;height:12px;
+  border-left:2px solid var(--acc);border-top:2px solid var(--acc)}
+.card h2{font-family:var(--disp);font-size:13px;letter-spacing:.2em;color:var(--grn);
+  margin-bottom:8px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.card h2 .r{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--mut)}
+
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--mut)}
+.dot.on{background:var(--grn);box-shadow:0 0 8px var(--grn)}
+.dot.hot{background:var(--acc);box-shadow:0 0 8px var(--acc);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.3}}
+
+/* meters */
+.meter{margin-bottom:8px}.meter:last-child{margin-bottom:0}
+.meter .t{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px}
+.meter .t b{color:var(--ink);font-weight:400}.meter .t span{color:var(--grn);font-size:10px}
+.bar{height:6px;background:#1a0508;border:1px solid #2a080d;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--grn),var(--yel));transition:width .5s}
+.bar.hot>i{background:linear-gradient(90deg,var(--amb),var(--acc))}
+
+/* rows */
+.kv{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px dotted #2a080d}
+.kv:last-child{border:0}.kv b{color:var(--mut);font-weight:400}.kv span{color:var(--ink);text-align:right;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:62%}
+.kv span.g{color:var(--grn)}.kv span.a{color:var(--amb)}.kv span.r{color:var(--acc)}
+.chip{display:inline-block;font-size:9px;padding:1px 6px;border:1px solid var(--grn-dim);color:var(--grn);
+  letter-spacing:.1em;margin-left:5px}
+.chip.r{border-color:var(--acc-dim);color:var(--acc)}
+
+/* feeds */
+pre.feed{background:#000;border:1px solid #2a080d;height:180px;overflow-y:auto;padding:7px;
+  font-size:10.5px;line-height:1.45;white-space:pre-wrap;word-break:break-word;color:#9fe8c8}
+pre.feed.tall{height:230px}
+pre.feed .op{color:var(--amb)}
+
+/* console */
+.crow{display:flex;gap:6px;margin-top:7px}
+textarea{flex:1;background:#000;border:1px solid var(--acc-dim);color:var(--grn);font-family:var(--mono);
+  font-size:14px;padding:8px;resize:none;min-height:44px;letter-spacing:.05em}
+textarea:focus{outline:none;border-color:var(--grn);box-shadow:0 0 10px rgba(0,255,156,.2)}
+button{font-family:var(--disp);font-weight:700;font-size:13px;letter-spacing:.12em;color:#000;
+  background:var(--acc);border:0;padding:0 13px;cursor:pointer;box-shadow:0 0 14px rgba(255,47,61,.4)}
+button:active{opacity:.7}button.g{background:var(--grn);box-shadow:0 0 14px rgba(0,255,156,.4)}
+button.ghost{background:#1a0508;color:var(--mut);border:1px solid var(--acc-dim);box-shadow:none}
+.cbar{display:flex;gap:6px;align-items:center;margin-bottom:7px;font-size:10px;color:var(--mut)}
+.cbar .st{margin-left:auto;letter-spacing:.1em}.cbar .st.on{color:var(--grn)}
+label.tog{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mut);letter-spacing:.08em}
+input#tok{width:100%;background:#000;border:1px solid var(--acc-dim);color:var(--grn);
+  font-family:var(--mono);font-size:12px;padding:7px;margin-top:6px;letter-spacing:.1em}
+.foot{text-align:center;font-size:9px;color:var(--mut);letter-spacing:.2em;margin-top:6px}
+</style>
+</head>
+<body>
+<div id="scan"></div>
+<header>
+  <div>
+    <h1>PROMETHEUS<span style="color:var(--mut)"> HQ</span></h1>
+    <div class="sub">MOBILE TERMINAL · <span id="clock">LINK…</span></div>
+  </div>
+  <div style="text-align:right"><span class="dot" id="beat"></span></div>
+</header>
+
+<!-- VITALS -->
+<div class="card">
+  <h2>HOST VITALS <span class="r" id="v-gpu">—</span></h2>
+  <div id="meters"><div class="sub">reading…</div></div>
+</div>
+
+<!-- PROJECT -->
+<div class="card">
+  <h2>PROJECT <span class="r" id="p-game">—</span></h2>
+  <div id="project"><div class="sub">reading…</div></div>
+</div>
+
+<!-- SESSION MIRROR -->
+<div class="card">
+  <h2>CURRENT SESSION <span class="r" id="m-sess">—</span></h2>
+  <pre class="feed" id="mirror">connecting to live session…</pre>
+</div>
+
+<!-- CONSOLE -->
+<div class="card">
+  <h2>OPERATOR CONSOLE <span class="dot" id="c-dot"></span></h2>
+  <div class="cbar">
+    <button class="ghost" id="c-stop">STOP</button>
+    <label class="tog"><input type="checkbox" id="c-fresh"> fresh</label>
+    <span class="st" id="c-st">idle</span>
+  </div>
+  <pre class="feed tall" id="cout"></pre>
+  <div class="crow">
+    <textarea id="cin" placeholder="prompt HQ console… (Claude, --continue)" enterkeyhint="send"></textarea>
+    <button id="c-send">SEND</button>
+  </div>
+  <input id="tok" placeholder="access token" autocomplete="off">
+</div>
+
+<div class="foot" id="foot">PROMETHEUS HQ // SEELE-CLASS TERMINAL</div>
+
+<script>
+const $=s=>document.querySelector(s);
+// token: /m?token=XXX saves then strips from URL
+const tok=$('#tok');
+const qt=new URLSearchParams(location.search).get('token');
+if(qt){localStorage.setItem('prom_tok',qt.trim());history.replaceState({},'',location.pathname);}
+tok.value=localStorage.getItem('prom_tok')||'';
+tok.oninput=()=>localStorage.setItem('prom_tok',tok.value.trim());
+const hdr=()=>{const t=tok.value.trim();return t?{'X-Prom-Token':t}:{};};
+const jget=u=>fetch(u,{headers:hdr()}).then(r=>r.json());
+const jpost=(u,b)=>fetch(u,{method:'POST',headers:{'Content-Type':'application/json',...hdr()},
+  body:JSON.stringify(b||{})}).then(r=>r.json());
+const esc=s=>(s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const pct=v=>Math.max(0,Math.min(100,+v||0));
+
+function meter(label,val,txt,hot){
+  return `<div class="meter"><div class="t"><b>${label}</b><span>${txt}</span></div>
+    <div class="bar${hot?' hot':''}"><i style="width:${pct(val)}%"></i></div></div>`;}
+
+// ---- VITALS ----
+async function pollSys(){
+  try{const v=await jget('/api/sys');let h='';
+    h+=meter('CPU',v.cpu,(v.cpu!=null?v.cpu+'%':'—'),v.cpu>90);
+    h+=meter('RAM',v.ram_pct,(v.ram_used_gb!=null?`${v.ram_used_gb}/${v.ram_total_gb} GB`:'—'),v.ram_pct>92);
+    if(v.gpu!=null)h+=meter('GPU',v.gpu,`${v.gpu}% · ${v.gpu_temp??'—'}°C`,v.gpu_temp>80);
+    if(v.gpu_mem_pct!=null)h+=meter('VRAM',v.gpu_mem_pct,v.gpu_mem_pct+'%',false);
+    if(v.disk_pct!=null)h+=meter('DISK C:',v.disk_pct,v.disk_pct+'% used',v.disk_pct>92);
+    $('#meters').innerHTML=h;
+    $('#v-gpu').textContent=v.gpu_name||'';
+  }catch(e){$('#meters').innerHTML='<div class="sub">host link down</div>';}
+}
+
+// ---- PROJECT (overview + runtime) ----
+async function pollProject(){
+  try{
+    const [o,rt]=await Promise.all([jget('/api/overview'),jget('/api/runtime')]);
+    const rm=o.roadmap||{},pr=o.proc||{},git=o.git||{};
+    $('#p-game').textContent=(git.branch||'');
+    let h='';
+    h+=`<div class="kv"><b>frontier</b><span class="g">${esc(rm.frontier||'—')}</span></div>`;
+    h+=`<div class="kv"><b>roadmap</b><span>${rm.done??'?'} / ${rm.total??'?'} done</span></div>`;
+    const emu=rt.alive;
+    h+=`<div class="kv"><b>emulator</b><span class="${emu?'g':'r'}">${emu?'RUNNING':'offline'}${rt.tick?` · tick ${rt.tick}`:''}</span></div>`;
+    if(rt.verdict)h+=`<div class="kv"><b>last verdict</b><span class="a">${esc(rt.verdict)}</span></div>`;
+    if(rt.func)h+=`<div class="kv"><b>pc @</b><span>${esc(rt.func)}+0x${(rt.func_off||0).toString(16)}</span></div>`;
+    h+=`<div class="kv"><b>build</b><span class="${pr.build_active?'a':''}">${pr.build_active?'COMPILING':'idle'}</span></div>`;
+    h+=`<div class="kv"><b>runner exe</b><span>${pr.exe_age_min!=null?pr.exe_age_min+'m old':'—'}</span></div>`;
+    h+=`<div class="kv"><b>git</b><span>${esc((git.head||'').slice(0,40))}${git.dirty?' <span class=chip.r>dirty</span>':''}</span></div>`;
+    if(o.action&&o.action.running)h+=`<div class="kv"><b>action</b><span class="a">${esc(o.action.name)} running</span></div>`;
+    $('#project').innerHTML=h;
+  }catch(e){$('#project').innerHTML='<div class="sub">overview link down</div>';}
+}
+
+// ---- SESSION MIRROR ----
+let mSeen=-1;
+async function pollMirror(){
+  try{const m=await jget('/api/mirror');
+    $('#m-sess').textContent=m.session?('#'+String(m.session).slice(0,8)):(m.enabled?'idle':'paused');
+    const el=$('#mirror');
+    if(m.total!==mSeen){
+      el.innerHTML=(m.out||[]).map(l=>{
+        const op=/^\s*(»|✓|×|>|──)/.test(l);
+        return `<span class="${op?'op':''}">${esc(l)}</span>`;}).join('\n');
+      const near=el.scrollHeight-el.scrollTop-el.clientHeight<80;
+      if(near||mSeen<0)el.scrollTop=el.scrollHeight;
+      mSeen=m.total;
+    }
+  }catch(e){}
+}
+
+// ---- CONSOLE ----
+let cRunning=false;
+function renderClaude(c){
+  $('#cout').innerHTML=(c.out||[]).map(l=>{
+    const op=/^\s*(»|✓|×|>|!!|--)/.test(l);return `<span class="${op?'op':''}">${esc(l)}</span>`;}).join('\n');
+  const el=$('#cout');el.scrollTop=el.scrollHeight;
+  cRunning=!!c.running;
+  $('#c-dot').className='dot '+(c.running?'hot':(c.rc===0?'on':''));
+  $('#c-st').textContent=c.running?('running '+(c.elapsed||0)+'s'):(c.rc!=null?('done rc='+c.rc):'idle');
+  $('#c-st').classList.toggle('on',!!c.running);
+}
+async function pollClaude(){try{renderClaude(await jget('/api/claude'));}catch(e){}}
+$('#c-send').onclick=async()=>{
+  const v=$('#cin').value.trim();if(!v)return;
+  $('#cin').value='';
+  const r=await jpost('/api/claude/send',{prompt:v,fresh:$('#c-fresh').checked});
+  if(r.error){const el=$('#cout');el.innerHTML+=`\n<span class="op">!! ${esc(r.error)}</span>`;el.scrollTop=el.scrollHeight;}
+  else pollClaude();
+};
+$('#c-stop').onclick=async()=>{await jpost('/api/claude/stop',{});pollClaude();};
+$('#cin').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#c-send').click();}});
+
+// ---- loops ----
+let beat=false;
+function heartbeat(ok){beat=!beat;const b=$('#beat');b.className='dot '+(ok?(beat?'on':''):'hot');
+  $('#clock').textContent=ok?new Date().toLocaleTimeString():'LINK LOST';$('#foot').textContent=ok?
+    'PROMETHEUS HQ // LINK OK':'PROMETHEUS HQ // RECONNECTING';}
+async function slow(){try{await Promise.all([pollSys(),pollProject()]);heartbeat(true);}catch(e){heartbeat(false);}}
+async function fast(){await Promise.all([pollMirror(),pollClaude()]);}
+slow();fast();setInterval(slow,4000);setInterval(fast,1800);
+</script>
+</body>
+</html>

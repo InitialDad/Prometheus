@@ -185,10 +185,18 @@ def diagnose_log(name):
         return {"error": "no such log"}
     try:
         out = subprocess.run([sys.executable, os.path.join(HERE, "diagnose.py"), "triage", path],
-                             capture_output=True, text=True, timeout=60)
+                             capture_output=True, text=True, timeout=60,
+                             creationflags=CREATE_NO_WINDOW)
         return {"report": out.stdout or out.stderr}
     except Exception as e:
         return {"error": str(e)}
+
+
+# Suppress the console window these child processes would otherwise pop. Under
+# pythonw (no parent console) every un-flagged tasklist/git call allocates a
+# NEW console window, and with the phone polling /api/overview that flashes
+# windows several times a second. CREATE_NO_WINDOW keeps them invisible.
+CREATE_NO_WINDOW = 0x08000000 if os.name == "nt" else 0
 
 
 def proc_state():
@@ -196,7 +204,8 @@ def proc_state():
     def running(name):
         try:
             out = subprocess.run(["tasklist", "/FI", f"IMAGENAME eq {name}", "/NH"],
-                                 capture_output=True, text=True, timeout=8)
+                                 capture_output=True, text=True, timeout=8,
+                                 creationflags=CREATE_NO_WINDOW)
             return name.lower() in out.stdout.lower()
         except Exception:
             return False
@@ -215,7 +224,8 @@ def git_state():
     def g(*a):
         try:
             return subprocess.run(["git", "-C", PS2RECOMP, *a], capture_output=True,
-                                  text=True, timeout=8).stdout.strip()
+                                  text=True, timeout=8,
+                                  creationflags=CREATE_NO_WINDOW).stdout.strip()
         except Exception:
             return ""
     return {
@@ -330,9 +340,29 @@ def action_status():
 # --------------------------------------------------------------------------- #
 # HTTP
 # --------------------------------------------------------------------------- #
+# Shared secret required for MUTATING requests that arrive from anywhere other
+# than this machine. Set PROM_TOKEN in the environment to enable phone access;
+# localhost (the desktop HQ window) never needs it, so nothing local changes.
+# This is what makes it safe to bind the hub to the tailnet: the Claude console
+# runs with bypassPermissions (full shell), so its POST must never be reachable
+# without the token.
+TOKEN = os.environ.get("PROM_TOKEN", "").strip()
+_LOCAL = {"127.0.0.1", "::1", "localhost", "::ffff:127.0.0.1"}
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass  # quiet
+
+    def _is_authed(self):
+        """Localhost is always trusted. Remote callers must present the token."""
+        if self.client_address and self.client_address[0] in _LOCAL:
+            return True
+        if not TOKEN:
+            return False  # remote caller but no token configured -> deny mutations
+        supplied = (self.headers.get("X-Prom-Token")
+                    or parse_qs(urlparse(self.path).query).get("token", [""])[0])
+        return supplied == TOKEN
 
     def _json(self, obj, code=200):
         body = json.dumps(obj).encode()
@@ -417,6 +447,8 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if p == "/" or p == "/index.html":
                 return self._html(load_page("nerv.html"))
+            if p == "/m" or p == "/mobile":
+                return self._html(load_page("mobile.html"))
             if p == "/api/overview":
                 return self._json({
                     "roadmap": get_roadmap(), "knowledge": get_knowledge_counts(),
@@ -517,6 +549,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         u = urlparse(self.path)
+        if not self._is_authed():
+            return self._json({"error": "unauthorized - token required for "
+                                        "remote control"}, 401)
         try:
             length = int(self.headers.get("Content-Length", 0))
             body = json.loads(self.rfile.read(length) or b"{}") if length else {}
@@ -558,13 +593,18 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--port", type=int, default=8777)
-    ap.add_argument("--host", default="127.0.0.1")
+    ap.add_argument("--port", type=int, default=int(os.environ.get("PROM_PORT", "8777")))
+    ap.add_argument("--host", default=os.environ.get("PROM_HOST", "127.0.0.1"))
     a = ap.parse_args()
     log_activity(f"HUB start on {a.host}:{a.port}")
     X.start_samplers()
     srv = ThreadingHTTPServer((a.host, a.port), Handler)
-    print(f"\n  PROMETHEUS HUB  ->  http://{a.host}:{a.port}\n  (Ctrl-C to stop)\n")
+    print(f"\n  PROMETHEUS HUB  ->  http://{a.host}:{a.port}\n  (Ctrl-C to stop)")
+    if a.host != "127.0.0.1":
+        print(f"  phone  ->  http://<tailscale-ip>:{a.port}/m")
+        print("  auth   ->  " + ("token set" if TOKEN
+                                 else "WARNING: PROM_TOKEN unset, console open!"))
+    print()
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

@@ -95,3 +95,6 @@ desktop.ini
 !09_ORCHESTRATOR/prometheus_icon.png
 !09_ORCHESTRATOR/prometheus.ico
 .git.disabled/
+
+# machine-specific phone launcher (holds local access token)
+09_ORCHESTRATOR/PrometheusHQ_Phone.cmd
